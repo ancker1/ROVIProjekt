@@ -14,6 +14,7 @@
 
 #include <rwslibs/rwstudioapp/RobWorkStudioApp.hpp>
 
+#include "alignment.hpp"
 
 #include <iostream>
 
@@ -24,8 +25,13 @@ cv::Mat calculateDisparityMap( cv::Mat imageLeft, cv::Mat imageRight, int numDis
      *  Calculate disparity map using Block Matching
      */
     cv::Mat disparity;
-    cv::Ptr<cv::StereoBM> sbm = cv::StereoBM::create( numDisparities, blockSize );
-    sbm->compute(imageLeft, imageRight, disparity);
+
+    //cv::Ptr<cv::StereoBM> sbm = cv::StereoBM::create( numDisparities, blockSize );
+    //sbm->compute(imageLeft, imageRight, disparity);
+
+    cv::Ptr<cv::StereoSGBM> sgbm = cv::StereoSGBM::create(0, numDisparities, blockSize);
+    sgbm->compute(imageLeft, imageRight, disparity);
+
     return disparity;
 }
 
@@ -37,25 +43,46 @@ void visualizeDisparity( cv::Mat disparity )
     cv::waitKey(0);
 }
 
-void show_cloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
+cv::Mat defineQ(int imgWidth, int imgHeight, double Tx, double f)
 {
+    cv::Mat Q = (cv::Mat_<double>(4,4) << 1, 0, 0, double(-imgWidth)/2.0,0,1,0,double(-imgHeight)/2.0,0,0,0,f,0,0,double(1.0/Tx),0);
+    return Q;
+}
+
+void showCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
+{
+    // might be better to show it with colors
     pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer ("3D Viewer"));
     viewer->setBackgroundColor(0, 0, 0);
-    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> color_g(cloud, 0, 255, 0);
-    viewer->addPointCloud<pcl::PointXYZ>(cloud, color_g, "cloud");
-    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "cloud");
+    viewer->addPointCloud<pcl::PointXYZ>(cloud, "cloud");
+    //viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "cloud");
 
-    //viewer->addCoordinateSystem(1.0);
     viewer->initCameraParameters();
-    //viewer->setCameraClipDistances(0.244446, 0.824412);
-    //viewer->setCameraPosition(-0.0562254,-0.0666346,-0.529442,-0.00165773, -0.0633305, -0.167617,0.982829,0.108549,-0.149214);
-    //viewer->setPosition(662,137);
 
     while (!viewer->wasStopped ())
     {
-      viewer->spinOnce (100);
-      boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+      viewer->spinOnce(100);
+      boost::this_thread::sleep (boost::posix_time::milliseconds(100));
     }
+}
+
+pcl::PointCloud<pcl::PointXYZ>::Ptr depthToCloud(cv::Mat depthMap, float z_threshold)
+{
+    pcl::PointXYZ defaultPoint;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr scene( new pcl::PointCloud<pcl::PointXYZ>(depthMap.rows, depthMap.cols, defaultPoint) );
+    for (unsigned int i = 0; i < depthMap.rows; i++) {
+        for (unsigned int j = 0; j < depthMap.cols; j++){
+            pcl::PointXYZ point;
+            cv::Vec3f pos = depthMap.at<cv::Vec3f>(i,j);
+            if ( fabs(pos[2]) < z_threshold ){
+                point.x = pos[0];
+                point.y = pos[1];
+                point.z = pos[2];
+                scene->at(i,j) = point;
+            }
+        }
+    }
+    return scene;
 }
 
 int main(int argc, char** argv)
@@ -98,21 +125,6 @@ int main(int argc, char** argv)
     stringstream >> fovy >> width >> height;
     std::cout << "Camera properties: fov " << fovy << " width " << width << " height " << height << std::endl;
 
-    //rws::RobWorkStudio* const rwstudio = rws::RobWorkStudioApp::getRobWorkStudio();
-
-    //rws::RobWorkStudioApp rwapp("");
-    /*
-    rwapp.start();
-    while( rwapp.getRobWorkStudio() == nullptr ){
-        if( !rwapp.isRunning() ){
-            RW_THROW("Could not start RobworkStudio app");
-            return -1;
-        }
-        rw::common::TimerUtil::sleepMs(100);
-    }
-    rws::RobWorkStudio* const rwstudio = rwapp.getRobWorkStudio();
-    rwstudio->postOpenWorkCell(wc_path);
-*/
 
 
     /*******************************************************************
@@ -135,24 +147,23 @@ int main(int argc, char** argv)
     /*******************************************************************
      *  Calculate disparity and display
     *******************************************************************/
-    int numDisparity = 16, blockSize = 11;
+    int numDisparity = 16, blockSize = 9;
     cv::Mat disparityMap = calculateDisparityMap(leftImage, rightImage, numDisparity, blockSize);
     visualizeDisparity( disparityMap );
 
     /*******************************************************************
-     *  If it is a rectified system:
-     *  - Images are from same image plane.
-     *  - Depth can be computed from disparity.
+     *  Assuming it is a rectified system
     *******************************************************************/
-    // Q is recieved from rectification by openCV
+    float Tx = 100, f = 500, z_threshold = 500;  // What is focal length???
+    cv::Mat Q = defineQ(leftImage.cols, leftImage.rows, Tx, f);
 
-//    cv::Mat Q;      // Camera calibrations is needed to define Q.
+    cv::Mat depthMap;
+    cv::reprojectImageTo3D(disparityMap, depthMap, Q);
 
-//    cv::Mat depthMat;
-//    cv::reprojectImageTo3D(disparityMap, depthMat, Q);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr scene = depthToCloud(depthMap, z_threshold);
 
-    // get pointcloud from depthMat
-
+    showCloud(scene);
+    pcl::io::savePCDFileASCII("scene.pcd", *scene);
     /*******************************************************************
      *  Load and show point cloud
      *******************************************************************/
@@ -160,7 +171,7 @@ int main(int argc, char** argv)
 
     pcl::PCDReader reader;  // Read cloud data from PCD files
     reader.read("../../ObjectFiles/cylinder_voxel.pcd", *cloud_object);
-    show_cloud(cloud_object);
+    showCloud(cloud_object);
 
 
     std::cout << "-- Done --" << std::endl;
