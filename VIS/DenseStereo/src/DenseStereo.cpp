@@ -98,8 +98,9 @@ int main(int argc, char** argv)
     stringstream >> fovy >> width >> height;
     std::cout << "Camera properties: fov " << fovy << " width " << width << " height " << height << std::endl;
 
-    const std::string arg_rw = "";
-    rws::RobWorkStudioApp rwapp("");
+    //rws::RobWorkStudio* const rwstudio = rws::RobWorkStudioApp::getRobWorkStudio();
+
+    //rws::RobWorkStudioApp rwapp("");
     /*
     rwapp.start();
     while( rwapp.getRobWorkStudio() == nullptr ){

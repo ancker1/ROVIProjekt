@@ -13,12 +13,15 @@
 	<Include file="UR5/UR-6-85-5-A/Device.wc.xml" />
 
 <!--insert gripper definition-->
-
-
+<Frame name="WSG50TCP" refframe="UR-6-85-5-A.TCP" type="Fixed">
+	<RPY>0 0 0</RPY> <Pos>0 0 0.0720</Pos>
+</Frame>
+<Include file="wsg50/wsg50.xml" />
 
 	<Frame name="GraspTCP" refframe="UR-6-85-5-A.TCP" type="Fixed">
 		<RPY>0 0 0</RPY> <Pos>0 0 0.15</Pos>
 	</Frame>
+
 	
 	<Frame name="Bottle" refframe="Table"  type="Movable" daf="true" >
      <RPY> -90 0 90 </RPY> <Pos> 0 0.474 0.21 </Pos>
@@ -35,10 +38,14 @@
 </Frame>
 
 	<Frame name="Cylinder" refframe="Table"  type="Movable" daf="true" >
-     <RPY> -90 0 90 </RPY> <Pos> -0.25 0.474 0.150 </Pos>
+     <RPY> -90 0 180 </RPY> <Pos> -0.25 0.474 0.150 </Pos>
      <Drawable name="Cylinder" refframe="Cylinder">
          <Polytope file="parts/cylinder" />
      </Drawable>
+</Frame>
+
+<Frame name="GraspTarget" refframe="Cylinder" type="Movable">
+	<RPY>0 0 0</RPY> <Pos>0 0 0</Pos>
 </Frame>
 
 <!-- Cameras -->
