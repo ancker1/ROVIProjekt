@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 set (CMAKE_CXX_STANDARD 11)
 # Project name
-project( RRT )
+project( reachability )
 
 # Used for: Resolve absolute path names
 SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
@@ -17,6 +17,6 @@ FIND_PACKAGE(RobWork REQUIRED)
 include_directories(${ROBWORK_INCLUDE_DIRS})
 link_directories(${ROBWORK_LIBRARY_DIRS})
 
-add_executable( RRT src/RRT.cpp)
-target_link_libraries(RRT ${ROBWORK_LIBRARIES})
+add_executable( reachability src/reachability.cpp)
+target_link_libraries(reachability ${ROBWORK_LIBRARIES})
  
