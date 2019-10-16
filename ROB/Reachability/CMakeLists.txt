@@ -6,7 +6,7 @@ project( reachability )
 # Used for: Resolve absolute path names
 SET(ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
-SET(RW_ROOT /home/emil/RobWork/RobWork)
+SET(RW_ROOT ~/RobWork/RobWork)
 
 
 SET(CMAKE_BUILD_TYPE Release)
