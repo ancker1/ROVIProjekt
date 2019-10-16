@@ -137,6 +137,11 @@ int main(int argc, char** argv)
         return -1;
     }
 
+    cv::imshow("test", leftImage);
+    cv::waitKey(0);
+    cv::imshow("test", rightImage);
+    cv::waitKey(0);
+
     /*******************************************************************
      *  Save colors and cast to gray scale
     *******************************************************************/
