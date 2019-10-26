@@ -96,27 +96,12 @@ std::vector<rw::math::Q> collision_free_from_object(bool from_side, const rw::mo
     return collisionFreeSolutions;
 }
 
-std::vector<rw::math::Vector2D<double>> position_object_frame_gen()
-{
-    std::vector<rw::math::Vector2D<double>> pos_obj_check; // x,y
-    pos_obj_check[0][0] = -0.25; // default
-    pos_obj_check[0][1] = 0.474; // default
-
-    pos_obj_check[0][0] = -0;
-    pos_obj_check[0][1] = 0.474;
-
-    pos_obj_check[0][0] = 0.25;
-    pos_obj_check[0][1] = 0.474;
-
-    return pos_obj_check;
-}
-
 std::vector<rw::math::Vector3D<double>> position_base_frame_gen_rand(int iterations)
 {
     std::vector<rw::math::Vector3D<double>> pos_base_check; // x,y,collision_free
     int i = 0;
     while(i < iterations) {
-        double randx = rw::math::Random::ran(-0.375, 0.375);
+        double randx = rw::math::Random::ran(-0.325, 0.325);
         double randy = rw::math::Random::ran(-0.525, 0.225);
 
         if(randy < -0.325){
@@ -162,7 +147,7 @@ std::vector<rw::math::Vector3D<double>> position_base_frame_gen()
     return pos_base_check;
 }
 
-std::vector<rw::math::Vector3D<double>> best_robot_position(std::vector<rw::math::Vector3D<double>> &positions_base, bool from_side, const rw::models::WorkCell::Ptr workcell, rw::kinematics::State state, rw::models::SerialDevice::Ptr robot, rw::kinematics::MovableFrame::Ptr object_frame)
+std::vector<rw::math::Vector3D<double>> best_robot_position(std::vector<rw::math::Vector3D<double>> &positions_base, rw::math::Vector3D<double> object_pos, bool from_side, const rw::models::WorkCell::Ptr workcell, rw::kinematics::State state, rw::models::SerialDevice::Ptr robot, rw::kinematics::MovableFrame::Ptr object_frame)
 {
     if(from_side)
         std::cout << "Finding collision free solutions grasping from side " << std::endl;
@@ -175,12 +160,17 @@ std::vector<rw::math::Vector3D<double>> best_robot_position(std::vector<rw::math
     // Moving robot base
     for (unsigned int i = 0; i < positions_base.size(); i++) {
         rw::kinematics::State state = workcell->getDefaultState();
+        // Placing robot
         rw::math::Vector3D<> posBase;
         posBase[0] = positions_base[i][0]; // x - coordinate of base frame
         posBase[1] = positions_base[i][1]; // y - coordinate of base frame
 
         rw::math::Transform3D<> newBase (posBase, base->getTransform(state).R());
         base->moveTo(newBase, state);
+
+        // Placing object
+        rw::math::Transform3D<> newObj (object_pos, object_frame->getTransform(state).R());
+        object_frame->moveTo(newObj, state);
 
         std::vector<rw::math::Q> collisionFreeSolutions = collision_free_from_object(from_side, workcell, state, robot, object_frame);
         positions_base[i][2] = collisionFreeSolutions.size();
@@ -246,20 +236,39 @@ int main(int argc, char** argv)
     /*******************************************************************
      * Moving robot around to get best position of base and get collsion free for up/side of object
      *******************************************************************/
-    std::vector<rw::math::Vector3D<double>> base_frame_positions_side = position_base_frame_gen_rand(1000); // gen 1000 random point
+    std::vector<rw::math::Vector3D<double>> base_frame_positions_side_pick_right = position_base_frame_gen_rand(1000); // gen 1000 random point
+    std::vector<rw::math::Vector3D<double>> base_frame_positions_side_pick_mid = base_frame_positions_side_pick_right;
+    std::vector<rw::math::Vector3D<double>> base_frame_positions_side_pick_left = base_frame_positions_side_pick_right;
+    std::vector<rw::math::Vector3D<double>> base_frame_positions_side_place = base_frame_positions_side_pick_right;
     //std::vector<rw::math::Vector3D<double>> base_frame_positions_top = position_base_frame_gen();
-    //std::vector<rw::math::Vector2D<double>> object_frame_positions = position_object_frame_gen();
-    base_frame_positions_side = best_robot_position(base_frame_positions_side, true, wc, state, robotUR6, cylinderFrame);
+
+
+    // Cylinder pos right
+    rw::math::Vector3D<> cylinderPos(-0.25, 0.474, 0.150);
+    base_frame_positions_side_pick_right = best_robot_position(base_frame_positions_side_pick_right, cylinderPos, true, wc, state, robotUR6, cylinderFrame); // Moves all robot position to one object position
+
+    // Cylinder pos mid
+    cylinderPos[0] = 0.0;
+    base_frame_positions_side_pick_mid = best_robot_position(base_frame_positions_side_pick_mid, cylinderPos, true, wc, state, robotUR6, cylinderFrame);
+
+    // Cylinder pos left
+    cylinderPos[0] = 0.25;
+    base_frame_positions_side_pick_left = best_robot_position(base_frame_positions_side_pick_left, cylinderPos, true, wc, state, robotUR6, cylinderFrame);
+
+    // Cylinder in place area
+    cylinderPos[0] = 0.3;
+    cylinderPos[1] = -0.5;
+    base_frame_positions_side_place = best_robot_position(base_frame_positions_side_place, cylinderPos, true, wc, state, robotUR6, cylinderFrame);
     //base_frame_positions_top = best_robot_position(base_frame_positions_top, false, wc, state, robotUR6, cylinderFrame);
 
     /*******************************************************************
      * Writing to file
      *******************************************************************/
-     write_pos_to_file("base_pos_side.txt", base_frame_positions_side);
-     //write_pos_to_file("base_pos_top.txt", base_frame_positions_top);
+     write_pos_to_file("base_pos_side_pick_right.txt", base_frame_positions_side_pick_right);
+     write_pos_to_file("base_pos_side_pick_mid.txt", base_frame_positions_side_pick_mid);
+     write_pos_to_file("base_pos_side_pick_left.txt", base_frame_positions_side_pick_left);
+     write_pos_to_file("base_pos_side_place.txt", base_frame_positions_side_place);
 
-//    std::vector<rw::math::Q> collisionFreeSolutions = collision_free_from_object(true, wc, state, robotUR6, cylinderFrame);
-//    std::cout << "Amount of collision free solutions: " << collisionFreeSolutions.size() << std::endl;
 
 
 //    rw::kinematics::MovableFrame *base = wc->findFrame<rw::kinematics::MovableFrame>("URReference");
