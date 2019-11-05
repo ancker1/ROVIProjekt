@@ -62,7 +62,6 @@ std::vector<rw::math::Q> collision_free_from_object(bool from_side, const rw::mo
             rw::math::Transform3D<> newTarget (posTarget, rotyaw90.toRotation3D()*rotroll90.toRotation3D()*rotTarget_side.toRotation3D());
             target->moveTo(newTarget, state);
             std::vector<rw::math::Q> solutions = getConfigurations("GraspTarget", "GraspTCP", robot, workcell, state);
-            std::cout << "32" << solutions[0].size() << std::endl;
             for ( unsigned int i = 0; i < solutions.size(); i++ ){
                 robot->setQ(solutions[i], state);
                 if ( !detector->inCollision(state, NULL, true) ){   // Take first solution without collision
@@ -86,6 +85,7 @@ std::vector<rw::math::Q> collision_free_from_object(bool from_side, const rw::mo
             for ( unsigned int i = 0; i < solutions.size(); i++ ){
                 robot->setQ(solutions[i], state);
                 if ( !detector->inCollision(state, NULL, true) ){   // Take first solution without collision
+                    std::cout << solutions[i] << std::endl;
                     collisionFreeSolutions.push_back(solutions[i]);
                     break;
                 }
@@ -235,7 +235,7 @@ int main(int argc, char** argv)
     rw::proximity::CollisionDetector::Ptr detector = rw::common::ownedPtr(new rw::proximity::CollisionDetector(wc, rwlibs::proximitystrategies::ProximityStrategyFactory::makeDefaultCollisionStrategy()));
     rw::kinematics::State state = wc->getDefaultState();
     std::cout << cylinderFrame->getTransform(state).P() << std::endl;
-    collision_free_from_object(true, wc, state, robotUR6, cylinderFrame);
+    collision_free_from_object(false, wc, state, robotUR6, cylinderFrame);
     /*******************************************************************
      * Moving robot around to get best position of base and get collsion free for up/side of object
      *******************************************************************/

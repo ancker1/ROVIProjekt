@@ -20,7 +20,7 @@ using namespace rwlibs::pathplanners;
 using namespace rwlibs::proximitystrategies;
 
 #define MAXTIME 60. // Max time trying to find solution.
-#define ESTEPSIZE 1 // Step size of RRT-connect.
+#define ESTEPSIZE 0.1 // Step size of RRT-connect.
 
 bool checkCollisions(Device::Ptr device, const State &state, const CollisionDetector &detector, const Q &q) {
 	State testState;
@@ -72,8 +72,8 @@ int main(int argc, char** argv) {
     State state = wc->getDefaultState();
 
     //These Q's contains the start and end configurations
-    Q from(6, 2.30356, -2.9901, -0.152361, -3.14073, 2.80971, -3.14159); // Pick configuration Q{2.30356, -2.9901, -0.152361, -3.14073, 2.80971, -3.14159} (from side right corner)
-    Q to(6, 0.900888, -0.897058, 1.64999, -0.752929, -0.669908, -3.14159); // Place configuration Q{0.900888, -0.897058, 1.64999, -0.752929, -0.669908, -3.14159} (middle in place area)
+    Q from(6, 2.26097, -2.2029, -1.3037, -4.34737, -1.5708, -0.880619); // Pick configuration Q{2.30356, -2.9901, -0.152361, -3.14073, 2.80971, -3.14159} (from side right corner)
+    Q to(6, -0.842337, -2.31799, -1.10501, -4.43098, -1.5708, 2.29926); // Place configuration Q{0.900888, -0.897058, 1.64999, -0.752929, -0.669908, -3.14159} (middle in place area)
 
     //Set Q to the initial state and grip the bottle frame
     device->setQ(from, state); // sets initial state
