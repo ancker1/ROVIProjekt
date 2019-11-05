@@ -62,9 +62,11 @@ std::vector<rw::math::Q> collision_free_from_object(bool from_side, const rw::mo
             rw::math::Transform3D<> newTarget (posTarget, rotyaw90.toRotation3D()*rotroll90.toRotation3D()*rotTarget_side.toRotation3D());
             target->moveTo(newTarget, state);
             std::vector<rw::math::Q> solutions = getConfigurations("GraspTarget", "GraspTCP", robot, workcell, state);
+            std::cout << "32" << solutions[0].size() << std::endl;
             for ( unsigned int i = 0; i < solutions.size(); i++ ){
                 robot->setQ(solutions[i], state);
                 if ( !detector->inCollision(state, NULL, true) ){   // Take first solution without collision
+                    std::cout << solutions[i] << std::endl;
                     collisionFreeSolutions.push_back(solutions[i]);
                     break;
                 }
@@ -204,7 +206,7 @@ int main(int argc, char** argv)
      *  Load workcell, frames and device
      *******************************************************************/
     // Load workcell
-    static const std::string wc_path = "../../Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml";
+    static const std::string wc_path = "/home/mikkel/Desktop/Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml"; //"../../Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml";
     const rw::models::WorkCell::Ptr wc = rw::loaders::WorkCellLoader::Factory::load(wc_path);
     if ( wc.isNull() ){
         RW_THROW("Error loading workcell");
@@ -232,42 +234,43 @@ int main(int argc, char** argv)
 
     rw::proximity::CollisionDetector::Ptr detector = rw::common::ownedPtr(new rw::proximity::CollisionDetector(wc, rwlibs::proximitystrategies::ProximityStrategyFactory::makeDefaultCollisionStrategy()));
     rw::kinematics::State state = wc->getDefaultState();
-
+    std::cout << cylinderFrame->getTransform(state).P() << std::endl;
+    collision_free_from_object(true, wc, state, robotUR6, cylinderFrame);
     /*******************************************************************
      * Moving robot around to get best position of base and get collsion free for up/side of object
      *******************************************************************/
-    std::vector<rw::math::Vector3D<double>> base_frame_positions_side_pick_right = position_base_frame_gen_rand(1000); // gen 1000 random point
-    std::vector<rw::math::Vector3D<double>> base_frame_positions_side_pick_mid = base_frame_positions_side_pick_right;
-    std::vector<rw::math::Vector3D<double>> base_frame_positions_side_pick_left = base_frame_positions_side_pick_right;
-    std::vector<rw::math::Vector3D<double>> base_frame_positions_side_place = base_frame_positions_side_pick_right;
-    //std::vector<rw::math::Vector3D<double>> base_frame_positions_top = position_base_frame_gen();
+//    std::vector<rw::math::Vector3D<double>> base_frame_positions_side_pick_right = position_base_frame_gen_rand(1000); // gen 1000 random point
+//    std::vector<rw::math::Vector3D<double>> base_frame_positions_side_pick_mid = base_frame_positions_side_pick_right;
+//    std::vector<rw::math::Vector3D<double>> base_frame_positions_side_pick_left = base_frame_positions_side_pick_right;
+//    std::vector<rw::math::Vector3D<double>> base_frame_positions_side_place = base_frame_positions_side_pick_right;
+//    //std::vector<rw::math::Vector3D<double>> base_frame_positions_top = position_base_frame_gen();
 
 
-    // Cylinder pos right
-    rw::math::Vector3D<> cylinderPos(-0.25, 0.474, 0.150);
-    base_frame_positions_side_pick_right = best_robot_position(base_frame_positions_side_pick_right, cylinderPos, true, wc, state, robotUR6, cylinderFrame); // Moves all robot position to one object position
+//    // Cylinder pos right
+//    rw::math::Vector3D<> cylinderPos(-0.25, 0.474, 0.150);
+//    base_frame_positions_side_pick_right = best_robot_position(base_frame_positions_side_pick_right, cylinderPos, true, wc, state, robotUR6, cylinderFrame); // Moves all robot position to one object position
 
-    // Cylinder pos mid
-    cylinderPos[0] = 0.0;
-    base_frame_positions_side_pick_mid = best_robot_position(base_frame_positions_side_pick_mid, cylinderPos, true, wc, state, robotUR6, cylinderFrame);
+//    // Cylinder pos mid
+//    cylinderPos[0] = 0.0;
+//    base_frame_positions_side_pick_mid = best_robot_position(base_frame_positions_side_pick_mid, cylinderPos, true, wc, state, robotUR6, cylinderFrame);
 
-    // Cylinder pos left
-    cylinderPos[0] = 0.25;
-    base_frame_positions_side_pick_left = best_robot_position(base_frame_positions_side_pick_left, cylinderPos, true, wc, state, robotUR6, cylinderFrame);
+//    // Cylinder pos left
+//    cylinderPos[0] = 0.25;
+//    base_frame_positions_side_pick_left = best_robot_position(base_frame_positions_side_pick_left, cylinderPos, true, wc, state, robotUR6, cylinderFrame);
 
-    // Cylinder in place area
-    cylinderPos[0] = 0.3;
-    cylinderPos[1] = -0.5;
-    base_frame_positions_side_place = best_robot_position(base_frame_positions_side_place, cylinderPos, true, wc, state, robotUR6, cylinderFrame);
-    //base_frame_positions_top = best_robot_position(base_frame_positions_top, false, wc, state, robotUR6, cylinderFrame);
+//    // Cylinder in place area
+//    cylinderPos[0] = 0.3;
+//    cylinderPos[1] = -0.5;
+//    base_frame_positions_side_place = best_robot_position(base_frame_positions_side_place, cylinderPos, true, wc, state, robotUR6, cylinderFrame);
+//    //base_frame_positions_top = best_robot_position(base_frame_positions_top, false, wc, state, robotUR6, cylinderFrame);
 
-    /*******************************************************************
-     * Writing to file
-     *******************************************************************/
-     write_pos_to_file("base_pos_side_pick_right.txt", base_frame_positions_side_pick_right);
-     write_pos_to_file("base_pos_side_pick_mid.txt", base_frame_positions_side_pick_mid);
-     write_pos_to_file("base_pos_side_pick_left.txt", base_frame_positions_side_pick_left);
-     write_pos_to_file("base_pos_side_place.txt", base_frame_positions_side_place);
+//    /*******************************************************************
+//     * Writing to file
+//     *******************************************************************/
+//     write_pos_to_file("base_pos_side_pick_right.txt", base_frame_positions_side_pick_right);
+//     write_pos_to_file("base_pos_side_pick_mid.txt", base_frame_positions_side_pick_mid);
+//     write_pos_to_file("base_pos_side_pick_left.txt", base_frame_positions_side_pick_left);
+//     write_pos_to_file("base_pos_side_place.txt", base_frame_positions_side_place);
 
 
 

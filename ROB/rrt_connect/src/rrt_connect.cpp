@@ -20,7 +20,7 @@ using namespace rwlibs::pathplanners;
 using namespace rwlibs::proximitystrategies;
 
 #define MAXTIME 60. // Max time trying to find solution.
-#define ESTEPSIZE 0.0000001 // Step size of RRT-connect.
+#define ESTEPSIZE 1 // Step size of RRT-connect.
 
 bool checkCollisions(Device::Ptr device, const State &state, const CollisionDetector &detector, const Q &q) {
 	State testState;
@@ -44,7 +44,7 @@ bool checkCollisions(Device::Ptr device, const State &state, const CollisionDete
 
 int main(int argc, char** argv) {
 
-    const string wcFile = "../../Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml";
+    const string wcFile = "/home/mikkel/Desktop/Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml"; //"../../Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml";
     const string deviceName = "UR-6-85-5-A";
     cout << "Trying to use workcell " << wcFile << " and device " << deviceName << endl;
     ofstream myfile;
