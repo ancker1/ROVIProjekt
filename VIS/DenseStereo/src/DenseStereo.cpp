@@ -8,6 +8,19 @@
 #include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/features/spin_image.h>
+
+
+#include <pcl/sample_consensus/method_types.h>
+#include <pcl/sample_consensus/model_types.h>
+#include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/surface/convex_hull.h>
+#include <pcl/segmentation/extract_polygonal_prism_data.h>
+#include <pcl/visualization/cloud_viewer.h>
+
 
 #include <rw/rw.hpp>
 #include <rw/loaders/WorkCellLoader.hpp>
@@ -85,15 +98,9 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr depthToCloud(cv::Mat depthMap, float z_thres
     return scene;
 }
 
-int main(int argc, char** argv)
+int DenseStereo(cv::Mat leftImage, cv::Mat rightImage)
 {
-    if ( argc != 3 ){
-        std::cout << "Usage:" << std::endl;
-        std::cout << "leftImgPath.png rightImgPath.png" << std::endl;
-        return -1;
-    }
-
-    std::cout << "-- Begin --" << std::endl;
+    std::cout << "-- Begin Dense Stereo --" << std::endl;
 
     /*******************************************************************
      *  RobWork Camera
@@ -130,16 +137,14 @@ int main(int argc, char** argv)
     /*******************************************************************
      *      Load images
      *******************************************************************/
-    cv::Mat leftImage   = cv::imread(argv[1]);
-    cv::Mat rightImage  = cv::imread(argv[2]);
     if ( leftImage.empty() || rightImage.empty() ){
         std::cout << "Error loading images" << std::endl;
         return -1;
     }
 
-    cv::imshow("test", leftImage);
+    cv::imshow("Left image", leftImage);
     cv::waitKey(0);
-    cv::imshow("test", rightImage);
+    cv::imshow("Right image", rightImage);
     cv::waitKey(0);
 
     /*******************************************************************
@@ -149,10 +154,17 @@ int main(int argc, char** argv)
     cv::cvtColor(leftImage, leftImage, CV_BGR2GRAY);
     cv::cvtColor(rightImage, rightImage, CV_BGR2GRAY);
 
+    cv::imshow("Left image", leftImage);
+    cv::waitKey(0);
+    cv::imshow("Right image", rightImage);
+    cv::waitKey(0);
+
+
+
     /*******************************************************************
      *  Calculate disparity and display
     *******************************************************************/
-    int numDisparity = 16, blockSize = 9;
+    int numDisparity = 32, blockSize = 11;
     cv::Mat disparityMap = calculateDisparityMap(leftImage, rightImage, numDisparity, blockSize);
     visualizeDisparity( disparityMap );
 
@@ -180,5 +192,124 @@ int main(int argc, char** argv)
 
 
     std::cout << "-- Done --" << std::endl;
+}
+
+void thresholdZ( pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr &output_cloud )
+{
+    pcl::PassThrough<pcl::PointXYZ> spatialFilter;
+    spatialFilter.setInputCloud (input_cloud);
+    spatialFilter.setFilterFieldName ("z");
+    spatialFilter.setFilterLimits (-2.0, 0); // Test denne, prev: -2.0, 0
+    spatialFilter.filter(*output_cloud);
+}
+
+void voxelGrid( pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr &output_cloud, float leafSize )
+{
+    pcl::VoxelGrid<pcl::PointXYZ> vxlGrid;
+    vxlGrid.setInputCloud(input_cloud);
+    vxlGrid.setLeafSize(leafSize, leafSize, leafSize);
+    vxlGrid.filter(*output_cloud);
+}
+
+
+int main(int argc, char** argv)
+{
+    if ( argc != 3 ){
+        std::cout << "Usage:" << std::endl;
+        std::cout << "leftImgPath.png rightImgPath.png" << std::endl;
+        return -1;
+    }
+    //cv::Mat leftImage   = cv::imread(argv[1]);
+    //cv::Mat rightImage  = cv::imread(argv[2]);
+    //DenseStereo(leftImage, rightImage);
+    //return 0;
+    /*
+     * Read PCD files
+    */
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_object (new pcl::PointCloud<pcl::PointXYZ>); // Point cloud with XYZ
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_scene (new pcl::PointCloud<pcl::PointXYZ>); // Point cloud with XYZ
+
+    pcl::PCDReader reader;  // Read cloud data from PCD files
+    reader.read("../../ObjectFiles/duck_voxel.pcd", *cloud_object);
+    reader.read("../../ObjectFiles/scene_duck.pcd", *cloud_scene);
+    //reader.read("/home/emil/Dropbox/UNI/MSc/Vision/exercises/lecture6/ex2/object-global.pcd", *cloud_object);
+    //reader.read("/home/emil/Dropbox/UNI/MSc/Vision/exercises/lecture6/ex2/scene.pcd", *cloud_scene);
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr plane(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr convexHull(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr objects(new pcl::PointCloud<pcl::PointXYZ>);
+    reader.read("../../ObjectFiles/scene_duck.pcd", *cloud);
+
+    /*
+     *  Find plane -> remove points
+     */
+
+    std::cout << "[Start] Scene count: " << cloud->points.size() << std::endl;
+    thresholdZ(cloud, cloud);
+    std::cout << "[Threshold z] Scene count: " << cloud->points.size() << std::endl;
+    voxelGrid(cloud, cloud, 0.005f);
+    std::cout << "[Voxel] Scene count: " << cloud->points.size() << std::endl;
+
+    showCloud(cloud);
+
+    // Get the plane model, if present.
+    pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
+    pcl::SACSegmentation<pcl::PointXYZ> segmentation;
+    segmentation.setInputCloud(cloud);
+    segmentation.setModelType(pcl::SACMODEL_PLANE);
+    segmentation.setMethodType(pcl::SAC_RANSAC);
+    segmentation.setDistanceThreshold(0.01);
+    segmentation.setOptimizeCoefficients(true);
+    pcl::PointIndices::Ptr planeIndices(new pcl::PointIndices);
+    segmentation.segment(*planeIndices, *coefficients);
+
+    pcl::ExtractIndices<pcl::PointXYZ> extract;
+    extract.setInputCloud(cloud);
+    extract.setIndices(planeIndices);
+    extract.setNegative(true);
+    extract.filter(*cloud);
+
+    showCloud(cloud);
+
+
+
+    /*********************************************************************************************
+     * Filter object
+     *********************************************************************************************/
+    std::cout << "[Start] Object count: " << cloud_object->points.size() << std::endl;
+    voxelGrid(cloud_object, cloud_object, 0.005f);
+    std::cout << "[Voxel] Object count: " << cloud_object->points.size() << std::endl;
+
+    /*
+     * Filter scene
+     * by depth
+    */
+    std::cout << "[Start] Scene count: " << cloud_scene->points.size() << std::endl;
+    thresholdZ(cloud_scene, cloud_scene);
+    std::cout << "[Threshold z] Scene count: " << cloud_scene->points.size() << std::endl;
+    voxelGrid(cloud_scene, cloud_scene, 0.005f);
+    std::cout << "[Voxel] Scene count: " << cloud_scene->points.size() << std::endl;
+
+    align::showTwoPointClouds(cloud_scene, cloud_object);
+
+    pcl::PointCloud<pcl::Normal>::Ptr normals_scene = align::global::calculateNormals(cloud_scene, 10);
+    pcl::PointCloud<pcl::Normal>::Ptr normals_object = align::global::calculateNormals(cloud_object,10);
+
+
+    pcl::PointCloud<pcl::Histogram<153>>::Ptr spinImage_scene = align::global::calculateSpinImage(cloud_scene, normals_scene, 0.5);
+    pcl::PointCloud<pcl::Histogram<153>>::Ptr spinImage_object = align::global::calculateSpinImage(cloud_object, normals_object, 0.5);
+
+    std::vector<float> featureDists;
+    std::vector<int> nearest_indices = align::global::findNearestFeatures(spinImage_scene, spinImage_object);
+    pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 transform = align::global::RANSAC_transform(cloud_scene, cloud_object, nearest_indices, 0.005f);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr object_tfed (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::transformPointCloud(*cloud_object, *object_tfed, transform);
+
+    align::showTwoPointClouds(cloud_scene, object_tfed);
+
+
+
     return 0;
 }

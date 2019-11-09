@@ -28,7 +28,7 @@ namespace align { namespace global {
 
     pcl::PointCloud<pcl::Histogram<153>>::Ptr calculateSpinImage( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::Normal>::Ptr normals, double searchRadius )
     {   // Find parameters for spinImageEst
-        pcl::SpinImageEstimation<pcl::PointXYZ, pcl::Normal, pcl::Histogram<153>> spinImageEst(8, 0.5, 4);
+        pcl::SpinImageEstimation<pcl::PointXYZ, pcl::Normal, pcl::Histogram<153>> spinImageEst(8, 0.5, 4); // prev (8, 0.5, 4)
         spinImageEst.setInputCloud(cloud);
         spinImageEst.setInputNormals(normals);
         pcl::search::KdTree<pcl::PointXYZ>::Ptr tree( new pcl::search::KdTree<pcl::PointXYZ>() );
@@ -66,7 +66,7 @@ namespace align { namespace global {
     }
 
 
-    pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 RANSAC_transform( const pcl::PointCloud<pcl::PointXYZ>::Ptr &scene, const pcl::PointCloud<pcl::PointXYZ>::Ptr &object, const std::vector<int> &nearestIndices)
+    pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 RANSAC_transform( const pcl::PointCloud<pcl::PointXYZ>::Ptr &scene, const pcl::PointCloud<pcl::PointXYZ>::Ptr &object, const std::vector<int> &nearestIndices, float inlierThreshold)
     {
         pcl::common::UniformGenerator<int> generator(0, nearestIndices.size()-1);
         pcl::PointCloud<pcl::PointXYZ>::Ptr objectTransformed( new pcl::PointCloud<pcl::PointXYZ> );
@@ -80,7 +80,7 @@ namespace align { namespace global {
         pcl::search::KdTree<pcl::PointXYZ> kdTree;
         kdTree.setInputCloud(scene);
 
-        float epsilon = std::pow(0.005,2); // 5mm threshold
+        float epsilon = std::pow(inlierThreshold,2); // 5mm threshold
 
         a->width = 3;
         a->height = 1;

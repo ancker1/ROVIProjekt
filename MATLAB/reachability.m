@@ -101,9 +101,23 @@ ylim([-80 80])
 hold off
 
 %% Surface plot
-x = data(:,1);
-y = data(:,2);
+clc; clear; close all;
+data_place = importdata('side/base_pos_side_place.txt');
+data_pick_left = importdata('side/base_side_pick_left.txt');
+data_pick_mid = importdata('side/base_side_pick_mid.txt');
+data_pick_right = importdata('side/base_side_pick_right.txt');
+
+% data = data_place
+% data = data_pick_left
+% data = data_pick_mid
+% data = data_pick_right
+data = data_pick_left + data_pick_mid + data_pick_right + data_place*3; % do not multiply with 3 if not using equal weighting
+
+x = data(:,1)./6; % ./4 if not using equal weighting
+y = data(:,2)./6; % ./4 if not using equal weighting
 z = data(:,3);
+
+z = mat2gray(z,[min(z) max(z)]);
 
 figure(2)
 stem3(x,y,z)
@@ -113,10 +127,47 @@ xv = linspace(min(x), max(x), 20);
 yv = linspace(min(y), max(y), 20);
 [X,Y] = meshgrid(xv, yv);
 Z = griddata(x,y,z,X,Y);
-figure(3)
+
+xv = linspace(-0.4, 0.4, 20);
+yv = linspace(-0.6, 0.6, 20);
+[X2,Y2] = meshgrid(xv, yv);
+Z2 = zeros(20,20);
+C2 = ones(20,20,3).*0.9;
+
+xv = linspace(-0.4, 0.4, 20);
+yv = linspace(-0.6, -0.3, 20);
+[X3,Y3] = meshgrid(xv, yv);
+Z3 = zeros(20,20);
+C3 = ones(20,20,3).*0.4;
+
+xv = linspace(-0.4, -0.2, 20);
+yv = linspace(0.4, 0.6, 20);
+[X4,Y4] = meshgrid(xv, yv);
+Z4 = zeros(20,20);
+C4 = ones(20,20,3).*0.4;
+
+figure('Name','Reachability Analysis','Position', [10 10 900 600])
+
 surf(X, Y, Z);
+hold on
+surf(X2,Y2,Z2,C2) % Table
+surf(X3,-Y3,Z3,C3) % Pick
+surf(-X4,-Y4,Z4,C4) % Place
+scatter([-0.25],[0.474],1200,[0.3 0.9 0.3], 'filled')
+scatter([0.00],[0.474],1200,[0.3 0.9 0.3], 'filled')
+scatter([0.25],[0.474],1200,[0.3 0.9 0.3], 'filled')
+scatter([0.30],-[0.500],1200,[0.3 0.9 0.3], 'filled')
+hold off
+colorbar
 xlim([-0.6 0.5])
 ylim([-0.5 0.5])
 grid on
-set(gca, 'ZLim',[0 100])
+text(-0.4, 0.585, 'Pick area', 'Color', 'white');
+text(0.2,-0.415,'Place area', 'Color', 'white')
 shading interp
+axis equal
+view(0, 90); % azimuth elevation
+%title('Reachability Analysis')
+
+base_pos_indx = find(max(z)==z)
+base_pos = [x(base_pos_indx) y(base_pos_indx) 0.150]
