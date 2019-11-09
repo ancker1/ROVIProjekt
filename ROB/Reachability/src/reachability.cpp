@@ -73,15 +73,16 @@ std::vector<rw::math::Q> collision_free_from_object(bool from_side, const rw::mo
         }
     }
     else if(!from_side){
-    // Finds solutions from top of object
+        // Finds solutions from top of object
         for (double roll = 0; roll < 2*rw::math::Pi; roll += rw::math::Deg2Rad*1) {
             // Rotates axis so following grasp target from the top
-            rw::math::RPY<> rotTarget_up(roll, 0, 0);
+            rw::math::RPY<> rotTarget_up(roll, rw::math::Deg2Rad*10, 0); // set to zero if not skew grapping
             rw::math::Vector3D<> posTarget = object_frame->getTransform(state).P();
             posTarget[2] = 0.07;
             rw::math::Transform3D<> newTarget (posTarget, object_frame->getTransform(state).R()*rotTarget_up.toRotation3D());
             target->moveTo(newTarget, state);
             std::vector<rw::math::Q> solutions = getConfigurations("GraspTarget", "GraspTCP", robot, workcell, state);
+            //std::cout << solutions.size() << std::endl;
             for ( unsigned int i = 0; i < solutions.size(); i++ ){
                 robot->setQ(solutions[i], state);
                 if ( !detector->inCollision(state, NULL, true) ){   // Take first solution without collision
@@ -206,7 +207,8 @@ int main(int argc, char** argv)
      *  Load workcell, frames and device
      *******************************************************************/
     // Load workcell
-    static const std::string wc_path = "/home/mikkel/Desktop/Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml"; //"../../Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml";
+    static std::string workcellpath = "/home/mikkel/Desktop/Project_WorkCell_Cam/Project_WorkCell"; //"../../Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml";
+    static const std::string wc_path = workcellpath + "/Scene.wc.xml";
     const rw::models::WorkCell::Ptr wc = rw::loaders::WorkCellLoader::Factory::load(wc_path);
     if ( wc.isNull() ){
         RW_THROW("Error loading workcell");
@@ -235,7 +237,7 @@ int main(int argc, char** argv)
     rw::proximity::CollisionDetector::Ptr detector = rw::common::ownedPtr(new rw::proximity::CollisionDetector(wc, rwlibs::proximitystrategies::ProximityStrategyFactory::makeDefaultCollisionStrategy()));
     rw::kinematics::State state = wc->getDefaultState();
     std::cout << cylinderFrame->getTransform(state).P() << std::endl;
-    collision_free_from_object(false, wc, state, robotUR6, cylinderFrame);
+    //collision_free_from_object(false, wc, state, robotUR6, cylinderFrame);
     /*******************************************************************
      * Moving robot around to get best position of base and get collsion free for up/side of object
      *******************************************************************/
@@ -282,7 +284,7 @@ int main(int argc, char** argv)
 //    rw::math::Transform3D<> newBase (posBase, base->getTransform(state).R());
 //    base->moveTo(newBase, state);
 
-//    std::vector<rw::math::Q> collisionFreeSolutions = collision_free_from_object(true, wc, state, robotUR6, cylinderFrame);
+//    std::vector<rw::math::Q> collisionFreeSolutions = collision_free_from_object(false, wc, state, robotUR6, cylinderFrame);
 //    /*******************************************************************
 //     *  Show solution
 //     *******************************************************************/
@@ -294,7 +296,7 @@ int main(int argc, char** argv)
 //        statePath.push_back(rw::trajectory::TimedState(time, state));
 //        time += dur/double(collisionFreeSolutions.size());
 //    }
-//    rw::loaders::PathLoader::storeTimedStatePath(*wc, statePath, "../../Project_WorkCell_Cam/Project_WorkCell/visu.rwplay");
+//    rw::loaders::PathLoader::storeTimedStatePath(*wc, statePath, workcellpath + "/visu.rwplay");
 
 
     std::cout << "-- Done --" << std::endl;
