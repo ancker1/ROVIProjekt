@@ -194,12 +194,12 @@ int DenseStereo(cv::Mat leftImage, cv::Mat rightImage)
     std::cout << "-- Done --" << std::endl;
 }
 
-void thresholdZ( pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr &output_cloud )
+void thresholdZ( pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr &output_cloud, float lowThreshold, float highTreshold )
 {
     pcl::PassThrough<pcl::PointXYZ> spatialFilter;
     spatialFilter.setInputCloud (input_cloud);
     spatialFilter.setFilterFieldName ("z");
-    spatialFilter.setFilterLimits (-2.0, 0); // Test denne, prev: -2.0, 0
+    spatialFilter.setFilterLimits (lowThreshold, highTreshold); //  prev: -2.0, 0
     spatialFilter.filter(*output_cloud);
 }
 
@@ -211,6 +211,68 @@ void voxelGrid( pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, pcl::PointCloud
     vxlGrid.filter(*output_cloud);
 }
 
+void poseEstimate(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_object, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_scene)
+{
+    std::cout << "[Start] Object count: " << cloud_object->points.size() << std::endl;
+    voxelGrid(cloud_object, cloud_object, 0.005f);
+    std::cout << "[Voxel] Object count: " << cloud_object->points.size() << std::endl;
+
+    /*
+     * Filter scene
+     * by depth
+    */
+    std::cout << "[Start] Scene count: " << cloud_scene->points.size() << std::endl;
+    thresholdZ(cloud_scene, cloud_scene, -2.0f, 0.0f);
+    std::cout << "[Threshold z] Scene count: " << cloud_scene->points.size() << std::endl;
+    voxelGrid(cloud_scene, cloud_scene, 0.005f);
+    std::cout << "[Voxel] Scene count: " << cloud_scene->points.size() << std::endl;
+
+    align::showTwoPointClouds(cloud_scene, cloud_object);
+
+    pcl::PointCloud<pcl::Normal>::Ptr normals_scene = align::global::calculateNormals(cloud_scene, 10);
+    pcl::PointCloud<pcl::Normal>::Ptr normals_object = align::global::calculateNormals(cloud_object,10);
+
+
+    pcl::PointCloud<pcl::Histogram<153>>::Ptr spinImage_scene = align::global::calculateSpinImage(cloud_scene, normals_scene, 0.5);
+    pcl::PointCloud<pcl::Histogram<153>>::Ptr spinImage_object = align::global::calculateSpinImage(cloud_object, normals_object, 0.5);
+
+    std::vector<float> featureDists;
+    std::vector<int> nearest_indices = align::global::findNearestFeatures(spinImage_scene, spinImage_object);
+    pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 transform = align::global::RANSAC_transform(cloud_scene, cloud_object, nearest_indices, 0.005f);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr object_tfed (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::transformPointCloud(*cloud_object, *object_tfed, transform);
+
+    align::showTwoPointClouds(cloud_scene, object_tfed);
+}
+
+void preprocess_scene(pcl::PointCloud<pcl::PointXYZ>::Ptr scene)
+{
+    thresholdZ(scene, scene, -2.0f, 0.0f); // keep points, where z in [-2.0 , 0]
+    voxelGrid(scene, scene, 0.005f);       // Apply Voxel Grid with leaf size 5 [mm]
+
+    //showCloud(scene);
+
+    // Find largest plane in point cloud
+    pcl::PointCloud<pcl::PointXYZ>::Ptr plane(new pcl::PointCloud<pcl::PointXYZ>);
+
+    pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
+    pcl::SACSegmentation<pcl::PointXYZ> segmentation;
+    segmentation.setInputCloud(scene);
+    segmentation.setModelType(pcl::SACMODEL_PLANE);
+    segmentation.setMethodType(pcl::SAC_RANSAC);
+    segmentation.setDistanceThreshold(0.01);
+    segmentation.setOptimizeCoefficients(true);
+    pcl::PointIndices::Ptr planeIndices(new pcl::PointIndices);
+    segmentation.segment(*planeIndices, *coefficients);
+
+    pcl::ExtractIndices<pcl::PointXYZ> extract;
+    extract.setInputCloud(scene);
+    extract.setIndices(planeIndices);
+    extract.setNegative(true);
+    extract.filter(*scene);
+
+    //showCloud(cloud);
+}
 
 int main(int argc, char** argv)
 {
@@ -247,7 +309,7 @@ int main(int argc, char** argv)
      */
 
     std::cout << "[Start] Scene count: " << cloud->points.size() << std::endl;
-    thresholdZ(cloud, cloud);
+    thresholdZ(cloud, cloud, -2.0f, 0.0f);
     std::cout << "[Threshold z] Scene count: " << cloud->points.size() << std::endl;
     voxelGrid(cloud, cloud, 0.005f);
     std::cout << "[Voxel] Scene count: " << cloud->points.size() << std::endl;
@@ -272,42 +334,6 @@ int main(int argc, char** argv)
     extract.filter(*cloud);
 
     showCloud(cloud);
-
-
-
-    /*********************************************************************************************
-     * Filter object
-     *********************************************************************************************/
-    std::cout << "[Start] Object count: " << cloud_object->points.size() << std::endl;
-    voxelGrid(cloud_object, cloud_object, 0.005f);
-    std::cout << "[Voxel] Object count: " << cloud_object->points.size() << std::endl;
-
-    /*
-     * Filter scene
-     * by depth
-    */
-    std::cout << "[Start] Scene count: " << cloud_scene->points.size() << std::endl;
-    thresholdZ(cloud_scene, cloud_scene);
-    std::cout << "[Threshold z] Scene count: " << cloud_scene->points.size() << std::endl;
-    voxelGrid(cloud_scene, cloud_scene, 0.005f);
-    std::cout << "[Voxel] Scene count: " << cloud_scene->points.size() << std::endl;
-
-    align::showTwoPointClouds(cloud_scene, cloud_object);
-
-    pcl::PointCloud<pcl::Normal>::Ptr normals_scene = align::global::calculateNormals(cloud_scene, 10);
-    pcl::PointCloud<pcl::Normal>::Ptr normals_object = align::global::calculateNormals(cloud_object,10);
-
-
-    pcl::PointCloud<pcl::Histogram<153>>::Ptr spinImage_scene = align::global::calculateSpinImage(cloud_scene, normals_scene, 0.5);
-    pcl::PointCloud<pcl::Histogram<153>>::Ptr spinImage_object = align::global::calculateSpinImage(cloud_object, normals_object, 0.5);
-
-    std::vector<float> featureDists;
-    std::vector<int> nearest_indices = align::global::findNearestFeatures(spinImage_scene, spinImage_object);
-    pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 transform = align::global::RANSAC_transform(cloud_scene, cloud_object, nearest_indices, 0.005f);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr object_tfed (new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::transformPointCloud(*cloud_object, *object_tfed, transform);
-
-    align::showTwoPointClouds(cloud_scene, object_tfed);
 
 
 
