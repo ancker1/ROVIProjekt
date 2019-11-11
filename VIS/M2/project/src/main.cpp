@@ -49,17 +49,17 @@ void showCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
 pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 poseEstimate(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_object, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_scene)
 {
 
-    std::cout << "[Start] Object count: " << cloud_object->points.size() << std::endl;
+    //std::cout << "[Start] Object count: " << cloud_object->points.size() << std::endl;
     preprocess::PointCloud::voxelGrid(cloud_object, cloud_object, 0.005f); // 5[mm] leaf size
-    std::cout << "[Voxel] Object count: " << cloud_object->points.size() << std::endl;
+    //std::cout << "[Voxel] Object count: " << cloud_object->points.size() << std::endl;
 
-    std::cout << "[Start] Scene count: " << cloud_scene->points.size() << std::endl;
+    //std::cout << "[Start] Scene count: " << cloud_scene->points.size() << std::endl;
     //preprocess::PointCloud::thresholdAxis(cloud_scene, cloud_scene, "z", -2.0f, 0.0f);
     //std::cout << "[Threshold z] Scene count: " << cloud_scene->points.size() << std::endl;
     //preprocess::PointCloud::voxelGrid(cloud_scene, cloud_scene, 0.005f);
     //std::cout << "[Voxel] Scene count: " << cloud_scene->points.size() << std::endl;
 
-    align::showTwoPointClouds(cloud_scene, cloud_object);
+    //align::showTwoPointClouds(cloud_scene, cloud_object);
 
     pcl::PointCloud<pcl::Normal>::Ptr normals_scene = align::global::calculateNormals(cloud_scene, 10);
     pcl::PointCloud<pcl::Normal>::Ptr normals_object = align::global::calculateNormals(cloud_object,10);
@@ -191,29 +191,50 @@ void testPoseEstimation()
     reader.read("../../ObjectFiles/duck_voxel.pcd", *cloud_object);
     std::string path = "/home/emil/Documents/M2ErrorEval/pcds/c";
     std::string typ = ".pcd";
+    std::vector<int> timeMeasure;
+    std::vector<int> amountPoints;
     std::vector<pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4> tfs;
     for(unsigned int i = 1; i < 31; i++)
     {
         std::string full_path = path+std::to_string(i)+typ;
         std::cout << "(" << i << "/30) " << full_path << std::endl;
         reader.read(full_path, *cloud_scene );
+        auto start = std::chrono::high_resolution_clock::now();
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_sceneObjects = preprocess::PointCloud::preprocessScene(cloud_scene);
-        std::cout << "A3" << std::endl;
+        preprocess::PointCloud::voxelGrid(cloud_scene, cloud_scene, 0.001); // set to 0.005
+        std::cout << cloud_scene->points.size() << std::endl;
+        amountPoints.push_back(cloud_scene->points.size());
+        //showCloud(cloud_scene);
         pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 transform = poseEstimate(cloud_object, cloud_sceneObjects);
-        std::cout << "A4" << std::endl;
         pcl::PointCloud<pcl::PointXYZ>::Ptr object_tfed (new pcl::PointCloud<pcl::PointXYZ>);
         pcl::transformPointCloud(*cloud_object, *object_tfed, transform);
         pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 T_ICP = align::local::ICP(cloud_sceneObjects, object_tfed, 50);
         pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 combinedTransform = transform * T_ICP;
-        std::cout << "A11" << std::endl;
+
+        auto stop = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+        int dur_ms = duration.count();
+        timeMeasure.push_back(dur_ms);
+        std::cout << dur_ms << std::endl;
+        //pcl::transformPointCloud(*cloud_object, *object_tfed, combinedTransform);
+        //align::showTwoPointClouds(cloud_sceneObjects, object_tfed);
         tfs.push_back(combinedTransform);
-        std::cout << "B11" << std::endl;
     }
-    ofstream outfile;
+    ofstream outfile, outfile2, outfile3;
     outfile.open("/home/emil/Documents/M2ErrorEval/poseEstTestCombined.txt");
     for(pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 tf : tfs)
         outfile << tf << endl;
     outfile.close();
+
+    outfile2.open("/home/emil/Documents/M2ErrorEval/poseEstTestTime.txt");
+    for(int dur : timeMeasure)
+        outfile2 << dur << endl;
+    outfile2.close();
+
+    outfile3.open("/home/emil/Documents/M2ErrorEval/poseEstTestPoints.txt");
+    for(int am : amountPoints)
+        outfile3 << am << endl;
+    outfile3.close();
 }
 
 int main(int argc, char** argv)
@@ -223,8 +244,8 @@ int main(int argc, char** argv)
         std::cout << "leftImgPath.png rightImgPath.png" << std::endl;
         return -1;
     } */
-   // testPoseEstimation();
-   // return 0;
+    testPoseEstimation();
+    return 0;
 
     /**** Read point clouds ****/
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_object (new pcl::PointCloud<pcl::PointXYZ>);  // Point cloud with XYZ
@@ -235,7 +256,7 @@ int main(int argc, char** argv)
     reader.read("../../ObjectFiles/scene_duck.pcd", *cloud_scene );
 
     /**** Pose Estimation ****/
-   // showCloud(cloud_scene);
+    showCloud(cloud_scene);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_sceneObjects = preprocess::PointCloud::preprocessScene(cloud_scene);
    // showCloud(cloud_sceneObjects);
 
@@ -247,7 +268,7 @@ int main(int argc, char** argv)
    // align::showTwoPointClouds(cloud_sceneObjects, object_tfed);
     pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 T_ICP = align::local::ICP(cloud_sceneObjects, object_tfed, 50);
     std::cout << "(ICP) Pose: " << T_ICP << std::endl;
-   // align::showTwoPointClouds(cloud_sceneObjects, object_tfed);
+    align::showTwoPointClouds(cloud_sceneObjects, object_tfed);
 
     pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 combinedTransform = transform * T_ICP;
     std::cout << "(Combined) Pose: " << combinedTransform << std::endl;

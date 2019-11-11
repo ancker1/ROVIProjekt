@@ -8,6 +8,8 @@
 
 #include <pcl/segmentation/extract_polygonal_prism_data.h>
 #include <pcl/surface/convex_hull.h>
+#include <pcl/common/transforms.h>
+#include <pcl/filters/statistical_outlier_removal.h>
 
 #include <pcl/visualization/cloud_viewer.h>
 
@@ -39,7 +41,7 @@ namespace preprocess { namespace PointCloud{
         extract.filter(*cloud);
     }
 
-    pcl::PointIndices::Ptr findPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
+    std::tuple<pcl::PointIndices::Ptr, pcl::ModelCoefficients::Ptr> findPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
     {
         pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
         pcl::SACSegmentation<pcl::PointXYZ> segmentation;
@@ -50,13 +52,15 @@ namespace preprocess { namespace PointCloud{
         segmentation.setOptimizeCoefficients(true);
         pcl::PointIndices::Ptr planeIndices(new pcl::PointIndices);
         segmentation.segment(*planeIndices, *coefficients);
-        return planeIndices;
+        //std::cout << coefficients->values.size() << std::endl;
+        //plane_normal = (coefficients[0], coefficients[1], coefficients[2])
+        return std::make_tuple(planeIndices, coefficients);
     }
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr preprocessScene(pcl::PointCloud<pcl::PointXYZ>::Ptr scene)
     {
         preprocess::PointCloud::thresholdAxis(scene, scene, "z", -2.0f, 0.0f);   // keep points, where z in [-2.0 , 0]
-        preprocess::PointCloud::voxelGrid(scene, scene, 0.005f);                // Apply Voxel Grid with leaf size 5 [mm]
+        //preprocess::PointCloud::voxelGrid(scene, scene, 0.005f);                // Apply Voxel Grid with leaf size 5 [mm]
 
         //showCloud(scene);
         //std::cout << "Size of cloud" << scene->points.size() << std::endl;
@@ -66,19 +70,78 @@ namespace preprocess { namespace PointCloud{
         pcl::PointCloud<pcl::PointXYZ>::Ptr objects     (new pcl::PointCloud<pcl::PointXYZ>);
         pcl::PointCloud<pcl::PointXYZ>::Ptr convexHull  (new pcl::PointCloud<pcl::PointXYZ>);
 
-
-        pcl::PointIndices::Ptr planeIndices = findPlane(scene);
-
+        /**** Method: ConvexHull ****/
+        auto planeInfo = findPlane(scene);
+        pcl::PointIndices::Ptr planeIndices = std::get<0>(planeInfo);
+        pcl::ModelCoefficients::Ptr planeCoeffs = std::get<1>(planeInfo);
 
         if (planeIndices->indices.size() == 0)
                 std::cout << "No plane found" << std::endl;
         else
         {
 
+
             pcl::ExtractIndices<pcl::PointXYZ> extractIndices;
             extractIndices.setInputCloud(scene);
             extractIndices.setIndices(planeIndices);
             extractIndices.filter(*plane);
+
+            /****** Below/Above plane test *******/
+            removeIndicesFromCloud(scene, planeIndices);
+            std::vector<int> belowIndices;
+            pcl::PointXYZ planePoint = scene->points[planeIndices->indices[0]]; // Random points on plane
+            for ( unsigned int i = 0; i < scene->points.size(); i++ )
+            {
+                float dotProd = (scene->points[i].x - planePoint.x) * planeCoeffs->values[0] + (scene->points[i].y - planePoint.y) * planeCoeffs->values[1] + (scene->points[i].z - planePoint.z) * planeCoeffs->values[2];
+                //std::cout << dotProd << std::endl;
+                if ( dotProd < 0 )
+                    belowIndices.push_back(i);
+            }
+            //boost::shared_ptr<std::vector<int>> below (new std::vector<int> (belowIndices));
+            boost::shared_ptr<std::vector<int>> below_ptr = boost::make_shared<std::vector<int>>(belowIndices);
+            //pcl::PointIndices::Ptr bealow;
+            //bealow->indices(belowIndices);
+            pcl::ExtractIndices<pcl::PointXYZ> extractBelowIndices;
+            extractIndices.setInputCloud(scene);
+            extractIndices.setIndices(below_ptr);
+            extractIndices.setNegative(true);
+            extractIndices.filter(*scene);
+
+            pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+            sor.setInputCloud (scene);
+            sor.setMeanK (20);
+            sor.setStddevMulThresh (1.0);
+            sor.filter (*scene);
+
+            //removeIndicesFromCloud(scene, below);
+            return scene;
+
+            /* Work-around not using convex hull */
+            removeIndicesFromCloud(scene, planeIndices);
+            pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sort;
+            sor.setInputCloud (scene);
+            sor.setMeanK (20);
+            sor.setStddevMulThresh (1.0);
+            sor.filter (*scene);
+            preprocess::PointCloud::voxelGrid(scene, scene, 0.005f);
+            return scene;
+            /*
+            pcl::ExtractPolygonalPrismData<pcl::PointXYZ> prism;
+            prism.setInputCloud(scene);
+            prism.setInputPlanarHull(plane);
+            prism.setHeightLimits(0.01, 0.2);
+            pcl::PointIndices::Ptr objsI(new pcl::PointIndices);
+            prism.segment(*objsI);
+            extractIndices.setIndices(objsI);
+            extractIndices.filter(*objects);
+            preprocess::PointCloud::voxelGrid(objects, objects, 0.005f);
+            pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+            sor.setInputCloud (objects);
+            sor.setMeanK (20);
+            sor.setStddevMulThresh (1.0);
+            sor.filter (*objects);
+            return objects;*/
+            /* Work-around done */
 
             pcl::ConvexHull<pcl::PointXYZ> hull;         
             hull.setInputCloud(plane);
