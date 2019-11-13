@@ -22,7 +22,7 @@ using namespace rwlibs::pathplanners;
 using namespace rwlibs::proximitystrategies;
 
 #define MAXTIME 60. // Max time trying to find solution.
-#define ESTEPSIZE 3 // Step size of RRT-connect.
+#define ESTEPSIZE 0.65 // Step size of RRT-connect.
 
 struct rrt_connect {
   std::vector<float> stepsizes;
@@ -252,21 +252,27 @@ void print_path_time_statistics(bool append, rrt_connect rrt_connect_info)
 void calc_and_print_path_treaded(bool append, std::vector<float> stepsizes, WorkCell::Ptr workcell, Device::Ptr robot, Frame* tool_frame, Frame* object_frame, Q from, Q to)
 {
     // Running 4 threads when writing to file
-    rrt_connect rrt_total, rrt1, rrt2, rrt3, rrt4;
+    rrt_connect rrt_total, rrt1, rrt2, rrt3, rrt4, rrt5, rrt6;
 
     rrt1.stepsizes = stepsizes;
     rrt2.stepsizes = stepsizes;
     rrt3.stepsizes = stepsizes;
     rrt4.stepsizes = stepsizes;
+    rrt5.stepsizes = stepsizes;
+    rrt6.stepsizes = stepsizes;
 
     std::thread t1( calculate_path_from_stepsize_thread, std::ref(rrt1), workcell, robot, tool_frame, object_frame, from, to);
     std::thread t2( calculate_path_from_stepsize_thread, std::ref(rrt2), workcell, robot, tool_frame, object_frame, from, to);
     std::thread t3( calculate_path_from_stepsize_thread, std::ref(rrt3), workcell, robot, tool_frame, object_frame, from, to);
     std::thread t4( calculate_path_from_stepsize_thread, std::ref(rrt4), workcell, robot, tool_frame, object_frame, from, to);
+    std::thread t5( calculate_path_from_stepsize_thread, std::ref(rrt5), workcell, robot, tool_frame, object_frame, from, to);
+    std::thread t6( calculate_path_from_stepsize_thread, std::ref(rrt6), workcell, robot, tool_frame, object_frame, from, to);
     t1.join();
     t2.join();
     t3.join();
     t4.join();
+    t5.join();
+    t6.join();
 
     // Joining all the data to write to file
     for(unsigned int i = 0; i < rrt1.stepsizes.size(); i++)
@@ -276,16 +282,22 @@ void calc_and_print_path_treaded(bool append, std::vector<float> stepsizes, Work
         rrt_total.stepsizes.push_back(rrt2.stepsizes[i]);
         rrt_total.stepsizes.push_back(rrt3.stepsizes[i]);
         rrt_total.stepsizes.push_back(rrt4.stepsizes[i]);
+        rrt_total.stepsizes.push_back(rrt5.stepsizes[i]);
+        rrt_total.stepsizes.push_back(rrt6.stepsizes[i]);
         // Paths
         rrt_total.paths.push_back(rrt1.paths[i]);
         rrt_total.paths.push_back(rrt2.paths[i]);
         rrt_total.paths.push_back(rrt3.paths[i]);
         rrt_total.paths.push_back(rrt4.paths[i]);
+        rrt_total.paths.push_back(rrt5.paths[i]);
+        rrt_total.paths.push_back(rrt6.paths[i]);
         // Times
         rrt_total.times.push_back(rrt1.times[i]);
         rrt_total.times.push_back(rrt2.times[i]);
         rrt_total.times.push_back(rrt3.times[i]);
         rrt_total.times.push_back(rrt4.times[i]);
+        rrt_total.times.push_back(rrt5.times[i]);
+        rrt_total.times.push_back(rrt6.times[i]);
     }
 
 
@@ -434,15 +446,16 @@ int main(int argc, char** argv) {
 
 
     // Initialize stepsize values
-    for (float i = 0.5; i <= 3; i += 0.005) {
+    for (float i = 0.05; i <= 3; i += 0.05) {
         stepsizes.push_back(i);
     }
 
-    int number_of_data = 40/4; // Divide by number of threads running in function below
+    int number_of_threads = 6;
+    int number_of_data = 30/number_of_threads; // Divide by number of threads running in function below
 
     for (unsigned int i = 0; i < number_of_data; i++)
     {
-        std::cout << "Calculating iteration " << i*4 << " out of " << number_of_data*4 << " for rrt-connect" << std::endl;
+        std::cout << "Calculating iteration " << i*number_of_threads << " out of " << number_of_data*number_of_threads << " for rrt-connect" << std::endl;
         if (i == 0) // Do not append at the start to file
             calc_and_print_path_treaded(false, stepsizes, wc, device, tool_frame, cylinder_frame, from, to); // Running 4 threads when generating data
         else
