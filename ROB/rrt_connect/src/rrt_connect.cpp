@@ -265,19 +265,19 @@ void calc_and_print_path_treaded(bool append, std::vector<float> stepsizes, Work
     //rrt6.stepsizes = stepsizes;
 
 
-        calculate_path_from_stepsize_thread(rrt1, workcell, robot, tool_frame, object_frame, from, to);
+       // calculate_path_from_stepsize_thread(rrt1, workcell, robot, tool_frame, object_frame, from, to);
 
 
 
-//    std::thread t1( calculate_path_from_stepsize_thread, std::ref(rrt1), workcell, robot, tool_frame, object_frame, from, to);
-//    std::thread t2( calculate_path_from_stepsize_thread, std::ref(rrt2), workcell, robot, tool_frame, object_frame, from, to);
-//    std::thread t3( calculate_path_from_stepsize_thread, std::ref(rrt3), workcell, robot, tool_frame, object_frame, from, to);
+    std::thread t1( calculate_path_from_stepsize_thread, std::ref(rrt1), workcell, robot, tool_frame, object_frame, from, to);
+    std::thread t2( calculate_path_from_stepsize_thread, std::ref(rrt2), workcell, robot, tool_frame, object_frame, from, to);
+    std::thread t3( calculate_path_from_stepsize_thread, std::ref(rrt3), workcell, robot, tool_frame, object_frame, from, to);
     //std::thread t4( calculate_path_from_stepsize_thread, std::ref(rrt4), workcell, robot, tool_frame, object_frame, from, to);
     //std::thread t5( calculate_path_from_stepsize_thread, std::ref(rrt5), workcell, robot, tool_frame, object_frame, from, to);
     //std::thread t6( calculate_path_from_stepsize_thread, std::ref(rrt6), workcell, robot, tool_frame, object_frame, from, to);
-//    t1.join();
-//    t2.join();
-//    t3.join();
+    t1.join();
+    t2.join();
+    t3.join();
     //t4.join();
     //t5.join();
     //t6.join();
@@ -287,22 +287,22 @@ void calc_and_print_path_treaded(bool append, std::vector<float> stepsizes, Work
     {
         // Stepsizes
         rrt_total.stepsizes.push_back(rrt1.stepsizes[i]);
-//        rrt_total.stepsizes.push_back(rrt2.stepsizes[i]);
-//        rrt_total.stepsizes.push_back(rrt3.stepsizes[i]);
+        rrt_total.stepsizes.push_back(rrt2.stepsizes[i]);
+        rrt_total.stepsizes.push_back(rrt3.stepsizes[i]);
         //rrt_total.stepsizes.push_back(rrt4.stepsizes[i]);
         //rrt_total.stepsizes.push_back(rrt5.stepsizes[i]);
         //rrt_total.stepsizes.push_back(rrt6.stepsizes[i]);
         // Paths
         rrt_total.paths.push_back(rrt1.paths[i]);
-//        rrt_total.paths.push_back(rrt2.paths[i]);
-//        rrt_total.paths.push_back(rrt3.paths[i]);
+        rrt_total.paths.push_back(rrt2.paths[i]);
+        rrt_total.paths.push_back(rrt3.paths[i]);
         //rrt_total.paths.push_back(rrt4.paths[i]);
         //rrt_total.paths.push_back(rrt5.paths[i]);
         //rrt_total.paths.push_back(rrt6.paths[i]);
         // Times
         rrt_total.times.push_back(rrt1.times[i]);
-//        rrt_total.times.push_back(rrt2.times[i]);
-//        rrt_total.times.push_back(rrt3.times[i]);
+        rrt_total.times.push_back(rrt2.times[i]);
+        rrt_total.times.push_back(rrt3.times[i]);
         //rrt_total.times.push_back(rrt4.times[i]);
         //rrt_total.times.push_back(rrt5.times[i]);
         //rrt_total.times.push_back(rrt6.times[i]);
@@ -459,7 +459,7 @@ int main(int argc, char** argv) {
     }
 
     int number_of_threads = 3;
-    int number_of_data = 30;//number_of_threads; // Divide by number of threads running in function below
+    int number_of_data = 60/number_of_threads; // Divide by number of threads running in function below
 
     for (unsigned int i = 0; i < number_of_data; i++)
     {
