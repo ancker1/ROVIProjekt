@@ -23,6 +23,6 @@ include_directories(${PCL_INCLUDE_DIRS} ${ROBWORK_INCLUDE_DIRS} ${ROBWORKSTUDIO_
 link_directories(${PCL_LIBRARY_DIRS} ${ROBWORK_LIBRARY_DIRS} ${ROBWORKSTUDIO_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-add_executable( M2 src/main.cpp src/global_alignment.hpp src/local_alignment.hpp src/alignment.hpp src/preprocess.hpp)
+add_executable( M2 src/main.cpp src/global_alignment.hpp src/local_alignment.hpp src/alignment.hpp src/preprocess.hpp src/pose_estimation.hpp)
 target_link_libraries(M2 ${PCL_LIBRARIES} ${OpenCV_LIBS} ${ROBWORK_LIBRARIES} ${ROBWORKSTUDIO_LIBRARIES})
  

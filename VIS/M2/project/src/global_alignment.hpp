@@ -28,7 +28,7 @@ namespace align { namespace global {
 
     pcl::PointCloud<pcl::Histogram<153>>::Ptr calculateSpinImage( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::Normal>::Ptr normals, double searchRadius )
     {   // Find parameters for spinImageEst
-        pcl::SpinImageEstimation<pcl::PointXYZ, pcl::Normal, pcl::Histogram<153>> spinImageEst(8, 0.5, 4); // prev (8, 0.5, 4)
+        pcl::SpinImageEstimation<pcl::PointXYZ, pcl::Normal, pcl::Histogram<153>> spinImageEst(8, 0.5, 0); // prev (8, 0.5, 4)
         spinImageEst.setInputCloud(cloud);
         spinImageEst.setInputNormals(normals);
 

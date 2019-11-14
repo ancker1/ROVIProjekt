@@ -1,3 +1,4 @@
+#pragma once
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/passthrough.h>
 
@@ -142,7 +143,7 @@ namespace preprocess { namespace PointCloud{
             sor.filter (*objects);
             return objects;*/
             /* Work-around done */
-
+            /*
             pcl::ConvexHull<pcl::PointXYZ> hull;         
             hull.setInputCloud(plane);
             hull.setDimension(2);
@@ -161,7 +162,7 @@ namespace preprocess { namespace PointCloud{
                 extractIndices.setIndices(objectIndices);
                 extractIndices.filter(*objects);            // Get all points retreived by hull
             }
-
+            */
         }
         return objects;
     }
