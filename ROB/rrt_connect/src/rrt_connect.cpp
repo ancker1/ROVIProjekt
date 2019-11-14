@@ -51,10 +51,9 @@ bool checkCollisions(Device::Ptr device, const State &state, const CollisionDete
     return true;
 }
 
-std::tuple<float, QPath> calculate_path_from_stepsize(WorkCell::Ptr workcell, Device::Ptr robot, Frame* tool_frame, Frame* object_frame, Q from, Q to, float stepsize)
+QPath calculate_path_rrt(WorkCell::Ptr workcell, Device::Ptr robot, Frame* tool_frame, Frame* object_frame, Q from, Q to)
 {
     QPath path;
-    float time;
 
     State state = workcell->getDefaultState();
     //Set Q to the initial state and grip the bottle frame
@@ -66,26 +65,20 @@ std::tuple<float, QPath> calculate_path_from_stepsize(WorkCell::Ptr workcell, De
 
     QSampler::Ptr sampler = QSampler::makeConstrained(QSampler::makeUniform(robot),constraint.getQConstraintPtr());
     QMetric::Ptr metric = MetricFactory::makeEuclidean<Q>();
-    QToQPlanner::Ptr planner = RRTPlanner::makeQToQPlanner(constraint, sampler, metric, stepsize, RRTPlanner::RRTConnect);
+    QToQPlanner::Ptr planner = RRTPlanner::makeQToQPlanner(constraint, sampler, metric, ESTEPSIZE, RRTPlanner::RRTConnect);
 
     // check if collision in state
     if (!checkCollisions(robot, state, detector, from))
-        return {0.0, path};
+        return path;
     if (!checkCollisions(robot, state, detector, to))
-        return {0.0, path};
-
-    // time to plan rrt, used for statistics.
-    Timer t;
-    t.resetAndResume();
+        return path;
 
     //Use the planner to find a trajectory between the configurations
     planner->query(from, to, path);
     planner->make(constraint);
 
-    t.pause();
-    time = t.getTime();
 
-    return {time, path};
+    return path;
 }
 
 void calculate_path_from_stepsize_thread( rrt_connect &rrt_info, WorkCell::Ptr workcell, Device::Ptr robot, Frame* tool_frame, Frame* object_frame, Q from, Q to)
@@ -133,18 +126,18 @@ void calculate_path_from_stepsize_thread( rrt_connect &rrt_info, WorkCell::Ptr w
     }
 }
 
-Vector3D<> fw_kinematics_pos_world_to_mFrame(WorkCell::Ptr workcell, Q configuration, Device::Ptr robot, Frame* mframe)
+Transform3D<> fw_kinematics_pos_world_to_mFrame(WorkCell::Ptr workcell, Q configuration, Device::Ptr robot, Frame* mframe)
 {
-    Vector3D<> baseTmFramePos;
+    Transform3D<> worldTmFramePos;
     State state = workcell->getDefaultState();
     // Setting configuration of robot
     robot->setQ( configuration , state );
 
     // Calculate Tranformation from world to mFrame
     Transform3D<> bTmf = Kinematics::worldTframe(mframe, state);
-    baseTmFramePos = bTmf.P();
+    worldTmFramePos = bTmf;
 
-    return baseTmFramePos;
+    return worldTmFramePos;
 }
 
 void print_cartesian_dist_statistics(bool append, rrt_connect rrt_connect_info, WorkCell::Ptr workcell, Device::Ptr robot, Frame* mframe)
@@ -171,8 +164,8 @@ void print_cartesian_dist_statistics(bool append, rrt_connect rrt_connect_info, 
         path = rrt_connect_info.paths[i];
 
         for (unsigned int j = 1; j < path.size(); j++){
-            currentPos = fw_kinematics_pos_world_to_mFrame(workcell, path.at(j), robot, mframe);
-            prevPos = fw_kinematics_pos_world_to_mFrame(workcell, path.at(j-1), robot, mframe);
+            currentPos = fw_kinematics_pos_world_to_mFrame(workcell, path.at(j), robot, mframe).P(); // Only calculating based on position
+            prevPos = fw_kinematics_pos_world_to_mFrame(workcell, path.at(j-1), robot, mframe).P(); // Only calculating base on position
 
             dist += sqrt(pow((currentPos[0]-prevPos[0]),2)+pow((currentPos[1]-prevPos[1]),2)+pow((currentPos[2]-prevPos[2]),2)); // L2 distance
         }
@@ -252,6 +245,23 @@ void print_path_time_statistics(bool append, rrt_connect rrt_connect_info)
     file.close();
 }
 
+void print_trajectory(string file_name, std::vector<rw::math::Transform3D<>> transforms)
+{
+
+    ofstream file;
+
+    file.open(file_name);
+    // Write a homogen transformation to file
+    for(unsigned int i = 0; i < transforms.size(); i++){
+        tf = transforms[i];
+        file << tf.R().getRow(0)[0] << " " << tf.R().getRow(0)[1] << " " << tf.R().getRow(0)[2] << " " << tf.P()[0] << endl;
+        file << tf.R().getRow(1)[0] << " " << tf.R().getRow(1)[1] << " " << tf.R().getRow(1)[2] << " " << tf.P()[1] << endl;
+        file << tf.R().getRow(2)[0] << " " << tf.R().getRow(2)[1] << " " << tf.R().getRow(2)[2] << " " << tf.P()[2] << endl;
+        file <<          0          << " " <<          0          << " " <<          0          << " " <<      1    << endl;
+    }
+
+}
+
 void calc_and_print_path_treaded(bool append, std::vector<float> stepsizes, WorkCell::Ptr workcell, Device::Ptr robot, Frame* tool_frame, Frame* object_frame, Q from, Q to)
 {
     // Running 4 threads when writing to file
@@ -317,6 +327,9 @@ void calc_and_print_path_treaded(bool append, std::vector<float> stepsizes, Work
 
 int main(int argc, char** argv) {
 
+    /****************************************************************************************
+    **                            RobWork setup for workcell                               **
+    ****************************************************************************************/
     const string wcFile = "/home/mikkel/Desktop/Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml"; //"../../Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml";
     const string deviceName = "UR-6-85-5-A";
     cout << "Trying to use workcell " << wcFile << " and device " << deviceName << endl;
@@ -447,7 +460,7 @@ int main(int argc, char** argv) {
     /****************************************************************************************
     **                                 MultiThreading                                      **
     ****************************************************************************************/
-
+/*
     Q from(6, 2.26097, -2.2029, -1.3037, -4.34737, -1.5708, -0.880619); // Pick configuration
     Q to(6, -0.842337, -2.31799, -1.10501, -4.43098, -1.5708, 2.29926); // Place configuration
     std::vector<float> stepsizes;
@@ -469,5 +482,36 @@ int main(int argc, char** argv) {
         else
             calc_and_print_path_treaded(true, stepsizes, wc, device, tool_frame, cylinder_frame, from, to); // Running 3 threads when generating data
     }
-	return 0;
+
+*/
+    /****************************************************************************************
+    **                         Running RRT with optimal stepsize                           **
+    ****************************************************************************************/
+    /*
+    QPath path;
+    Q to(6, -0.842337, -2.31799, -1.10501, -4.43098, -1.5708, 2.29926); // Place configuration
+    std::vector<rw::math::Transform3D<>> transforms;
+    // ******************************* PICK PLACE 1 *********************************** //
+    Q from(6, 2.26097, -2.2029, -1.3037, -4.34737, -1.5708, -0.880619); // Pick configuration right corner
+    path = calculate_path_rrt(wc, device, tool_frame, cylinder_frame, from, to);
+    for (unsigned int j = 0; j < path.size(); j++){
+        print_trajectory("rrtConnect_traject_pickplace_right.txt", path[i]);
+    }
+
+    // ******************************* PICK PLACE 2 *********************************** //
+    Q from(6, 2.26097, -2.2029, -1.3037, -4.34737, -1.5708, -0.880619); // Pick configuration middle
+    path = calculate_path_rrt(wc, device, tool_frame, cylinder_frame, from, to);
+    for (unsigned int j = 0; j < path.size(); j++){
+        print_trajectory("rrtConnect_traject_pickplace_middle.txt", path[i]);
+    }
+
+    // ******************************* PICK PLACE 3 *********************************** //
+    Q from(6, 2.26097, -2.2029, -1.3037, -4.34737, -1.5708, -0.880619); // Pick configuration left corner
+    path = calculate_path_rrt(wc, device, tool_frame, cylinder_frame, from, to);
+    for (unsigned int j = 0; j < path.size(); j++){
+        print_trajectory("rrtConnect_traject_pickplace_left.txt", path[i]);
+    }
+    */
+
+    return 0;
 }

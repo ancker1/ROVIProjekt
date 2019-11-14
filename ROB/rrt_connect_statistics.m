@@ -1,6 +1,6 @@
 %% Main information
 clear; clc
-number_of_repeated_data = 30;
+number_of_repeated_data = 60;
 
 
 
