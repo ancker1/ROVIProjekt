@@ -317,7 +317,7 @@ void calc_and_print_path_treaded(bool append, std::vector<float> stepsizes, Work
 
 int main(int argc, char** argv) {
 
-    const string wcFile = "/home/mikkel/Desktop/Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml"; //"../../Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml";
+    const string wcFile = "/home/emil/Desktop/Project_WorkCell_Cam_RRT/Project_WorkCell/Scene.wc.xml"; //"../../Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml";
     const string deviceName = "UR-6-85-5-A";
     cout << "Trying to use workcell " << wcFile << " and device " << deviceName << endl;
     ofstream myfile;
