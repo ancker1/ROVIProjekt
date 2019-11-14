@@ -114,18 +114,21 @@ void calculate_path_from_stepsize_thread( rrt_connect &rrt_info, WorkCell::Ptr w
             std::cout << "Error Collision between device in \"to\" configuration. Please stop program and make another configuration" << std::endl;
 
         // time to plan rrt, used for statistics.
-        Timer t;
-        t.resetAndResume();
+        auto start = std::chrono::high_resolution_clock::now();
+
 
         //Use the planner to find a trajectory between the configurations
         planner->query(from, to, path);
+        auto stop = std::chrono::high_resolution_clock::now();
+
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
+        int dur = duration.count();
+
         planner->make(constraint);
 
-        t.pause();
-        time = t.getTime();
 
         rrt_info.paths.push_back(path);
-        rrt_info.times.push_back(time);
+        rrt_info.times.push_back(dur);
 
     }
 }
@@ -257,47 +260,52 @@ void calc_and_print_path_treaded(bool append, std::vector<float> stepsizes, Work
     rrt1.stepsizes = stepsizes;
     rrt2.stepsizes = stepsizes;
     rrt3.stepsizes = stepsizes;
-    rrt4.stepsizes = stepsizes;
-    rrt5.stepsizes = stepsizes;
-    rrt6.stepsizes = stepsizes;
+    //rrt4.stepsizes = stepsizes;
+    //rrt5.stepsizes = stepsizes;
+    //rrt6.stepsizes = stepsizes;
 
-    std::thread t1( calculate_path_from_stepsize_thread, std::ref(rrt1), workcell, robot, tool_frame, object_frame, from, to);
-    std::thread t2( calculate_path_from_stepsize_thread, std::ref(rrt2), workcell, robot, tool_frame, object_frame, from, to);
-    std::thread t3( calculate_path_from_stepsize_thread, std::ref(rrt3), workcell, robot, tool_frame, object_frame, from, to);
-    std::thread t4( calculate_path_from_stepsize_thread, std::ref(rrt4), workcell, robot, tool_frame, object_frame, from, to);
-    std::thread t5( calculate_path_from_stepsize_thread, std::ref(rrt5), workcell, robot, tool_frame, object_frame, from, to);
-    std::thread t6( calculate_path_from_stepsize_thread, std::ref(rrt6), workcell, robot, tool_frame, object_frame, from, to);
-    t1.join();
-    t2.join();
-    t3.join();
-    t4.join();
-    t5.join();
-    t6.join();
+
+        calculate_path_from_stepsize_thread(rrt1, workcell, robot, tool_frame, object_frame, from, to);
+
+
+
+//    std::thread t1( calculate_path_from_stepsize_thread, std::ref(rrt1), workcell, robot, tool_frame, object_frame, from, to);
+//    std::thread t2( calculate_path_from_stepsize_thread, std::ref(rrt2), workcell, robot, tool_frame, object_frame, from, to);
+//    std::thread t3( calculate_path_from_stepsize_thread, std::ref(rrt3), workcell, robot, tool_frame, object_frame, from, to);
+    //std::thread t4( calculate_path_from_stepsize_thread, std::ref(rrt4), workcell, robot, tool_frame, object_frame, from, to);
+    //std::thread t5( calculate_path_from_stepsize_thread, std::ref(rrt5), workcell, robot, tool_frame, object_frame, from, to);
+    //std::thread t6( calculate_path_from_stepsize_thread, std::ref(rrt6), workcell, robot, tool_frame, object_frame, from, to);
+//    t1.join();
+//    t2.join();
+//    t3.join();
+    //t4.join();
+    //t5.join();
+    //t6.join();
 
     // Joining all the data to write to file
     for(unsigned int i = 0; i < rrt1.stepsizes.size(); i++)
     {
         // Stepsizes
         rrt_total.stepsizes.push_back(rrt1.stepsizes[i]);
-        rrt_total.stepsizes.push_back(rrt2.stepsizes[i]);
-        rrt_total.stepsizes.push_back(rrt3.stepsizes[i]);
-        rrt_total.stepsizes.push_back(rrt4.stepsizes[i]);
-        rrt_total.stepsizes.push_back(rrt5.stepsizes[i]);
-        rrt_total.stepsizes.push_back(rrt6.stepsizes[i]);
+//        rrt_total.stepsizes.push_back(rrt2.stepsizes[i]);
+//        rrt_total.stepsizes.push_back(rrt3.stepsizes[i]);
+        //rrt_total.stepsizes.push_back(rrt4.stepsizes[i]);
+        //rrt_total.stepsizes.push_back(rrt5.stepsizes[i]);
+        //rrt_total.stepsizes.push_back(rrt6.stepsizes[i]);
         // Paths
         rrt_total.paths.push_back(rrt1.paths[i]);
-        rrt_total.paths.push_back(rrt2.paths[i]);
-        rrt_total.paths.push_back(rrt3.paths[i]);
-        rrt_total.paths.push_back(rrt4.paths[i]);
-        rrt_total.paths.push_back(rrt5.paths[i]);
-        rrt_total.paths.push_back(rrt6.paths[i]);
+//        rrt_total.paths.push_back(rrt2.paths[i]);
+//        rrt_total.paths.push_back(rrt3.paths[i]);
+        //rrt_total.paths.push_back(rrt4.paths[i]);
+        //rrt_total.paths.push_back(rrt5.paths[i]);
+        //rrt_total.paths.push_back(rrt6.paths[i]);
         // Times
         rrt_total.times.push_back(rrt1.times[i]);
-        rrt_total.times.push_back(rrt2.times[i]);
-        rrt_total.times.push_back(rrt3.times[i]);
-        rrt_total.times.push_back(rrt4.times[i]);
-        rrt_total.times.push_back(rrt5.times[i]);
-        rrt_total.times.push_back(rrt6.times[i]);
+//        rrt_total.times.push_back(rrt2.times[i]);
+//        rrt_total.times.push_back(rrt3.times[i]);
+        //rrt_total.times.push_back(rrt4.times[i]);
+        //rrt_total.times.push_back(rrt5.times[i]);
+        //rrt_total.times.push_back(rrt6.times[i]);
     }
 
 
@@ -446,20 +454,20 @@ int main(int argc, char** argv) {
 
 
     // Initialize stepsize values
-    for (float i = 0.05; i <= 3; i += 0.05) {
+    for (float i = 0.1; i <= 3; i += 0.1) {
         stepsizes.push_back(i);
     }
 
-    int number_of_threads = 6;
-    int number_of_data = 30/number_of_threads; // Divide by number of threads running in function below
+    int number_of_threads = 3;
+    int number_of_data = 30;//number_of_threads; // Divide by number of threads running in function below
 
     for (unsigned int i = 0; i < number_of_data; i++)
     {
         std::cout << "Calculating iteration " << i*number_of_threads << " out of " << number_of_data*number_of_threads << " for rrt-connect" << std::endl;
         if (i == 0) // Do not append at the start to file
-            calc_and_print_path_treaded(false, stepsizes, wc, device, tool_frame, cylinder_frame, from, to); // Running 4 threads when generating data
+            calc_and_print_path_treaded(false, stepsizes, wc, device, tool_frame, cylinder_frame, from, to); // Running 3 threads when generating data
         else
-            calc_and_print_path_treaded(true, stepsizes, wc, device, tool_frame, cylinder_frame, from, to); // Running 4 threads when generating data
+            calc_and_print_path_treaded(true, stepsizes, wc, device, tool_frame, cylinder_frame, from, to); // Running 3 threads when generating data
     }
 	return 0;
 }

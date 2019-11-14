@@ -48,6 +48,8 @@ ylabel('Standard deviation configuration distance')
 
 figure('name', 'Boxplot of configuration distance versus Stepsize')
 boxplot(dist, stepsize);
+xlabel('Stepsize');
+ylabel('Configuration distance')
 
 disp('-------------------------------------------------------------------')
 disp('Finding minimum mean of configuration distance and corresponding stepsize')
@@ -81,7 +83,7 @@ subplot(3,1,1)
 scatter(stepsize, dist)
 title('Scatter plot')
 xlabel('Stepsize')
-ylabel('Cartersian distance distance')
+ylabel('Cartersian distance')
 
 subplot(3,1,2)
 plot(mean_dist(:,1), mean_dist(:,2))
@@ -97,6 +99,9 @@ ylabel('Standard deviation Cartersian distance')
 
 figure('name', 'Boxplot of cartersian distance versus Stepsize')
 boxplot(dist, stepsize);
+xlabel('Stepsize')
+ylabel('Cartersian distance')
+
 
 disp('-------------------------------------------------------------------')
 disp('Finding minimum mean of cartersian distance and corresponding stepsize')
@@ -127,26 +132,29 @@ subplot(3,1,1)
 scatter(stepsize, time)
 title('Scatter plot')
 xlabel('Stepsize')
-ylabel('Cartersian distance distance')
+ylabel('Calculation time of path')
 
 subplot(3,1,2)
 plot(mean_time(:,1), mean_time(:,2))
 title('Mean plot')
 xlabel('Stepsize')
-ylabel('Meaned Cartersian distance')
+ylabel('Meaned calculation time of path')
 
 subplot(3,1,3)
 plot(std_dev_time(:,1), std_dev_time(:,2))
 title('Standard deviation plot')
 xlabel('Stepsize')
-ylabel('Standard deviation Cartersian distance')
+ylabel('Standard deviation calculation time of path')
 
 figure('name', 'Boxplot of Calculation time of path versus Stepsize')
 boxplot(time, stepsize);
+xlabel('Stepsize')
+ylabel('Calculation time of path')
+
 
 disp('-------------------------------------------------------------------')
 disp('Finding minimum mean of time and corresponding stepsize')
-disp('-------------------------------------------------------------------')
+disp('---------boxplot(time, stepsize);----------------------------------------------------------')
 [minimum_mean, index] = min(mean_time(:,2));
 minimum_mean
 stepsize_min_mean = mean_time(index)
@@ -174,25 +182,27 @@ subplot(3,1,1)
 scatter(stepsize, numconfig)
 title('Scatter plot')
 xlabel('Stepsize')
-ylabel('Cartersian distance distance')
+ylabel('Number of configuration ')
 
 subplot(3,1,2)
 plot(mean_num_config(:,1), mean_num_config(:,2))
 title('Mean plot')
 xlabel('Stepsize')
-ylabel('Meaned Cartersian distance')
+ylabel('Meaned number of configuration ')
 
 subplot(3,1,3)
 plot(std_dev_num_config(:,1), std_dev_num_config(:,2))
 title('Standard deviation plot')
 xlabel('Stepsize')
-ylabel('Standard deviation Cartersian distance')
+ylabel('Standard deviation number of configuration ')
 
 figure('name', 'Boxplot of number of configuration versus Stepsize')
 boxplot(numconfig, stepsize);
+xlabel('Stepsize')
+ylabel('Number of configuration ')
 
 disp('-------------------------------------------------------------------')
-disp('Finding minimum mean of configuration and corresponding stepsize')
+disp('Finding minimum mean of number of configuration and corresponding stepsize')
 disp('-------------------------------------------------------------------')
 [minimum_mean, index] = min(mean_num_config(:,2));
 minimum_mean
