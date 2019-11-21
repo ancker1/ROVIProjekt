@@ -236,8 +236,13 @@ int main(int argc, char** argv)
 
     rw::proximity::CollisionDetector::Ptr detector = rw::common::ownedPtr(new rw::proximity::CollisionDetector(wc, rwlibs::proximitystrategies::ProximityStrategyFactory::makeDefaultCollisionStrategy()));
     rw::kinematics::State state = wc->getDefaultState();
-    std::cout << cylinderFrame->getTransform(state).P() << std::endl;
-    //collision_free_from_object(false, wc, state, robotUR6, cylinderFrame);
+    //std::cout << cylinderFrame->getTransform(state).P() << std::endl;
+
+    //Finding configuration for place area of cylinder
+    //rw::math::Vector3D<> cylinderPos(0.3, -0.5, 0.150);
+    //rw::math::Transform3D<> cylinderTrans(cylinderPos, cylinderFrame->getTransform(state).R());
+    //cylinderFrame->moveTo(cylinderTrans, state);
+    collision_free_from_object(false, wc, state, robotUR6, cylinderFrame);
     /*******************************************************************
      * Moving robot around to get best position of base and get collsion free for up/side of object
      *******************************************************************/

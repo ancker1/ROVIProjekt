@@ -46,17 +46,19 @@ title('Standard deviation plot')
 xlabel('Stepsize')
 ylabel('Standard deviation configuration distance')
 
-figure('name', 'Boxplot of configuration distance versus Stepsize')
+figure('name', 'Boxplot of configuration distance versus stepsize')
 boxplot(dist, stepsize);
-xlabel('Stepsize');
-ylabel('Configuration distance')
-
+title('Boxplot of configuration distance versus stepsize', 'FontSize', 30)
+xlabel('Stepsize', 'FontSize', 20);
+ylabel('Configuration distance', 'FontSize', 20)
+ 
 disp('-------------------------------------------------------------------')
 disp('Finding minimum mean of configuration distance and corresponding stepsize')
 disp('-------------------------------------------------------------------')
 [minimum_mean, index] = min(mean_dist(:,2));
 minimum_mean
 stepsize_min_mean = mean_dist(index)
+
 %% RRT-connect stepsize vs certesian distance statistics
 % Distance is from world to TCP frame
 
@@ -146,10 +148,11 @@ title('Standard deviation plot')
 xlabel('Stepsize')
 ylabel('Standard deviation calculation time of path')
 
-figure('name', 'Boxplot of Calculation time of path versus Stepsize')
+figure('name', 'Boxplot of calculation time of path versus stepsize')
 boxplot(time, stepsize);
-xlabel('Stepsize')
-ylabel('Calculation time of path')
+title('Boxplot of calculation time of path versus stepsize', 'FontSize', 30)
+xlabel('Stepsize', 'FontSize', 20)
+ylabel('Calculation time of path [ms]', 'FontSize', 20)
 
 
 disp('-------------------------------------------------------------------')
@@ -198,8 +201,9 @@ ylabel('Standard deviation number of configuration ')
 
 figure('name', 'Boxplot of number of configuration versus Stepsize')
 boxplot(numconfig, stepsize);
-xlabel('Stepsize')
-ylabel('Number of configuration ')
+title('Boxplot of number of configuration versus stepsize', 'FontSize', 30)
+xlabel('Stepsize', 'FontSize', 20)
+ylabel('Number of configuration ', 'FontSize', 20)
 
 disp('-------------------------------------------------------------------')
 disp('Finding minimum mean of number of configuration and corresponding stepsize')

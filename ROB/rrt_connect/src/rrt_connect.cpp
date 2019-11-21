@@ -9,63 +9,51 @@
 #include <rwlibs/pathplanners/rrt/RRTQToQPlanner.hpp>
 #include <rwlibs/proximitystrategies/ProximityStrategyFactory.hpp>
 
-using namespace std;
-using namespace rw::common;
-using namespace rw::math;
-using namespace rw::kinematics;
-using namespace rw::loaders;
-using namespace rw::models;
-using namespace rw::pathplanning;
-using namespace rw::proximity;
-using namespace rw::trajectory;
-using namespace rwlibs::pathplanners;
-using namespace rwlibs::proximitystrategies;
-
 #define MAXTIME 60. // Max time trying to find solution.
-#define ESTEPSIZE 0.65 // Step size of RRT-connect.
+#define ESTEPSIZE 0.4 // Step size of RRT-connect.
 
 struct rrt_connect {
   std::vector<float> stepsizes;
-  std::vector<QPath> paths;
+  std::vector<rw::trajectory::QPath> paths;
   std::vector<float> times;
 } ;
 
-
-bool checkCollisions(Device::Ptr device, const State &state, const CollisionDetector &detector, const Q &q) {
-	State testState;
-	CollisionDetector::QueryResult data;
+// Function below is from template used in lab6 //
+bool checkCollisions(rw::models::Device::Ptr device, const rw::kinematics::State &state, const rw::proximity::CollisionDetector &detector, const rw::math::Q &q) {
+    rw::kinematics::State testState;
+    rw::proximity::CollisionDetector::QueryResult data;
 	bool colFrom;
 
 	testState = state;
 	device->setQ(q,testState);
 	colFrom = detector.inCollision(testState,&data);
 	if (colFrom) {
-		cerr << "Configuration in collision: " << q << endl;
-		cerr << "Colliding frames: " << endl;
-		FramePairSet fps = data.collidingFrames;
-		for (FramePairSet::iterator it = fps.begin(); it != fps.end(); it++) {
-			cerr << (*it).first->getName() << " " << (*it).second->getName() << endl;
+        std::cerr << "Configuration in collision: " << q << std::endl;
+        std::cerr << "Colliding frames: " << std::endl;
+        rw::kinematics::FramePairSet fps = data.collidingFrames;
+        for (rw::kinematics::FramePairSet::iterator it = fps.begin(); it != fps.end(); it++) {
+            std::cerr << (*it).first->getName() << " " << (*it).second->getName() << std::endl;
 		}
 		return false;
 	}
     return true;
 }
 
-QPath calculate_path_rrt(WorkCell::Ptr workcell, Device::Ptr robot, Frame* tool_frame, Frame* object_frame, Q from, Q to)
+rw::trajectory::QPath calculate_path_rrt(rw::models::WorkCell::Ptr workcell, rw::models::Device::Ptr robot, rw::kinematics::Frame* tool_frame, rw::kinematics::Frame* object_frame, rw::math::Q from, rw::math::Q to)
 {
-    QPath path;
+    rw::trajectory::QPath path;
 
-    State state = workcell->getDefaultState();
+    rw::kinematics::State state = workcell->getDefaultState();
     //Set Q to the initial state and grip the bottle frame
     robot->setQ(from, state); // sets initial state
-    Kinematics::gripFrame(object_frame, tool_frame, state); // Grip the bottle
+    rw::kinematics::Kinematics::gripFrame(object_frame, tool_frame, state); // Grip the bottle
 
-    CollisionDetector detector(workcell, ProximityStrategyFactory::makeDefaultCollisionStrategy());
-    PlannerConstraint constraint = PlannerConstraint::make(&detector, robot, state);
+    rw::proximity::CollisionDetector detector(workcell, rwlibs::proximitystrategies::ProximityStrategyFactory::makeDefaultCollisionStrategy());
+    rw::pathplanning::PlannerConstraint constraint = rw::pathplanning::PlannerConstraint::make(&detector, robot, state);
 
-    QSampler::Ptr sampler = QSampler::makeConstrained(QSampler::makeUniform(robot),constraint.getQConstraintPtr());
-    QMetric::Ptr metric = MetricFactory::makeEuclidean<Q>();
-    QToQPlanner::Ptr planner = RRTPlanner::makeQToQPlanner(constraint, sampler, metric, ESTEPSIZE, RRTPlanner::RRTConnect);
+    rw::pathplanning::QSampler::Ptr sampler = rw::pathplanning::QSampler::makeConstrained(rw::pathplanning::QSampler::makeUniform(robot),constraint.getQConstraintPtr());
+    rw::math::QMetric::Ptr metric = rw::math::MetricFactory::makeEuclidean<rw::math::Q>();
+    rw::pathplanning::QToQPlanner::Ptr planner = rwlibs::pathplanners::RRTPlanner::makeQToQPlanner(constraint, sampler, metric, ESTEPSIZE, rwlibs::pathplanners::RRTPlanner::RRTConnect);
 
     // check if collision in state
     if (!checkCollisions(robot, state, detector, from))
@@ -81,24 +69,24 @@ QPath calculate_path_rrt(WorkCell::Ptr workcell, Device::Ptr robot, Frame* tool_
     return path;
 }
 
-void calculate_path_from_stepsize_thread( rrt_connect &rrt_info, WorkCell::Ptr workcell, Device::Ptr robot, Frame* tool_frame, Frame* object_frame, Q from, Q to)
+void calculate_path_from_stepsize_thread( rrt_connect &rrt_info, rw::models::WorkCell::Ptr workcell, rw::models::Device::Ptr robot, rw::kinematics::Frame* tool_frame, rw::kinematics::Frame* object_frame, rw::math::Q from, rw::math::Q to)
 {
     for (unsigned int i = 0; i < rrt_info.stepsizes.size(); i++) {
         // Calculation of path and time for one stepsize
-        QPath path;
+        rw::trajectory::QPath path;
         float time;
 
-        State state = workcell->getDefaultState();
+        rw::kinematics::State state = workcell->getDefaultState();
         //Set Q to the initial state and grip the bottle frame
         robot->setQ(from, state); // sets initial state
-        Kinematics::gripFrame(object_frame, tool_frame, state); // Grip the bottle
+        rw::kinematics::Kinematics::gripFrame(object_frame, tool_frame, state); // Grip the bottle
 
-        CollisionDetector detector(workcell, ProximityStrategyFactory::makeDefaultCollisionStrategy());
-        PlannerConstraint constraint = PlannerConstraint::make(&detector, robot, state);
+        rw::proximity::CollisionDetector detector(workcell, rwlibs::proximitystrategies::ProximityStrategyFactory::makeDefaultCollisionStrategy());
+        rw::pathplanning::PlannerConstraint constraint = rw::pathplanning::PlannerConstraint::make(&detector, robot, state);
 
-        QSampler::Ptr sampler = QSampler::makeConstrained(QSampler::makeUniform(robot),constraint.getQConstraintPtr());
-        QMetric::Ptr metric = MetricFactory::makeEuclidean<Q>();
-        QToQPlanner::Ptr planner = RRTPlanner::makeQToQPlanner(constraint, sampler, metric, rrt_info.stepsizes[i], RRTPlanner::RRTConnect);
+        rw::pathplanning::QSampler::Ptr sampler = rw::pathplanning::QSampler::makeConstrained(rw::pathplanning::QSampler::makeUniform(robot),constraint.getQConstraintPtr());
+        rw::math::QMetric::Ptr metric = rw::math::MetricFactory::makeEuclidean<rw::math::Q>();
+        rw::pathplanning::QToQPlanner::Ptr planner = rwlibs::pathplanners::RRTPlanner::makeQToQPlanner(constraint, sampler, metric, rrt_info.stepsizes[i], rwlibs::pathplanners::RRTPlanner::RRTConnect);
 
         // check if collision in state
         if (!checkCollisions(robot, state, detector, from))
@@ -126,29 +114,29 @@ void calculate_path_from_stepsize_thread( rrt_connect &rrt_info, WorkCell::Ptr w
     }
 }
 
-Transform3D<> fw_kinematics_pos_world_to_mFrame(WorkCell::Ptr workcell, Q configuration, Device::Ptr robot, Frame* mframe)
+rw::math::Transform3D<> fw_kinematics_pos_world_to_mFrame(rw::models::WorkCell::Ptr workcell, rw::math::Q configuration, rw::models::Device::Ptr robot, rw::kinematics::Frame* mframe)
 {
-    Transform3D<> worldTmFramePos;
-    State state = workcell->getDefaultState();
+    rw::math::Transform3D<> worldTmFramePos;
+    rw::kinematics::State state = workcell->getDefaultState();
     // Setting configuration of robot
     robot->setQ( configuration , state );
 
     // Calculate Tranformation from world to mFrame
-    Transform3D<> bTmf = Kinematics::worldTframe(mframe, state);
+    rw::math::Transform3D<> bTmf = rw::kinematics::Kinematics::worldTframe(mframe, state);
     worldTmFramePos = bTmf;
 
     return worldTmFramePos;
 }
 
-void print_cartesian_dist_statistics(bool append, rrt_connect rrt_connect_info, WorkCell::Ptr workcell, Device::Ptr robot, Frame* mframe)
+void print_cartesian_dist_statistics(bool append, rrt_connect rrt_connect_info, rw::models::WorkCell::Ptr workcell, rw::models::Device::Ptr robot, rw::kinematics::Frame* mframe)
 {
-    ofstream file;
+    std::ofstream file;
     float dist = 0;
-    QPath path;
-    Q currentQ;
-    Q prevQ;
-    Vector3D<> currentPos;
-    Vector3D<> prevPos;
+    rw::trajectory::QPath path;
+    rw::math::Q currentQ;
+    rw::math::Q prevQ;
+    rw::math::Vector3D<> currentPos;
+    rw::math::Vector3D<> prevPos;
 
     std::cout << "Begining writing cartesian dist statistics to file" << std::endl;
 
@@ -178,9 +166,9 @@ void print_cartesian_dist_statistics(bool append, rrt_connect rrt_connect_info, 
 
 void print_configuration_dist_statistics(bool append, rrt_connect rrt_connect_info)
 {
-    ofstream file;
+    std::ofstream file;
     float dist = 0;
-    QPath path;
+    rw::trajectory::QPath path;
 
     std::cout << "Begining writing configuration dist statistics to file" << std::endl;
 
@@ -205,8 +193,8 @@ void print_configuration_dist_statistics(bool append, rrt_connect rrt_connect_in
 
 void print_configuration_num_statistics(bool append, rrt_connect rrt_connect_info)
 {
-    ofstream file;
-    QPath path;
+    std::ofstream file;
+    rw::trajectory::QPath path;
 
     std::cout << "Begining writing configuration number statistics to file" << std::endl;
 
@@ -227,8 +215,8 @@ void print_configuration_num_statistics(bool append, rrt_connect rrt_connect_inf
 
 void print_path_time_statistics(bool append, rrt_connect rrt_connect_info)
 {
-    ofstream file;
-    QPath path;
+    std::ofstream file;
+    rw::trajectory::QPath path;
 
     std::cout << "Begining writing path time statistics to file" << std::endl;
 
@@ -245,24 +233,24 @@ void print_path_time_statistics(bool append, rrt_connect rrt_connect_info)
     file.close();
 }
 
-void print_trajectory(string file_name, std::vector<rw::math::Transform3D<>> transforms)
+void print_trajectory(std::string file_name, std::vector<rw::math::Transform3D<>> transforms)
 {
 
-    ofstream file;
+    std::ofstream file;
 
     file.open(file_name);
     // Write a homogen transformation to file
     for(unsigned int i = 0; i < transforms.size(); i++){
-        tf = transforms[i];
-        file << tf.R().getRow(0)[0] << " " << tf.R().getRow(0)[1] << " " << tf.R().getRow(0)[2] << " " << tf.P()[0] << endl;
-        file << tf.R().getRow(1)[0] << " " << tf.R().getRow(1)[1] << " " << tf.R().getRow(1)[2] << " " << tf.P()[1] << endl;
-        file << tf.R().getRow(2)[0] << " " << tf.R().getRow(2)[1] << " " << tf.R().getRow(2)[2] << " " << tf.P()[2] << endl;
-        file <<          0          << " " <<          0          << " " <<          0          << " " <<      1    << endl;
+        rw::math::Transform3D<> tf = transforms[i];
+        file << tf.R().getRow(0)[0] << " " << tf.R().getRow(0)[1] << " " << tf.R().getRow(0)[2] << " " << tf.P()[0] << std::endl;
+        file << tf.R().getRow(1)[0] << " " << tf.R().getRow(1)[1] << " " << tf.R().getRow(1)[2] << " " << tf.P()[1] << std::endl;
+        file << tf.R().getRow(2)[0] << " " << tf.R().getRow(2)[1] << " " << tf.R().getRow(2)[2] << " " << tf.P()[2] << std::endl;
+        file <<          0          << " " <<          0          << " " <<          0          << " " <<      1    << std::endl;
     }
 
 }
 
-void calc_and_print_path_treaded(bool append, std::vector<float> stepsizes, WorkCell::Ptr workcell, Device::Ptr robot, Frame* tool_frame, Frame* object_frame, Q from, Q to)
+void calc_and_print_path_treaded(bool append, std::vector<float> stepsizes, rw::models::WorkCell::Ptr workcell, rw::models::Device::Ptr robot, rw::kinematics::Frame* tool_frame, rw::kinematics::Frame* object_frame, rw::math::Q from, rw::math::Q to)
 {
     // Running 4 threads when writing to file
     rrt_connect rrt_total, rrt1, rrt2, rrt3, rrt4, rrt5, rrt6;
@@ -330,53 +318,56 @@ int main(int argc, char** argv) {
     /****************************************************************************************
     **                            RobWork setup for workcell                               **
     ****************************************************************************************/
-    const string wcFile = "/home/mikkel/Desktop/Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml"; //"../../Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml";
-    const string deviceName = "UR-6-85-5-A";
-    cout << "Trying to use workcell " << wcFile << " and device " << deviceName << endl;
-    ofstream myfile;
+    const std::string wcFile = "/home/mikkel/Desktop/Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml"; //"../../Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml";
+    const std::string deviceName = "UR-6-85-5-A";
+    std::cout << "Trying to use workcell " << wcFile << " and device " << deviceName << std::endl;
+    std::ofstream myfile;
     myfile.open("path.lua");
     rw::math::Math::seed();     //Sets the random seed
 
 
-    WorkCell::Ptr wc = WorkCellLoader::Factory::load(wcFile);
+    rw::models::WorkCell::Ptr wc = rw::loaders::WorkCellLoader::Factory::load(wcFile);
     //Find the tool and bottle frame
     const std::string name_tool_frame = "WSG50TCP";
     const std::string name_cylinder_frame = "Cylinder";
 
-    Frame *tool_frame = wc->findFrame(name_tool_frame);
-    Frame *cylinder_frame = wc->findFrame(name_cylinder_frame);
+    rw::kinematics::Frame *tool_frame = wc->findFrame(name_tool_frame);
+    rw::kinematics::Frame *cylinder_frame = wc->findFrame(name_cylinder_frame);
 
-    Device::Ptr device = wc->findDevice(deviceName);
+    rw::models::Device::Ptr device = wc->findDevice(deviceName);
     if (device == NULL)
     {
-        cerr << "Device: " << deviceName << " not found!" << endl;
+        std::cerr << "Device: " << deviceName << " not found!" << std::endl;
         return 0;
     }
 
+    /****************************************************************************************
+    **                         Print on trajectory to LUA file                             **
+    ****************************************************************************************/
+    // The code below to "Calculating optimal parameters multiThreading" is from template used in lab6 //
 
 //    //Get the state
-//    State state = wc->getDefaultState();
+//    rw::kinematics::State state = wc->getDefaultState();
 
 //    //These Q's contains the start and end configurations
-//    Q from(6, 2.26097, -2.2029, -1.3037, -4.34737, -1.5708, -0.880619); // Pick configuration Q{2.30356, -2.9901, -0.152361, -3.14073, 2.80971, -3.14159} (from side right corner)
-//    Q to(6, -0.842337, -2.31799, -1.10501, -4.43098, -1.5708, 2.29926); // Place configuration Q{0.900888, -0.897058, 1.64999, -0.752929, -0.669908, -3.14159} (middle in place area)
+//    rw::math::Q from(6, 1.77843, -2.10011, -1.47274, -4.28113, -1.5708, -1.36316); // Pick configuration Q{2.30356, -2.9901, -0.152361, -3.14073, 2.80971, -3.14159} (from side right corner)
+//    rw::math::Q to(6, -0.782077, -2.24428, -1.23335, -4.37635, -1.5708, 2.35952); // Place configuration Q{0.900888, -0.897058, 1.64999, -0.752929, -0.669908, -3.14159} (middle in place area)
 
 //    //Set Q to the initial state and grip the bottle frame
 //    device->setQ(from, state); // sets initial state
-//    Kinematics::gripFrame(cylinder_frame, tool_frame, state); // Grip the bottle
+//    rw::kinematics::Kinematics::gripFrame(cylinder_frame, tool_frame, state); // Grip the bottle
 
-//    CollisionDetector detector(wc, ProximityStrategyFactory::makeDefaultCollisionStrategy());
-//    PlannerConstraint constraint = PlannerConstraint::make(&detector,device,state);
+//    rw::proximity::CollisionDetector detector(wc, rwlibs::proximitystrategies::ProximityStrategyFactory::makeDefaultCollisionStrategy());
+//    rw::pathplanning::PlannerConstraint constraint = rw::pathplanning::PlannerConstraint::make(&detector,device,state);
 
-//    QSampler::Ptr sampler = QSampler::makeConstrained(QSampler::makeUniform(device),constraint.getQConstraintPtr());
-//    QMetric::Ptr metric = MetricFactory::makeEuclidean<Q>();
-//    QToQPlanner::Ptr planner = RRTPlanner::makeQToQPlanner(constraint, sampler, metric, ESTEPSIZE, RRTPlanner::RRTConnect);
+//    rw::pathplanning::QSampler::Ptr sampler = rw::pathplanning::QSampler::makeConstrained(rw::pathplanning::QSampler::makeUniform(device), constraint.getQConstraintPtr());
+//    rw::math::QMetric::Ptr metric = rw::math::MetricFactory::makeEuclidean<rw::math::Q>();
+//    rw::pathplanning::QToQPlanner::Ptr planner = rwlibs::pathplanners::RRTPlanner::makeQToQPlanner(constraint, sampler, metric, ESTEPSIZE, rwlibs::pathplanners::RRTPlanner::RRTConnect);
 
 //    if (!checkCollisions(device, state, detector, from))
 //        return 0;
 //    if (!checkCollisions(device, state, detector, to))
 //        return 0;
-
 
 //    //Creates the functions for the LUA script and initializes the position and state of the robot
 //    myfile << "wc = rws.getRobWorkStudio():getWorkCell()\n"
@@ -397,24 +388,13 @@ int main(int argc, char** argv) {
 //              <<"rw.sleep(0.1)\n"
 //              <<"end\n\n";
 
-//    cout << "Planning from " << from << " to " << to << endl;
-//    QPath path;
-//    Timer t;
-//    t.resetAndResume();
-
+//    std::cout << "Planning from " << from << " to " << to << std::endl;
+//    rw::trajectory::QPath path;
 //    //Use the planner to find a trajectory between the configurations
 //    planner->query(from, to, path);
 //    planner->make(constraint);
 
-//    t.pause();
 //    double distance = 0;
-
-//    cout << "Took secounds to calculate path: " << t.getTime()<< endl;
-
-//    if (t.getTime() >= MAXTIME)
-//    {
-//        cout << "Notice: max time of " << MAXTIME << " seconds reached." << endl;
-//    }
 
 //    //Appends the path to the LUA script. This file can be "played" in RobWorkStudio.
 //    for (unsigned int i = 0; i< path.size(); i++)
@@ -424,71 +404,44 @@ int main(int argc, char** argv) {
 //        if(i >= 1)
 //            distance += sqrt(pow((path.at(i)(0)-path.at(i-1)(0)),2)+pow((path.at(i)(1)-path.at(i-1)(1)),2)+pow((path.at(i)(2)-path.at(i-1)(2)),2)+pow((path.at(i)(3)-path.at(i-1)(3)),2)+pow((path.at(i)(4)-path.at(i-1)(4)),2)+pow((path.at(i)(5)-path.at(i-1)(5)),2)); // L2 distance
 //        //cout << path.at(i)(0) << endl;
-//        cout << distance << endl;
+//        std::cout << distance << std::endl;
 //        myfile <<"setQ({" << path.at(i)(0) << "," << path.at(i)(1) << "," << path.at(i)(2) << "," << path.at(i)(3) << "," << path.at(i)(4) << "," << path.at(i)(5) << "})" << "\n";
 //    }
 
 //    myfile.close();
 
     /****************************************************************************************
-    **                          Calculating optimal parameters                             **
+    **              Calculating optimal parameters multiThreading                          **
     ****************************************************************************************/
-    /*
-    Q from(6, 2.26097, -2.2029, -1.3037, -4.34737, -1.5708, -0.880619); // Pick configuration
-    Q to(6, -0.842337, -2.31799, -1.10501, -4.43098, -1.5708, 2.29926); // Place configuration
-    QPath path;
-    float time;
-    std::vector<QPath> paths;
-    std::vector<float> times;
-    std::vector<float> stepsizes;
 
-    int count = 0;
-    for (float i = 0.005; i <= 3; i += 0.005) {
-        std::cout << "Calculating paths with stepsize " << ++count << " out of " << 3/0.005 << std::endl;
-        stepsizes.push_back(i);
-        std::tie(time, path) = calculate_path_from_stepsize(wc, device, tool_frame, cylinder_frame, from, to, i);
-        paths.push_back(path);
-        times.push_back(time);
-    }
-
-    print_path_time_statistics(stepsizes, times);
-    print_configuration_num_statistics(stepsizes, paths);
-    print_configuration_dist_statistics(stepsizes, paths);
-    print_cartesian_dist_statistics(wc, device, tool_frame, stepsizes, paths);
-
-    */
-    /****************************************************************************************
-    **                                 MultiThreading                                      **
-    ****************************************************************************************/
-/*
-    Q from(6, 2.26097, -2.2029, -1.3037, -4.34737, -1.5708, -0.880619); // Pick configuration
-    Q to(6, -0.842337, -2.31799, -1.10501, -4.43098, -1.5708, 2.29926); // Place configuration
-    std::vector<float> stepsizes;
+//    rw::math::Q from(6, 1.77843, -2.10011, -1.47274, -4.28113, -1.5708, -1.36316); // Pick configuration, Middle
+//    rw::math::Q to(6, -0.782077, -2.24428, -1.23335, -4.37635, -1.5708, 2.35952);  // Place configuration, Middle
+//    std::vector<float> stepsizes;
 
 
-    // Initialize stepsize values
-    for (float i = 0.1; i <= 3; i += 0.1) {
-        stepsizes.push_back(i);
-    }
+//    // Initialize stepsize values
+//    for (float i = 0.1; i <= 3; i += 0.1) {
+//        stepsizes.push_back(i);
+//    }
 
-    int number_of_threads = 3;
-    int number_of_data = 60/number_of_threads; // Divide by number of threads running in function below
+//    int number_of_threads = 3;
+//    int number_of_data = 60/number_of_threads; // Divide by number of threads running in function below
 
-    for (unsigned int i = 0; i < number_of_data; i++)
-    {
-        std::cout << "Calculating iteration " << i*number_of_threads << " out of " << number_of_data*number_of_threads << " for rrt-connect" << std::endl;
-        if (i == 0) // Do not append at the start to file
-            calc_and_print_path_treaded(false, stepsizes, wc, device, tool_frame, cylinder_frame, from, to); // Running 3 threads when generating data
-        else
-            calc_and_print_path_treaded(true, stepsizes, wc, device, tool_frame, cylinder_frame, from, to); // Running 3 threads when generating data
-    }
+//    for (unsigned int i = 0; i < number_of_data; i++)
+//    {
+//        std::cout << "Calculating iteration " << i*number_of_threads << " out of " << number_of_data*number_of_threads << " for rrt-connect" << std::endl;
+//        if (i == 0) // Do not append at the start to file
+//            calc_and_print_path_treaded(false, stepsizes, wc, device, tool_frame, cylinder_frame, from, to); // Running 3 threads when generating data
+//        else
+//            calc_and_print_path_treaded(true, stepsizes, wc, device, tool_frame, cylinder_frame, from, to); // Running 3 threads when generating data
+//    }
 
-*/
+
     /****************************************************************************************
     **                         Running RRT with optimal stepsize                           **
     ****************************************************************************************/
     /*
-    QPath path;
+    rw::trajectory::QPath path;
     Q to(6, -0.842337, -2.31799, -1.10501, -4.43098, -1.5708, 2.29926); // Place configuration
     std::vector<rw::math::Transform3D<>> transforms;
     // ******************************* PICK PLACE 1 *********************************** //
