@@ -16,6 +16,9 @@ namespace align { namespace global {
 
     pcl::PointCloud<pcl::Normal>::Ptr calculateNormals( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int kNearest)
     {
+        /************************************************************************************
+         *  Calculates normals of the point cloud                                           *
+         ************************************************************************************/
         pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
         ne.setInputCloud(cloud);
         pcl::search::KdTree<pcl::PointXYZ>::Ptr tree( new pcl::search::KdTree<pcl::PointXYZ>() );
@@ -27,8 +30,11 @@ namespace align { namespace global {
     }
 
     pcl::PointCloud<pcl::Histogram<153>>::Ptr calculateSpinImage( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::Normal>::Ptr normals, double searchRadius )
-    {   // Find parameters for spinImageEst
-        pcl::SpinImageEstimation<pcl::PointXYZ, pcl::Normal, pcl::Histogram<153>> spinImageEst(8, 0.5, 0); // prev (8, 0.5, 4)
+    {
+        /************************************************************************************
+         * Calculates spin images of the point cloud                                        *
+         ************************************************************************************/
+        pcl::SpinImageEstimation<pcl::PointXYZ, pcl::Normal, pcl::Histogram<153>> spinImageEst(8, 0.5, 0);
         spinImageEst.setInputCloud(cloud);
         spinImageEst.setInputNormals(normals);
 
@@ -43,6 +49,9 @@ namespace align { namespace global {
 
     float l2Dist ( const pcl::Histogram<153> &histA, const pcl::Histogram<153> &histB )
     {
+        /************************************************************************************
+         *  Finds distance between two feature vectors                                      *
+         ************************************************************************************/
         float result = 0;
         for ( unsigned int i = 0; i < histA.descriptorSize(); i++ )
             result += std::sqrt( std::pow(histA.histogram[i] - histB.histogram[i], 2) );
@@ -50,7 +59,10 @@ namespace align { namespace global {
     }
 
     std::vector<int> findNearestFeatures( const pcl::PointCloud<pcl::Histogram<153>>::Ptr &scene, const pcl::PointCloud<pcl::Histogram<153>>::Ptr &object )
-    {   // Finds nearest point in spinB for every point in spinA
+    {
+        /************************************************************************************
+         * Finds nearest feature in scene for each object feature vector                    *
+         ************************************************************************************/
         std::vector<int> nearestIndices;
         for (unsigned int i = 0; i < object->size(); i++) {
             float minDist = std::numeric_limits<float>::max();
@@ -69,6 +81,10 @@ namespace align { namespace global {
 
     pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 RANSAC(const pcl::PointCloud<pcl::PointXYZ>::Ptr &scene, const  pcl::PointCloud<pcl::PointXYZ>::Ptr &global, const std::vector<int> &nearest_indices)
     {
+        /************************************************************************************
+         * RANSAC implementation for fitting a transformation                               *
+         * With preliminary model check                                                     *
+         ************************************************************************************/
         pcl::common::UniformGenerator<int> gen(0, nearest_indices.size()-1, 42);
 
         pcl::PointCloud<pcl::PointXYZ>::Ptr global_tfed(new pcl::PointCloud<pcl::PointXYZ>);
@@ -176,6 +192,10 @@ namespace align { namespace global {
 
     pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 RANSAC_transform( const pcl::PointCloud<pcl::PointXYZ>::Ptr &scene, const pcl::PointCloud<pcl::PointXYZ>::Ptr &object, const std::vector<int> &nearestIndices, float inlierThreshold)
     {
+        /************************************************************************************
+         * Implementation of RANSAC for fitting of transformation                           *
+         * Without preliminary model check                                                  *
+         ************************************************************************************/
         pcl::common::UniformGenerator<int> generator(0, nearestIndices.size()-1);
         pcl::PointCloud<pcl::PointXYZ>::Ptr objectTransformed( new pcl::PointCloud<pcl::PointXYZ> );
 

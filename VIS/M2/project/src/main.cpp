@@ -27,9 +27,25 @@
 #include <iostream>
 #include <fstream>
 
+/************************************************************************************
+ * main.cpp is used to run the functions defined in the files:                      *
+ * - alignment.hpp                                                                  *
+ * - global_alignment.hpp                                                           *
+ * - local_alignment.hpp                                                            *
+ * - pose_estimation.hpp                                                            *
+ * - preprocess.hpp                                                                 *
+ *                                                                                  *
+ * In the development of the methods in the above files the PCL documentation have  *
+ * been used as a source of inspiration and knowledge base:                         *
+ * (Link) http://www.pointclouds.org/documentation/                                 *
+ ************************************************************************************/
+
 
 void showCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
 {
+    /*************************************************************************************
+     *  Visualize one point cloud with green points                                      *
+     *************************************************************************************/
     // might be better to show it with colors
     pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer ("3D Viewer"));
     viewer->setBackgroundColor(0, 0, 0);
@@ -50,6 +66,10 @@ void showCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
 
 pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 poseEstimate_func(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_object, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_scene)
 {
+    /*************************************************************************************
+     *  Pose estimation function - This is not used anymore                              *
+     *  Have been moved to pose_estimation.hpp                                           *
+     *************************************************************************************/
 
     //std::cout << "[Start] Object count: " << cloud_object->points.size() << std::endl;
     preprocess::PointCloud::voxelGrid(cloud_object, cloud_object, 0.005f); // 5[mm] leaf size
@@ -80,6 +100,9 @@ pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Ma
 
 void TEST_RANSAC(pcl::PointCloud<pcl::PointXYZ>::Ptr object, pcl::PointCloud<pcl::PointXYZ>::Ptr scene)
 {
+    /*******************************************************************************************
+     * Evaluates RANSAC: test optimized RANSAC implementation vs. non optimizer implementation *
+     *******************************************************************************************/
     preprocess::PointCloud::voxelGrid(object, object, 0.005f); // 5[mm] leaf size
     // run 30 times
     pcl::PointCloud<pcl::Normal>::Ptr normals_scene = align::global::calculateNormals(scene, 10);
@@ -131,6 +154,10 @@ void TEST_RANSAC(pcl::PointCloud<pcl::PointXYZ>::Ptr object, pcl::PointCloud<pcl
 
 rw::math::Transform3D<double> getGroundTruthPose()
 {
+    /*************************************************************************************
+     * Gets the ground truth pose of the "duck" object                                   *
+     *                                                                                   *
+     *************************************************************************************/
     static const std::string wc_path = "/home/emil/Desktop/Project_WorkCell/Scene.wc.xml";
     const rw::models::WorkCell::Ptr wc = rw::loaders::WorkCellLoader::Factory::load(wc_path);
     if ( wc.isNull() ){
@@ -148,6 +175,11 @@ rw::math::Transform3D<double> getGroundTruthPose()
 
 void genRandomPoses()
 {
+    /*******************************************
+     *  This function is used to create 30     *
+     *  random poses which the object needs to *
+     *  be moved to                            *
+     *******************************************/
     static const std::string wc_path = "/home/emil/Desktop/Project_WorkCell/Scene.wc.xml";
     const rw::models::WorkCell::Ptr wc = rw::loaders::WorkCellLoader::Factory::load(wc_path);
     if ( wc.isNull() ){
@@ -187,6 +219,10 @@ void genRandomPoses()
 
 void testPoseEstimation(int voxelInt, float sceneLeafSize)
 {
+    /*************************************************************************************
+     *  This function evaluates the developed pose estimation (M2)                       *
+     *  Logs: pose estimate, execution time & amount of scene points                     *
+     *************************************************************************************/
     pcl::PointCloud<pcl::PointXYZ>::Ptr object (new pcl::PointCloud<pcl::PointXYZ>);  // Point cloud with XYZ
     pcl::PointCloud<pcl::PointXYZ>::Ptr objectTF  (new pcl::PointCloud<pcl::PointXYZ>);   // Point cloud with XYZ
     pcl::PointCloud<pcl::PointXYZ>::Ptr scene  (new pcl::PointCloud<pcl::PointXYZ>);   // Point cloud with XYZ
@@ -248,6 +284,10 @@ void testPoseEstimation(int voxelInt, float sceneLeafSize)
 
 void testRobustness()
 {
+    /*************************************************************************************
+     * Evaluates performance of pose estimation (M2) with respect to noise               *
+     * This function adds gaussian noise with zero mean and varying standard deviation   *
+     *************************************************************************************/
     std::string path = "/home/emil/Documents/M2ErrorEval/pcds/c";
     std::string typ = ".pcd";
     std::vector<pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4> tfs;
@@ -255,8 +295,7 @@ void testRobustness()
     pcl::PointCloud<pcl::PointXYZ>::Ptr object (new pcl::PointCloud<pcl::PointXYZ>);  // Point cloud with XYZ
     pcl::PointCloud<pcl::PointXYZ>::Ptr scene  (new pcl::PointCloud<pcl::PointXYZ>);   // Point cloud with XYZ
     pcl::PCDReader reader;  // Read cloud data from PCD files
-    //std::vector<float> vars{ 0.0001f, 0.0005f, 0.001f, 0.005f, 0.01f, 0.05f, 0.1f, 0.5f, 1.0f };
-    std::vector<float> vars{ 0.1f, 0.5f, 1.0f };
+    std::vector<float> vars{ 0.0001f, 0.0005f, 0.001f, 0.005f, 0.01f, 0.05f, 0.1f, 0.5f, 1.0f };
     for (float var : vars)
     {
         tfs.clear();
@@ -288,15 +327,10 @@ void testRobustness()
 
 int main(int argc, char** argv)
 {
-   /* if ( argc != 3 ){
-        std::cout << "Usage:" << std::endl;
-        std::cout << "leftImgPath.png rightImgPath.png" << std::endl;
-        return -1;
-    } */
-
-    /**** Robustness test ****/
-    testRobustness();
-    return 0;
+    /*************************************************************************************
+     * The pose estimation function is run as default                                    *
+     * - Uncomment the function you want to run and comment out the others               *
+     *************************************************************************************/
 
     /**** Read point clouds ****/
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_object (new pcl::PointCloud<pcl::PointXYZ>);  // Point cloud with XYZ
@@ -312,11 +346,9 @@ int main(int argc, char** argv)
     align::showTwoPointClouds(cloud_scene, cloud_object);
     return 0;
 
-//    ofstream outfile;
-//    outfile.open("/home/emil/Documents/M2ErrorEval/combinedTransform.txt");
-//        outfile << tf << endl;
-//    outfile.close();
-//    return 0;
+    /**** Robustness test ****/
+    //testRobustness();
+    //return 0;
 
     /**** Voxel leaf size test in preprocessing of scene ****/
     //for(unsigned int i = 1; i < 11; i++) // for(unsigned int i = 2; i < 5; i++)
@@ -333,8 +365,8 @@ int main(int argc, char** argv)
     //return 0;
 
     /**** Get (default) ground truth ****/
- //   rw::math::Transform3D<> groundTruth = getGroundTruthPose();
- //   std::cout << groundTruth << std::endl;
+    //rw::math::Transform3D<> groundTruth = getGroundTruthPose();
+    //std::cout << groundTruth << std::endl;
 
 
 }

@@ -4,9 +4,15 @@
 #include "global_alignment.hpp"
 
 namespace align {
+    /*************************************************************************************
+     * This namespace is used for all alignment techniques                               *
+     *************************************************************************************/
 
     void showTwoPointClouds( pcl::PointCloud<pcl::PointXYZ>::Ptr scene, pcl::PointCloud<pcl::PointXYZ>::Ptr object )
     {
+        /*************************************************************************************
+         * Visualization of two points clouds. Scene is green, Object is red.                *
+         *************************************************************************************/
         pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer("3D Viewer"));
         viewer->setBackgroundColor(0, 0, 0);
         pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> green(scene, 0, 255, 0);

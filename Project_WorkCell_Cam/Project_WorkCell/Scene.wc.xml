@@ -8,7 +8,7 @@
 	</Frame>
 
 	<Frame name="URReference" refframe="Table" type="Movable">
-		<RPY>0 0 0</RPY> <Pos>0.325 0 0.11</Pos>
+		<RPY>0 0 0</RPY> <Pos>-0.0081 -0.0403 0.11</Pos>
 	</Frame>
 	<Include file="UR5/UR-6-85-5-A/Device.wc.xml" />
 

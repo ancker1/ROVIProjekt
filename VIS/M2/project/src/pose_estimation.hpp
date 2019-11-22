@@ -6,6 +6,9 @@ namespace poseEstimate {
 
 pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 poseEstimateGlobal(pcl::PointCloud<pcl::PointXYZ>::Ptr scene, pcl::PointCloud<pcl::PointXYZ>::Ptr object)
 {
+    /************************************************************************************
+     *  Performs pose estimation using global alignment                                 *
+     ************************************************************************************/
     preprocess::PointCloud::voxelGrid(object, object, 0.005f);              // 5[mm] leaf size
     pcl::PointCloud<pcl::Normal>::Ptr normals_scene = align::global::calculateNormals(scene, 10);
     pcl::PointCloud<pcl::Normal>::Ptr normals_object = align::global::calculateNormals(object,10);
@@ -18,6 +21,9 @@ pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Ma
 
 pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 poseEstimate(pcl::PointCloud<pcl::PointXYZ>::Ptr scene, pcl::PointCloud<pcl::PointXYZ>::Ptr object)
 {
+    /************************************************************************************
+     * Performs pose estimation using global and local alignment                        *
+     ************************************************************************************/
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_sceneObjects = preprocess::PointCloud::preprocessScene(scene);
     preprocess::PointCloud::voxelGrid(scene, scene, 0.005f);
     pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 transform = poseEstimateGlobal(cloud_sceneObjects, object);
@@ -30,6 +36,10 @@ pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Ma
 
 pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 poseEstimate(pcl::PointCloud<pcl::PointXYZ>::Ptr scene, pcl::PointCloud<pcl::PointXYZ>::Ptr object, float sceneLeafSize)
 {
+    /************************************************************************************
+     * Performs pose estimation using global and local alignment                        *
+     * With varying leaf size of voxel grid applied on scene                            *
+     ************************************************************************************/
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_sceneObjects = preprocess::PointCloud::preprocessScene(scene);
     preprocess::PointCloud::voxelGrid(scene, scene, sceneLeafSize);
     pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 transform = poseEstimateGlobal(cloud_sceneObjects, object);
@@ -41,7 +51,9 @@ pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Ma
 }
 
 namespace visualize {
-    // Add poseEstimation versions with visualizations
+    /************************************************************************************
+     * Currently unused.                                                                *
+     ************************************************************************************/
 }
 
 }

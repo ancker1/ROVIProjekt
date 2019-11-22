@@ -12,6 +12,9 @@ namespace align { namespace local {
 
     pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 ICP ( pcl::PointCloud<pcl::PointXYZ>::Ptr &scene, pcl::PointCloud<pcl::PointXYZ>::Ptr &object )
     {
+        /************************************************************************************
+         *  Implementation of ICP for refinement of pose estimate                           *
+         ************************************************************************************/
         pcl::search::KdTree<pcl::PointXYZ> kdTree;
         kdTree.setInputCloud(scene);
 
@@ -52,6 +55,9 @@ namespace align { namespace local {
 
     pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 ICP( pcl::PointCloud<pcl::PointXYZ>::Ptr &scene, pcl::PointCloud<pcl::PointXYZ>::Ptr &object, int iterations )
     {
+        /************************************************************************************
+         * Call ICP (iterations) amount of times                                            *
+         ************************************************************************************/
         pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 transform = ICP(scene, object);
         for (unsigned int i = 0; i < iterations - 1; i++) {
             transform = transform * ICP(scene, object);

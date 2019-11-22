@@ -18,6 +18,9 @@ namespace preprocess { namespace PointCloud{
 
     void voxelGrid( pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr &output_cloud, float leafSize )
     {
+        /************************************************************************************
+         * Voxel grid with leaf size of (leafSize)                                          *
+         ************************************************************************************/
         pcl::VoxelGrid<pcl::PointXYZ> vxlGrid;
         vxlGrid.setInputCloud(input_cloud);
         vxlGrid.setLeafSize(leafSize, leafSize, leafSize);
@@ -26,6 +29,9 @@ namespace preprocess { namespace PointCloud{
 
     void thresholdAxis( pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr &output_cloud, std::string axis, float lowThreshold, float highTreshold )
     {
+        /************************************************************************************
+         * Spatial filter with varying (axis) and limits (lowThreshold, highThreshold)      *
+         ************************************************************************************/
         pcl::PassThrough<pcl::PointXYZ> spatialFilter;
         spatialFilter.setInputCloud (input_cloud);
         spatialFilter.setFilterFieldName (axis);
@@ -35,6 +41,9 @@ namespace preprocess { namespace PointCloud{
 
     void removeIndicesFromCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointIndices::Ptr indices)
     {
+        /************************************************************************************
+         * Remove specified indices from a point cloud                                      *
+         ************************************************************************************/
         pcl::ExtractIndices<pcl::PointXYZ> extract;
         extract.setInputCloud(cloud);
         extract.setIndices(indices);
@@ -44,6 +53,10 @@ namespace preprocess { namespace PointCloud{
 
     std::tuple<pcl::PointIndices::Ptr, pcl::ModelCoefficients::Ptr> findPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
     {
+        /**************************************************************************************************************
+         *  This function is heavily inspired by the link below                                                       *
+         *  http://robotica.unileon.es/index.php/PCL/OpenNI_tutorial_5:_3D_object_recognition_(pipeline)#Segmentation *
+         **************************************************************************************************************/
         pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
         pcl::SACSegmentation<pcl::PointXYZ> segmentation;
         segmentation.setInputCloud(cloud);
@@ -60,6 +73,9 @@ namespace preprocess { namespace PointCloud{
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr preprocessScene(pcl::PointCloud<pcl::PointXYZ>::Ptr scene)
     {
+        /************************************************************************************
+         * Functions used for preprocessing of the scene point cloud                        *
+         ************************************************************************************/
         preprocess::PointCloud::thresholdAxis(scene, scene, "z", -2.0f, 0.0f);   // keep points, where z in [-2.0 , 0]
         //preprocess::PointCloud::voxelGrid(scene, scene, 0.005f);                // Apply Voxel Grid with leaf size 5 [mm]
 
@@ -117,52 +133,6 @@ namespace preprocess { namespace PointCloud{
             //removeIndicesFromCloud(scene, below);
             return scene;
 
-            /* Work-around not using convex hull */
-            removeIndicesFromCloud(scene, planeIndices);
-            pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sort;
-            sor.setInputCloud (scene);
-            sor.setMeanK (20);
-            sor.setStddevMulThresh (1.0);
-            sor.filter (*scene);
-            preprocess::PointCloud::voxelGrid(scene, scene, 0.005f);
-            return scene;
-            /*
-            pcl::ExtractPolygonalPrismData<pcl::PointXYZ> prism;
-            prism.setInputCloud(scene);
-            prism.setInputPlanarHull(plane);
-            prism.setHeightLimits(0.01, 0.2);
-            pcl::PointIndices::Ptr objsI(new pcl::PointIndices);
-            prism.segment(*objsI);
-            extractIndices.setIndices(objsI);
-            extractIndices.filter(*objects);
-            preprocess::PointCloud::voxelGrid(objects, objects, 0.005f);
-            pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-            sor.setInputCloud (objects);
-            sor.setMeanK (20);
-            sor.setStddevMulThresh (1.0);
-            sor.filter (*objects);
-            return objects;*/
-            /* Work-around done */
-            /*
-            pcl::ConvexHull<pcl::PointXYZ> hull;         
-            hull.setInputCloud(plane);
-            hull.setDimension(2);
-            std::cout << "(Begin) reconstruct, plane size: " << plane->points.size() << std::endl;
-            hull.reconstruct(*convexHull);
-            std::cout << "(Done) reconstruct" << std::endl;
-            if (hull.getDimension() == 2)
-            {
-                // Prism object.
-                pcl::ExtractPolygonalPrismData<pcl::PointXYZ> prism;
-                prism.setInputCloud(scene);
-                prism.setInputPlanarHull(convexHull);
-                prism.setHeightLimits(0.01, 0.2); // Only keep objects with which are table + [1, 20] cm in height
-                pcl::PointIndices::Ptr objectIndices(new pcl::PointIndices);
-                prism.segment(*objectIndices);
-                extractIndices.setIndices(objectIndices);
-                extractIndices.filter(*objects);            // Get all points retreived by hull
-            }
-            */
         }
         return objects;
     }

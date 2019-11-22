@@ -209,7 +209,10 @@ files = ['poseestimates_var0.000100.txt';
          'poseestimates_var0.001000.txt';
          'poseestimates_var0.005000.txt';
          'poseestimates_var0.010000.txt';
-         'poseestimates_var0.050000.txt'];
+         'poseestimates_var0.050000.txt';
+         'poseestimates_var0.100000.txt';
+         'poseestimates_var0.500000.txt';
+         'poseestimates_var1.000000.txt'];
 poses = importdata('/home/emil/Documents/M2ErrorEval/posesMATLAB.txt');
 all_epsilon_t = ones(30,size(files,1));
 all_epsilon_r = ones(30,size(files,1));
@@ -230,14 +233,35 @@ for i = 1:size(files,1)
     all_epsilon_t(:,i) = epsilon_t;
     all_epsilon_r(:,i) = epsilon_r;
 end
+
+error_levels = [0.0001 0.0005 0.001 0.005 0.01 0.05 0.1 0.5 1.0];
+
 figure('Name','Epsilon_t')
-boxplot(all_epsilon_t, [0.0001 0.0005 0.001 0.005 0.01 0.05])
+boxplot(all_epsilon_t, error_levels)
 xlabel('\sigma [m]')
 ylabel('\epsilon_t [m]')
 set(gca,'FontSize',15)
+set(gcf,'position',[0,0,700,400])
 
 figure('Name','Epsilon_r')
-boxplot(all_epsilon_r, [0.0001 0.0005 0.001 0.005 0.01 0.05])
+boxplot(all_epsilon_r, error_levels)
 xlabel('\sigma [m]')
 ylabel('\epsilon_r [rad]')
 set(gca,'FontSize',15)
+set(gcf,'position',[0,0,700,400])
+
+figure('Name', 'Performance: Translation')
+T_t = 0.05;
+T_r = deg2rad(45);
+for i = 1:size(files,1)
+    performance_t(i) = size(find(all_epsilon_t(:,i) <= T_t),1)/size(all_epsilon_t,1);
+    performance_r(i) = size(find(all_epsilon_r(:,i) <= T_r),1)/size(all_epsilon_r,1);
+end
+plot(error_levels, performance_t, error_levels, performance_r)
+xticks(error_levels)
+set(gca, 'XScale', 'log')
+legend('Translation','Rotation')
+xlabel('\sigma [m]')
+ylabel('Success ratio')
+set(gca,'FontSize',15)
+set(gcf,'position',[0,0,900,400])
