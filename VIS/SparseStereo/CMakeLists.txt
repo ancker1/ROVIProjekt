@@ -20,7 +20,6 @@ find_package(OpenCV REQUIRED)
 include_directories(${ROBWORK_INCLUDE_DIRS} ${ROBWORKSTUDIO_INCLUDE_DIRS})
 link_directories(${ROBWORK_LIBRARY_DIRS} ${ROBWORKSTUDIO_LIBRARY_DIRS})
 
-
 add_executable( SparseStereo src/SparseStereo.cpp )
 target_link_libraries(SparseStereo ${OpenCV_LIBS} ${ROBWORK_LIBRARIES} ${ROBWORKSTUDIO_LIBRARIES})
  
