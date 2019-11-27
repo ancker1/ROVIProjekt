@@ -13,22 +13,6 @@
 #include <iostream>
 #include <fstream>
 
-struct Camera {
-    cv::Mat intrinsic;
-    cv::Mat transformation;
-    cv::Mat distortion;
-    cv::Mat projection;
-    cv::Mat translation;
-    cv::Mat rotation;
-    double image_width;
-    double image_height;
-
-    void printData() {
-        std::cout << image_width << " " << image_height << "\n" << intrinsic << "\n"
-                << distortion << "\n" << transformation << "\n" << projection
-                << std::endl;
-    }
-};
 
 void printProjectionMatrix(std::string frameName, rw::models::WorkCell::Ptr wc, cv::Mat &proj_mat, cv::Mat &cam_mat) {
     rw::kinematics::State state = wc->getDefaultState();
@@ -89,6 +73,52 @@ cv::Mat color_threshold_smiley(cv::Mat pic){
     return smiley;
 }
 
+cv::Mat color_threshold_ball(cv::Mat pic){
+    cv::Mat image_HSV, mask, mask_yellow, mask_blue, mask_red, smiley;
+    cv::cvtColor(pic, image_HSV, cv::COLOR_BGR2HSV);
+    cv::inRange(image_HSV, cv::Scalar(25, 102, 153), cv::Scalar(28, 255, 255), mask_yellow);
+    mask = mask_yellow + mask_red + mask_blue;
+
+    return mask;
+}
+
+cv::Point2d find_ball_center(cv::Mat ball_pic_binary){
+    cv::Point2d center;
+
+    std::vector<std::vector<cv::Point>> contours_points;
+    cv::findContours(ball_pic_binary, contours_points, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
+
+    cv::Point2d upper = contours_points[0][0];
+    cv::Point2d lower = contours_points[0][0];
+    cv::Point2d left = contours_points[0][0];
+    cv::Point2d right = contours_points[0][0];
+
+    for(int i = 0; i < contours_points.size(); i++)
+    {
+        for(int j = 0; j < contours_points[i].size(); j++)
+        {
+            if(upper.y > contours_points[i][j].y)
+                upper = contours_points[i][j];
+            if(lower.y < contours_points[i][j].y)
+                lower = contours_points[i][j];
+            if(left.x > contours_points[i][j].x)
+                left = contours_points[i][j];
+            if(right.x < contours_points[i][j].x)
+                right = contours_points[i][j];
+            std::cout << "counter #" << i << " , Point " << contours_points[i][j] << std::endl;
+        }
+    }
+
+    center.x = right.x - (right.x - left.x)/2.0;
+    center.y = upper.y + (lower.y - upper.y)/2.0;
+
+    cv::cvtColor(ball_pic_binary, ball_pic_binary, cv::COLOR_GRAY2BGR);
+    cv::circle(ball_pic_binary, center, 4, cv::Scalar(0,0,255), 2);
+
+    return center;
+}
+
+
 cv::Mat color_threshold_duck(cv::Mat pic){
 
     cv::Mat image_HSV, mask, mask_body, mask_beak, duck;
@@ -107,20 +137,17 @@ cv::Mat color_threshold_duck(cv::Mat pic){
 
     cv::bitwise_and(pic, mask, duck);
     return duck;
-
 }
 
 void write_transformation_mat(cv::Mat rotation_mat, cv::Mat translate_vec){
     std::ofstream outfile2;
 
     outfile2.open("M3_pose_estimate.txt");
-
     outfile2 << rotation_mat.at<double>(0, 0) << " " << rotation_mat.at<double>(0, 1) << " " << rotation_mat.at<double>(0, 2) << " " << translate_vec.at<double>(0, 0) << std::endl;
     outfile2 << rotation_mat.at<double>(1, 0) << " " << rotation_mat.at<double>(1, 1) << " " << rotation_mat.at<double>(1, 2) << " " << translate_vec.at<double>(1, 0) << std::endl;
     outfile2 << rotation_mat.at<double>(2, 0) << " " << rotation_mat.at<double>(2, 1) << " " << rotation_mat.at<double>(2, 2) << " " << translate_vec.at<double>(2, 0) << std::endl;
     outfile2 <<          0          << " " <<          0          << " " <<          0          << " " <<      1    << std::endl;
     outfile2.close();
-
 }
 
 int main()
@@ -151,8 +178,8 @@ int main()
      **                Find features in the right and left images                          **
      ****************************************************************************************/
     cv::Mat pic_left, pic_right, result;
-    pic_left = cv::imread("/home/mikkel/Camera_Left.png");
-    pic_right = cv::imread("/home/mikkel/Camera_Right.png");
+    pic_left = cv::imread("/home/mikkel/Camera_Left_duck.png");
+    pic_right = cv::imread("/home/mikkel/Camera_Right_duck.png");
     // Smiley
     //pic_left = color_threshold_smiley(pic_left);
     //pic_right = color_threshold_smiley(pic_right);
@@ -160,7 +187,7 @@ int main()
     pic_left = color_threshold_duck(pic_left);
     pic_right = color_threshold_duck(pic_right);
     /************************** SIFT ********************************************************/
-
+/*
 
 
     cv::Ptr<cv::xfeatures2d::SIFT> sift = cv::xfeatures2d::SIFT::create();
@@ -191,10 +218,11 @@ int main()
     //cv::drawKeypoints(pic_left, keypoint_left, pic_left);
     //cv::imshow("Left_img", pic_left);
 //    cv::waitKey(0);
+*/
     /****************************************************************************************
      **                   Triangulates the found features mathces                          **
      ****************************************************************************************/
-
+/*
     std::vector<cv::KeyPoint> good_keypoint_left, good_keypoint_right;
     for(int i = 0; i < good_matches.size(); i++)
     {
@@ -272,6 +300,32 @@ int main()
     std::cout << "Translation vector" << std::endl << translation_vector << std::endl;
 
     write_transformation_mat(rotation_mat, translation_vector);
+*/
+
+
+
+    /*****************************BALL CENTER POS************************/
+    cv::Mat pic_left_ball, pic_right_ball;
+    pic_left_ball = cv::imread("/home/mikkel/Camera_Left_ball.png");
+    pic_right_ball = cv::imread("/home/mikkel/Camera_Right_ball.png");
+
+    pic_left_ball = color_threshold_ball(pic_left_ball);
+    pic_right_ball = color_threshold_ball(pic_right_ball);
+
+    find_ball_center(pic_left_ball);
+    cv::Mat triangulate_point(1, 1, CV_64FC4);
+    cv::Mat left_point(1, 1, CV_64FC2);
+    cv::Mat right_point(1, 1, CV_64FC2);
+
+    std::cout << find_ball_center(pic_left_ball) << " " << find_ball_center(pic_right_ball) << std::endl;
+
+    left_point.at<cv::Vec2d>(0) = find_ball_center(pic_left_ball);
+
+    right_point.at<cv::Vec2d>(0) = find_ball_center(pic_right_ball);
+
+    cv::triangulatePoints(projection_mat_left, projection_mat_right, left_point, right_point, triangulate_point);
+
+    std::cout << triangulate_point / triangulate_point.at<double>(0, 3) << std::endl;
 
     return 0;
 }
