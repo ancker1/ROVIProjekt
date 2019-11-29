@@ -138,7 +138,7 @@ std::vector<rw::math::Q> linerInterpolateQ(std::vector<rw::math::Transform3D<>> 
     return path;
 }
 
-std::vector<rw::math::Transform3D<>> parabolicBlend(std::vector<rw::math::Transform3D<>> P, std::vector<float> T, rw::kinematics::MovableFrame *targetFrame, rw::models::SerialDevice::Ptr UR6, rw::models::WorkCell::Ptr wc, rw::kinematics::State state, rw::proximity::CollisionDetector::Ptr detector)
+std::vector<rw::math::Transform3D<>> parabolicBlend(std::vector<rw::math::Transform3D<>> P, std::vector<float> T)
 {   // we wish to limit acceleration during blend (puts lower limit on tau)
     // distance largest at: d = 1/4*(v2 - v1)*tau (puts upper limit on tau)
 
@@ -166,8 +166,8 @@ std::vector<rw::math::Transform3D<>> parabolicBlend(std::vector<rw::math::Transf
                 rw::math::Vector3D<> Pi = P[i-1].P() + (P[i].P() - P[i-1].P())*(t - T[i-1])/(T[i] - T[i-1]);
                 Ps.push_back(Pi);
                 rw::math::EAA<> eaaDiff(P[i-1].R() * P[i].R().inverse());
-                rw::math::EAA<> eaaChange(eaaDiff.axis(), eaaDiff.angle()*(t - T[i-1])/(T[i]-T[i-1]));
-                Path.push_back(rw::math::Transform3D<>( Pi, eaaChange.toRotation3D()*P[i-1].R() ));
+                rw::math::EAA<> eaaChange(eaaDiff.axis(), eaaDiff.angle()*(t - T[i])/(T[i-1]-T[i]));
+                Path.push_back(rw::math::Transform3D<>( Pi, eaaChange.toRotation3D()*P[i].R() ));
             }
             else if ( T[i] - tau <= t && t <= T[i] + tau ) // If within blend interval
             {
@@ -177,12 +177,15 @@ std::vector<rw::math::Transform3D<>> parabolicBlend(std::vector<rw::math::Transf
                 rw::math::Vector3D<> Pblend = (v2 - v1)/(4 * tau) * pow(t - T[i] + tau, 2) + v1*(t-T[i]) + X;
                 Ps.push_back(Pblend);
 
-                rw::math::EAA<> vR1(P[i-1].R() * P[i].R().inverse());
-                vR1 = rw::math::EAA<>(vR1.axis(), vR1.angle() / (T[i-1] - T[i]));
-                rw::math::EAA<> vR2(P[i+1].R() * P[i].R().inverse());
-                vR2 = rw::math::EAA<>(vR2.axis(), vR2.angle() / (T[i+1] - T[i]));
-                rw::math::EAA<> Rblendeaa = rw::math::EAA<>((vR2.axis()-vR1.axis())*(4/tau)* pow(t - T[i] + tau, 2)+vR1.axis()*(t-T[i]),(vR2.angle()-vR1.angle())*(4/tau)* pow(t - T[i] + tau, 2)+vR1.angle()*(t-T[i]));
-                rw::math::Rotation3D<> Rblend = Rblendeaa.toRotation3D()*P[i].R();
+                rw::math::EAA<> vR1eaa(P[i-1].R() * P[i].R().inverse());
+                rw::math::Vector3D<> vR1 = rw::math::Vector3D<>(vR1eaa.axis()*vR1eaa.angle() / (T[i-1] - T[i]));
+
+                rw::math::EAA<> vR2eaa(P[i+1].R() * P[i].R().inverse());
+                rw::math::Vector3D<> vR2 = rw::math::Vector3D<>(vR2eaa.axis()*vR2eaa.angle() / (T[i+1] - T[i]));
+
+                rw::math::Vector3D <> vBlend = (vR2 - vR1)/(4*tau)*pow(t - T[i] + tau, 2) + vR1*(t-T[i]); // + (X=0)
+
+                rw::math::Rotation3D<> Rblend = rw::math::EAA<>(vBlend).toRotation3D()*P[i].R();
 
                 //rw::math::EAA<> eaaChange(eaaDiff.axis(), eaaDiff.angle()*(t - T[i-1])/(T[i]-T[i-1]));
                 Path.push_back(rw::math::Transform3D<>( Pblend, Rblend ));
@@ -205,7 +208,24 @@ std::vector<rw::math::Transform3D<>> parabolicBlend(std::vector<rw::math::Transf
     return Path;
 }
 
-std::tuple<std::vector<rw::math::Q>,std::vector<rw::math::Transform3D<>>> linerInterpolate(std::vector<rw::math::Transform3D<>> P, std::vector<float> T, rw::kinematics::MovableFrame *targetFrame, rw::models::SerialDevice::Ptr UR6, rw::models::WorkCell::Ptr wc, rw::kinematics::State state, rw::proximity::CollisionDetector::Ptr detector)
+std::vector<rw::math::Transform3D<>> linearInterpolate(std::vector<rw::math::Transform3D<>> P, std::vector<float> T)
+{
+    std::vector<rw::math::Transform3D<>> path;
+    for ( unsigned int i = 1; i < P.size(); i++ )
+    {
+        for ( float t = T[i-1]; t < T[i]; t += 0.01f )
+        {
+            // Interpolate transforms...
+            rw::math::Vector3D<> Pi = P[i-1].P() + (P[i].P() - P[i-1].P())*(t - T[i-1])/(T[i] - T[i-1]);
+            rw::math::EAA<> eaaDiff(P[i-1].R() * P[i].R().inverse());
+            rw::math::EAA<> eaaChange(eaaDiff.axis(), eaaDiff.angle()*(t - T[i])/(T[i-1]-T[i]));
+            path.push_back(rw::math::Transform3D<>( Pi, eaaChange.toRotation3D()*P[i].R() ));
+        }
+    }
+    return path;
+}
+
+std::tuple<std::vector<rw::math::Q>,std::vector<rw::math::Transform3D<>>> linearInterpolate(std::vector<rw::math::Transform3D<>> P, std::vector<float> T, rw::kinematics::MovableFrame *targetFrame, rw::models::SerialDevice::Ptr UR6, rw::models::WorkCell::Ptr wc, rw::kinematics::State state, rw::proximity::CollisionDetector::Ptr detector)
 {   // Linear in cartesian space
     std::vector<rw::math::Q> path;
     std::vector<rw::math::Transform3D<>> xits;
@@ -214,20 +234,13 @@ std::tuple<std::vector<rw::math::Q>,std::vector<rw::math::Transform3D<>>> linerI
         for ( float t = T[i-1]; t < T[i]; t += 0.01f )
         {
             // Interpolate transforms...
-            rw::math::Transform3D<> Ximin1 = P[i-1];
-            rw::math::Transform3D<> Xi = P[i];
 
+            rw::math::Vector3D<> Pi = P[i-1].P() + (P[i].P() - P[i-1].P())*(t - T[i-1])/(T[i] - T[i-1]);
+            rw::math::EAA<> eaaDiff(P[i-1].R() * P[i].R().inverse());
+            rw::math::EAA<> eaaChange(eaaDiff.axis(), eaaDiff.angle()*(t - T[i])/(T[i-1]-T[i]));
+            xits.push_back(rw::math::Transform3D<>( Pi, eaaChange.toRotation3D()*P[i].R() ));
 
-            rw::math::Rotation3D<> rotdiff = Xi.R() * Ximin1.R().inverse();
-            rw::math::EAA<> rotdiffEAA(rotdiff);
-            rw::math::EAA<> rotEAAt(rotdiffEAA.axis(), rotdiffEAA.angle()*(t - T[i-1])/(T[i]-T[i-1]));
-
-            rw::math::Rotation3D<> rotdiffback = rotEAAt.toRotation3D();
-            rw::math::Rotation3D<> linrot = rotdiffback*Ximin1.R();
-
-            rw::math::Transform3D<> Xit(Ximin1.P() + (Xi.P() - Ximin1.P())*(t - T[i-1]), linrot);
-            xits.push_back(Xit);
-            targetFrame->moveTo(Xit, state);
+            targetFrame->moveTo(xits.back(), state);
 
             std::vector<rw::math::Q> solutions = getConfigurations("GraspTarget", "GraspTCP", UR6, wc, state);
             rw::math::Q configuration = getCollisionFreeSolution(UR6, state, detector, solutions);
@@ -306,24 +319,62 @@ int main(int argc, char** argv) {
         //std::cout << configuration << std::endl;
     }
 
+    /*******************************************************************
+     *  Time test of interpolation methods                             *
+     *******************************************************************/
+    std::vector<int> LItime; //Linear interpolate time
+    std::vector<int> PBtime; //Parabolic blend time
+    std::ofstream LIfile, PBfile;
+    for (unsigned int i = 0; i < 60; i++)
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+
+        linearInterpolate(Tfs, Times);
+
+        auto stop = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+        int dur_ms = duration.count();
+        LItime.push_back(dur_ms);
+        std::cout << "(" << i <<  ") Linear interpolation execution time: " << dur_ms << " [micros]" << std::endl;
+    }
+    LIfile.open("/home/emil/Documents/LIexetime.txt");
+    for ( int msTime : LItime )
+        LIfile << msTime << std::endl;
+
+    for (unsigned int i = 0; i < 60; i++)
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+
+        parabolicBlend(Tfs, Times);
+
+        auto stop = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+        int dur_ms = duration.count();
+        PBtime.push_back(dur_ms);
+        std::cout << "(" << i <<  ") Parabolic blend interpolation execution time: " << dur_ms << " [micros]" << std::endl;
+    }
+    PBfile.open("/home/emil/Documents/PBexetime.txt");
+    for ( int msTime : PBtime )
+        PBfile << msTime << std::endl;
+
 
 
     /*******************************************************************
-     *  Show solution
+     *  Show solution                                                  *
      *******************************************************************/
-    //  Interpolate in Cartesian space      linerInterpolate
-    //  Interpolate in joint space          linerInterpolateQ
+    //  Interpolate in Cartesian space      linearInterpolate
+    //  Interpolate in joint space          linearInterpolateQ
     //  Interpolate using Parabolic blend   parabolicBlend
-    auto paths = linerInterpolate(Tfs, Times, targetFrame, UR6, wc, state, detector);
-    std::vector<rw::math::Transform3D<>> blendPath = parabolicBlend(Tfs, Times, targetFrame, UR6, wc, state, detector);
+    auto paths = linearInterpolate(Tfs, Times, targetFrame, UR6, wc, state, detector);
+    std::vector<rw::math::Transform3D<>> blendPath = parabolicBlend(Tfs, Times);
     std::vector<rw::math::Q> jointPath = std::get<0>(paths);
     std::vector<rw::math::Transform3D<>> cartPath = std::get<1>(paths);
     std::cout << "Size of blend path: " << blendPath.size() << std::endl;
     // Write to file
     std::ofstream tfFile, qFile, blendFile;
-    tfFile.open("/home/emil/Documents/LinIntTF_v1.txt");
-    qFile.open("/home/emil/Documents/LinIntQ_v1.txt");
-    blendFile.open("/home/emil/Documents/blend_v1.txt");
+    tfFile.open("/home/emil/Documents/LinIntTF.txt");
+    qFile.open("/home/emil/Documents/LinIntQ.txt");
+    blendFile.open("/home/emil/Documents/blend.txt");
     for ( rw::math::Q jointQ : jointPath )
     {
         qFile << jointQ[0] << " " << jointQ[1] << " " << jointQ[2] << " " << jointQ[3] << " " << jointQ[4] << " " << jointQ[5] << std::endl;
