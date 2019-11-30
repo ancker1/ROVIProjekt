@@ -54,6 +54,9 @@ cv::Point2d find_ball_center(cv::Mat ball_pic_binary){
     std::vector<std::vector<cv::Point>> contours_points;
     cv::findContours(ball_pic_binary, contours_points, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
 
+    if(contours_points.size() == 0)
+        return center = cv::Point2d(0, 0);
+
     cv::Point2d upper = contours_points[0][0];
     cv::Point2d lower = contours_points[0][0];
     cv::Point2d left = contours_points[0][0];

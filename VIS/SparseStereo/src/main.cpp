@@ -72,11 +72,6 @@ void write_transformation_mat(cv::Mat rotation_mat, cv::Mat translate_vec){
     outfile2.close();
 }
 
-void write_est_3D_points(cv::Mat est_3D_points, std::vector<int> std_devs)
-{
-
-}
-
 int main()
 {
     // Load workcell
@@ -232,17 +227,17 @@ int main()
 
 
     /*****************************BALL CENTER POS************************/
-    cv::Mat pic_left_ball, pic_right_ball;
+    cv::Mat pic_left_ball, pic_right_ball, test;
     pic_left_ball = cv::imread("/home/mikkel/Camera_Left_ball.png");
     pic_right_ball = cv::imread("/home/mikkel/Camera_Right_ball.png");
 
-    std::cout << find_ball_pose(pic_left_ball, pic_right_ball, projection_mat_left, projection_mat_right) << std::endl;
-
+    test = find_ball_pose(pic_left_ball, pic_right_ball, projection_mat_left, projection_mat_right);
+   // std::cout << test << std::endl;
 
     /****************************Performance testing*********************/
 
     float mean = 0;
-    std::vector<float> std_dev = {0, 1, 5, 20, 50, 100, 200, 255};
+    std::vector<float> std_dev{0, 1, 5, 20, 50, 100, 200, 255};
 
     // Loading images
     std::vector<cv::Mat> test_left_ball_pics;
@@ -253,8 +248,8 @@ int main()
 
     for(unsigned int i = 0; i < num_test_pic; i++)
     {
-        test_left_ball_pics.push_back(cv::imread(test_pic_path + "Camera_Left_" + (char)i + ".png"));
-        test_right_ball_pics.push_back(cv::imread(test_pic_path + "Camera_Right_" + (char)i + ".png"));
+        test_left_ball_pics.push_back(cv::imread(test_pic_path + "Camera_Left" + std::to_string(i) + ".png"));
+        test_right_ball_pics.push_back(cv::imread(test_pic_path + "Camera_Right" + std::to_string(i) + ".png"));
     }
 
     // Evaluating performance
@@ -262,22 +257,31 @@ int main()
     cv::Mat right_eval_pic;
     cv::Mat ball_pose;
     float cur_std_dev;
+
+
+    std::ofstream myFile;
+    myFile.open("ball_performance.txt");
+
+
     for(unsigned int i = 0; i < std_dev.size(); i++)
     {
         cur_std_dev = std_dev[i];
-        for(unsigned int j = 0; j < num_test_pic; j = 0)
+        std::cout << "t " << cur_std_dev << std::endl;
+        for(unsigned int j = 0; j < num_test_pic; j++)
         {
+            if(j % 5 == 0)
+            {
+                std::cout << "Testing standard deviation " << cur_std_dev << " Picture " << j << " out of " << num_test_pic << std::endl;
+            }
             left_eval_pic = add_gaussian_noise(0, cur_std_dev, test_left_ball_pics[j]);
             right_eval_pic = add_gaussian_noise(0, cur_std_dev, test_right_ball_pics[j]);
 
             ball_pose = find_ball_pose(left_eval_pic, right_eval_pic, projection_mat_left, projection_mat_right);
-
-
+            myFile << cur_std_dev << " " << ball_pose.at<double>(0, 0) << " " << ball_pose.at<double>(0, 1) << " " << ball_pose.at<double>(0, 2) << std::endl;
         }
-
-
     }
 
+    myFile.close();
 
     return 0;
 
