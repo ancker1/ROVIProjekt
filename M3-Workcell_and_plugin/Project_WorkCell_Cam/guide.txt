@@ -1,0 +1,12 @@
+1. Download RoviSamplePlugin hvis ikke gjort
+2. Gå ind og ændre CMakeLists.txt og ved openCV ændre til version 4 i stedet for 3. 
+3. cd ind i build folder og kør cmake ..
+4. kør make
+5. Gå ind i src folder og ændre i filen SamplePlugin.cpp i funktion initialize(). Path skal passe til det robwork miljø man skal kører. 
+6. Load plugin igennem robowork studio
+
+
+
+
+
+Projekt opgave skal lave noget med de knapper som kommer når man loader plugin
