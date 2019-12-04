@@ -22,6 +22,6 @@ include_directories(${PCL_INCLUDE_DIRS} ${ROBWORK_INCLUDE_DIRS} ${ROBWORKSTUDIO_
 link_directories(${PCL_LIBRARY_DIRS} ${ROBWORK_LIBRARY_DIRS} ${ROBWORKSTUDIO_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-add_executable( DenseStereo src/DenseStereo.cpp)
+add_executable( DenseStereo src/DenseStereo.cpp src/global_alignment.hpp src/local_alignment.hpp src/alignment.hpp)
 target_link_libraries(DenseStereo ${PCL_LIBRARIES} ${OpenCV_LIBS} ${ROBWORK_LIBRARIES} ${ROBWORKSTUDIO_LIBRARIES})
  
