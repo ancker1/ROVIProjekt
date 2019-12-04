@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>428</width>
+    <width>476</width>
     <height>479</height>
    </rect>
   </property>
@@ -18,23 +18,37 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
+       <widget class="QPushButton" name="_btn_im">
+        <property name="text">
+         <string>Get Image</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="_btn_scan">
+        <property name="text">
+         <string>Get Scan</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="_btn0">
         <property name="text">
-         <string>PushButton0</string>
+         <string>Calculate Path</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="_btn1">
         <property name="text">
-         <string>PushButton1</string>
+         <string>Run Path</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="_checkBox">
+       <widget class="QPushButton" name="_btn_run">
         <property name="text">
-         <string>CheckBox</string>
+         <string>Run Pick &amp;&amp; Place</string>
         </property>
        </widget>
       </item>
@@ -51,12 +65,10 @@
       <item>
        <widget class="QLabel" name="_label">
         <property name="text">
-         <string>Label</string>
+         <string>ROVI Project 2019 
+ Emil Vincent Ancker &amp; Mikkel Larsen</string>
         </property>
        </widget>
-      </item>
-      <item>
-       <widget class="QCalendarWidget" name="_calendar"/>
       </item>
      </layout>
     </item>

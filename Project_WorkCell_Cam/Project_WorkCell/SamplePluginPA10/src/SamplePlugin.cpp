@@ -1,28 +1,5 @@
 #include "SamplePlugin.hpp"
 
-#include <rws/RobWorkStudio.hpp>
-
-#include <QPushButton>
-
-#include <rw/loaders/ImageLoader.hpp>
-#include <rw/loaders/WorkCellFactory.hpp>
-
-#include <functional>
-
-using namespace rw::common;
-using namespace rw::graphics;
-using namespace rw::kinematics;
-using namespace rw::loaders;
-using namespace rw::models;
-using namespace rw::sensor;
-using namespace rwlibs::opengl;
-using namespace rwlibs::simulation;
-
-using namespace rws;
-
-using namespace cv;
-
-using namespace std::placeholders;
 
 SamplePlugin::SamplePlugin():
     RobWorkStudioPlugin("SamplePluginUI", QIcon(":/pa_icon.png"))
@@ -30,14 +7,14 @@ SamplePlugin::SamplePlugin():
 	setupUi(this);
 
 	_timer = new QTimer(this);
-	_timer25D = new QTimer(this);
     connect(_timer, SIGNAL(timeout()), this, SLOT(timer()));
-    connect(_timer25D, SIGNAL(timeout()), this, SLOT(timer25D()));
-    
 
 	// now connect stuff from the ui component
+	connect(_btn_im    ,SIGNAL(pressed()), this, SLOT(btnPressed()) );
+	connect(_btn_scan    ,SIGNAL(pressed()), this, SLOT(btnPressed()) );
 	connect(_btn0    ,SIGNAL(pressed()), this, SLOT(btnPressed()) );
 	connect(_btn1    ,SIGNAL(pressed()), this, SLOT(btnPressed()) );
+	connect(_btn_run    ,SIGNAL(pressed()), this, SLOT(btnPressed()) );
 	connect(_spinBox  ,SIGNAL(valueChanged(int)), this, SLOT(btnPressed()) );
 
 	_framegrabber = NULL;
@@ -55,10 +32,10 @@ SamplePlugin::~SamplePlugin()
 void SamplePlugin::initialize() {
 	log().info() << "INITALIZE" << "\n";
 
-	getRobWorkStudio()->stateChangedEvent().add(std::bind(&SamplePlugin::stateChangedListener, this, _1), this);
+    getRobWorkStudio()->stateChangedEvent().add(std::bind(&SamplePlugin::stateChangedListener, this, std::placeholders::_1), this);
 
 	// Auto load workcell
-	WorkCell::Ptr wc = WorkCellLoader::Factory::load("/home/emil/Dropbox/UNI/MSc/ROVIProjekt/ROVIProjekt/Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml");
+    WorkCell::Ptr wc = WorkCellLoader::Factory::load("../../../Scene.wc.xml");
 	getRobWorkStudio()->setWorkCell(wc);
 
 }
@@ -84,7 +61,7 @@ void SamplePlugin::open(WorkCell* workcell)
 	}
 
 	// Create a GLFrameGrabber if there is a camera frame with a Camera property set
-	Frame* cameraFrame = _wc->findFrame("Camera_Left");
+	Frame* cameraFrame = _wc->findFrame(_cameras[0]);
 	if (cameraFrame != NULL) {
 		if (cameraFrame->getPropertyMap().has("Camera")) {
 			// Read the dimensions and field of view
@@ -100,7 +77,7 @@ void SamplePlugin::open(WorkCell* workcell)
 		}
 	}
 	
-	Frame* cameraFrame25D = _wc->findFrame("Scanner25D");
+	Frame* cameraFrame25D = _wc->findFrame(_cameras25D[0]);
 	if (cameraFrame25D != NULL) {
 		if (cameraFrame25D->getPropertyMap().has("Scanner25D")) {
 			// Read the dimensions and field of view
@@ -115,9 +92,9 @@ void SamplePlugin::open(WorkCell* workcell)
 			_framegrabber25D->init(gldrawer);
 		}
 	}
-	
-	
-	
+
+    _device = _wc->findDevice("UR-6-85-5-A");
+    _step = -1;
 	
     }
 }
@@ -156,26 +133,52 @@ Mat SamplePlugin::toOpenCVImage(const Image& img) {
 void SamplePlugin::btnPressed() {
     QObject *obj = sender();
 	if(obj==_btn0){
-		log().info() << "Button 0\n";
-		// Toggle the timer on and off
-		if (!_timer25D->isActive())
-		    _timer25D->start(100); // run 10 Hz
-		else
-			_timer25D->stop();
+//		log().info() << "Button 0\n";
+//		// Toggle the timer on and off
+//		if (!_timer25D->isActive())
+//		    _timer25D->start(100); // run 10 Hz
+//		else
+//			_timer25D->stop();
+        _timer->stop();
+        rw::math::Math::seed();
+        double extend = 0.05;
+        double maxTime = 60;
+        Q from(6, 1.571, -1.572, -1.572, -1.572, 1.571, 0);
+        Q to(6, 1.847, -2.465, -1.602, -0.647, 1.571, 0); //From pose estimation
+        createPathRRTConnect(from, to, extend, maxTime);
+
+
 	} else if(obj==_btn1){
-		log().info() << "Button 1\n";
-		// Toggle the timer on and off
-		if (!_timer->isActive())
-		    _timer->start(100); // run 10 Hz
-		else
-			_timer->stop();
+        log().info() << "Button 1\n";
+        // Toggle the timer on and off
+        if (!_timer->isActive()){
+            _timer->start(100); // run 10 Hz
+            _step = 0;
+        }
+        else
+            _step = 0;
+
 	} else if(obj==_spinBox){
 		log().info() << "spin value:" << _spinBox->value() << "\n";
 	}
+	else if( obj==_btn_im ){
+		getImage();
+	}
+	else if( obj==_btn_scan ){
+		get25DImage();
+	}
+	else if( obj==_btn_run ){
+		runPickAndPlace();	
+	}
+	
+	
 }
 
+void SamplePlugin::runPickAndPlace(){
+	cout << "This is a test" << endl;
+}
 
-void SamplePlugin::timer25D() {
+void SamplePlugin::get25DImage() {
 	if (_framegrabber25D != NULL) {
 		for( int i = 0; i < _cameras25D.size(); i ++)
 		{
@@ -196,19 +199,18 @@ void SamplePlugin::timer25D() {
 			output << "HEIGHT " << img->getHeight() << "\n";
 			output << "POINTS " << img->getData().size() << "\n";
 			output << "DATA ascii\n";
-			/*BOOST_FOREACH(const rw::math::Vector3D<float>& p_tmp, img->getData())
+            for(const auto &p_tmp : img->getData())
 			{
 				rw::math::Vector3D<float> p = p_tmp;
 				output << p(0) << " " << p(1) << " " << p(2) << "\n";
-			}*/
+			}
 			output.close();
 
 		}
 	}
 }
 
-
-void SamplePlugin::timer() {
+void SamplePlugin::getImage() {
 	if (_framegrabber != NULL) {
 		for( int i = 0; i < _cameras.size(); i ++)
 		{
@@ -224,13 +226,9 @@ void SamplePlugin::timer() {
 			// Convert to OpenCV image
 			Mat imflip, imflip_mat;
 			cv::flip(image, imflip, 1);
-			cv::cvtColor( imflip, imflip_mat, COLOR_RGB2BGR ); 
-
-			cv::imshow("imflip", imflip_mat);
-			cv::waitKey();
+			cv::cvtColor( imflip, imflip_mat, COLOR_RGB2BGR );
 
 			cv::imwrite(_cameras[i] + ".png", imflip_mat );
-
 
 			// Show in QLabel
 			QImage img(imflip.data, imflip.cols, imflip.rows, imflip.step, QImage::Format_RGB888);
@@ -242,6 +240,73 @@ void SamplePlugin::timer() {
 	}
 }
 
+void SamplePlugin::timer() {
+
+
+    if(0 <= _step && _step < _path.size()){
+        _device->setQ(_path.at(_step),_state);
+        getRobWorkStudio()->setState(_state);
+        _step++;
+    }
+}
+
 void SamplePlugin::stateChangedListener(const State& state) {
   _state = state;
+}
+
+bool SamplePlugin::checkCollisions(Device::Ptr device, const State &state, const CollisionDetector &detector, const Q &q) {
+    State testState;
+    CollisionDetector::QueryResult data;
+    bool colFrom;
+
+    testState = state;
+    device->setQ(q,testState);
+    colFrom = detector.inCollision(testState,&data);
+    if (colFrom) {
+        cerr << "Configuration in collision: " << q << endl;
+        cerr << "Colliding frames: " << endl;
+        FramePairSet fps = data.collidingFrames;
+        for (FramePairSet::iterator it = fps.begin(); it != fps.end(); it++) {
+            cerr << (*it).first->getName() << " " << (*it).second->getName() << endl;
+        }
+        return false;
+    }
+    return true;
+}
+
+void SamplePlugin::createPathRRTConnect(Q from, Q to,  double extend, double maxTime){
+    _device->setQ(from,_state);
+    getRobWorkStudio()->setState(_state);
+    CollisionDetector detector(_wc, ProximityStrategyFactory::makeDefaultCollisionStrategy());
+    PlannerConstraint constraint = PlannerConstraint::make(&detector,_device,_state);
+    QSampler::Ptr sampler = QSampler::makeConstrained(QSampler::makeUniform(_device),constraint.getQConstraintPtr());
+    QMetric::Ptr metric = MetricFactory::makeEuclidean<Q>();
+    QToQPlanner::Ptr planner = RRTPlanner::makeQToQPlanner(constraint, sampler, metric, extend, RRTPlanner::RRTConnect);
+
+    _path.clear();
+    if (!checkCollisions(_device, _state, detector, from))
+        cout << from << " is in colission!" << endl;
+    if (!checkCollisions(_device, _state, detector, to))
+        cout << to << " is in colission!" << endl;;
+    Timer t;
+    t.resetAndResume();
+    planner->query(from,to,_path,maxTime);
+    t.pause();
+
+
+    if (t.getTime() >= maxTime) {
+        cout << "Notice: max time of " << maxTime << " seconds reached." << endl;
+    }
+
+	const int duration = 10;
+
+    if(_path.size() == 2){  //The interpolated path between Q start and Q goal is collision free. Set the duration with respect to the desired velocity
+        LinearInterpolator<Q> linInt(from, to, duration);
+        QPath tempQ;
+        for(int i = 0; i < duration+1; i++){
+            tempQ.push_back(linInt.x(i));
+        }
+
+        _path=tempQ;
+    }
 }

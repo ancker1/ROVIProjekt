@@ -267,7 +267,7 @@ int main(int argc, char** argv) {
         return -1;
     }
     //Load Cylinder Frame
-    rw::kinematics::Frame *cylinderFrame = wc->findFrame<rw::kinematics::Frame>("Cylinder");
+    rw::kinematics::MovableFrame *cylinderFrame = wc->findFrame<rw::kinematics::MovableFrame>("Cylinder");
     if ( cylinderFrame == nullptr ){
         RW_THROW("Error finding frame: Cylinder");
         return -1;
@@ -292,6 +292,11 @@ int main(int argc, char** argv) {
     //rw::math::RPY<> placeRPY(-90, 0, 180);
     rw::math::Transform3D<> placeFrame(placePos, cylinderFrame->getTransform(state).R());
 
+
+    // Move Cylinder Frame for different pick locations
+    //cylinderFrame->moveTo(rw::math::Transform3D<>(rw::math::Vector3D<>(-0.250, 0.474, 0.150),cylinderFrame->getTransform(state).R()), state);
+    //cylinderFrame->moveTo(rw::math::Transform3D<>(rw::math::Vector3D<>(0.000, 0.474, 0.150),cylinderFrame->getTransform(state).R()), state);
+    //cylinderFrame->moveTo(rw::math::Transform3D<>(rw::math::Vector3D<>(0.250, 0.474, 0.150),cylinderFrame->getTransform(state).R()), state);
 
     auto PointTimes = getPointTimes(cylinderFrame->getTransform(state), UR6->baseTend(state), placeFrame);
     std::vector<rw::math::Transform3D<>> Points = std::get<0>(PointTimes);
@@ -337,7 +342,7 @@ int main(int argc, char** argv) {
         LItime.push_back(dur_ms);
         std::cout << "(" << i <<  ") Linear interpolation execution time: " << dur_ms << " [micros]" << std::endl;
     }
-    LIfile.open("/home/emil/Documents/LIexetime.txt");
+    LIfile.open("/home/emil/Documents/LIexetime_micros_1.txt");
     for ( int msTime : LItime )
         LIfile << msTime << std::endl;
 
@@ -353,7 +358,7 @@ int main(int argc, char** argv) {
         PBtime.push_back(dur_ms);
         std::cout << "(" << i <<  ") Parabolic blend interpolation execution time: " << dur_ms << " [micros]" << std::endl;
     }
-    PBfile.open("/home/emil/Documents/PBexetime.txt");
+    PBfile.open("/home/emil/Documents/PBexetime_micros_1.txt");
     for ( int msTime : PBtime )
         PBfile << msTime << std::endl;
 
@@ -372,9 +377,9 @@ int main(int argc, char** argv) {
     std::cout << "Size of blend path: " << blendPath.size() << std::endl;
     // Write to file
     std::ofstream tfFile, qFile, blendFile;
-    tfFile.open("/home/emil/Documents/LinIntTF.txt");
-    qFile.open("/home/emil/Documents/LinIntQ.txt");
-    blendFile.open("/home/emil/Documents/blend.txt");
+    tfFile.open("/home/emil/Documents/LinIntTF_1.txt");
+    qFile.open("/home/emil/Documents/LinIntQ_1.txt");
+    blendFile.open("/home/emil/Documents/blend_tau25_1.txt");
     for ( rw::math::Q jointQ : jointPath )
     {
         qFile << jointQ[0] << " " << jointQ[1] << " " << jointQ[2] << " " << jointQ[3] << " " << jointQ[4] << " " << jointQ[5] << std::endl;
