@@ -262,7 +262,7 @@ int main(int argc, char** argv)
     //base_frame_positions_top = best_robot_position(base_frame_positions_top, false, wc, state, robotUR6, cylinderFrame);
 
     /*******************************************************************
-     * Writing to file
+     *                          Writing to file
      *******************************************************************/
      write_pos_to_file("base_pos_side_pick_right.txt", base_frame_positions_side_pick_right);
      write_pos_to_file("base_pos_side_pick_mid.txt", base_frame_positions_side_pick_mid);
