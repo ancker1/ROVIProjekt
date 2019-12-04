@@ -1,3 +1,0 @@
-/home/mikkel/Dropbox/Semester7/ROVIProjekt/Project_WorkCell_Cam/RoviSamplePlugin/build/CMakeFiles/rebuild_cache.dir
-/home/mikkel/Dropbox/Semester7/ROVIProjekt/Project_WorkCell_Cam/RoviSamplePlugin/build/CMakeFiles/RoViPlugin.dir
-/home/mikkel/Dropbox/Semester7/ROVIProjekt/Project_WorkCell_Cam/RoviSamplePlugin/build/CMakeFiles/edit_cache.dir
