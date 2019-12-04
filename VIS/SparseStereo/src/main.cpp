@@ -1,3 +1,5 @@
+#pragma once
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/calib3d.hpp>
@@ -14,6 +16,8 @@
 
 #include "SparseStereoMethods.hpp"
 #include "TestingMethods.hpp"
+
+
 
 void printProjectionMatrix(std::string frameName, rw::models::WorkCell::Ptr wc, cv::Mat &proj_mat, cv::Mat &cam_mat) {
     rw::kinematics::State state = wc->getDefaultState();
@@ -44,8 +48,8 @@ void printProjectionMatrix(std::string frameName, rw::models::WorkCell::Ptr wc, 
             std::cout << "Intrinsic parameters:" << std::endl;
             std::cout << KA << std::endl;
 
-            rw::math::Transform3D<> camPosOGL = cameraFrame->wTf(state);
-            rw::math::Transform3D<> openGLToVis = rw::math::Transform3D<>(rw::math::RPY<>(-rw::math::Pi, 0, rw::math::Pi).toRotation3D());
+            rw::math::Transform3D<> camPosOGL = cameraFrame->wTf(state); // Transform world to camera
+            rw::math::Transform3D<> openGLToVis = rw::math::Transform3D<>(rw::math::RPY<>(-rw::math::Pi, 0, rw::math::Pi).toRotation3D()); // Rotate camera to point towards the table
             rw::math::Transform3D<> H = inverse(camPosOGL * inverse(openGLToVis));
 
             std::cout << "Extrinsic parameters:" << std::endl;
@@ -227,61 +231,57 @@ int main()
 
 
     /*****************************BALL CENTER POS************************/
+    std::cout << "hvad så fesser" << std::endl;
     cv::Mat pic_left_ball, pic_right_ball, test;
     pic_left_ball = cv::imread("/home/mikkel/Camera_Left_ball.png");
     pic_right_ball = cv::imread("/home/mikkel/Camera_Right_ball.png");
+    //colorFiltering(pic_right_ball);
+    //std::vector<cv::Vec3f> circles = findCircles((pic_left_ball), color_threshold_ball(pic_left_ball));
+    //std::cout << "amount of circles: " << circles.size() << std::endl;
+    /// Draw the circles detected
+    /*
+    for( size_t i = 0; i < circles.size(); i++ )
+    {
+        cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+        int radius = cvRound(circles[i][2]);
+        // circle center
+        cv::circle( pic_left_ball, center, 3, cv::Scalar(0,255,0), -1, 8, 0 );
+        // circle outline
+        cv::circle( pic_left_ball, center, radius, cv::Scalar(0,0,255), 3, 8, 0 );
+     }
 
-    test = find_ball_pose(pic_left_ball, pic_right_ball, projection_mat_left, projection_mat_right);
-   // std::cout << test << std::endl;
+    /// Show your results
+    cv::namedWindow( "Hough Circle Transform Demo", CV_WINDOW_AUTOSIZE );
+    cv::imshow( "Hough Circle Transform Demo", pic_left_ball );
 
-    /****************************Performance testing*********************/
+    cv::waitKey(0);
+    */
+
+//    test = find_ball_pose(pic_left_ball, pic_right_ball, projection_mat_left, projection_mat_right, false);
+//    cv::Mat guess = projection_mat_left*test;
+//    cv::Point guess2D = cv::Point2d(guess.at<double>(0,0), guess.at<double>(0,1));
+//    std::cout << "Guess2D: " << guess2D << std::endl;
+//    //cv::drawMarker(pic_left_ball, find_ball_center(color_threshold_ball(pic_left_ball)), cv::Scalar(255,0,0));
+//    cv::drawMarker(pic_left_ball, guess2D, cv::Scalar(255,0,0), cv::MARKER_TILTED_CROSS, 20, 3);
+//    cv::imshow("Marked", pic_left_ball);
+//    cv::waitKey(0);
+
+//    cv::Mat TF_TABLE = (cv::Mat_<double>(4, 4) << 1, 0, 0, 0,
+//                                                  0, 1, 0, 0,
+//                                                  0, 0, 1, 0.1,
+//                                                  0, 0, 0, 1);
+
+//    std::cout << TF_TABLE * test << std::endl;
+//    return 0;
+    /****************************Performance testing********************************/
 
     float mean = 0;
     std::vector<float> std_dev{0, 1, 5, 20, 50, 100, 200, 255};
-
-    // Loading images
-    std::vector<cv::Mat> test_left_ball_pics;
-    std::vector<cv::Mat> test_right_ball_pics;
-
     const std::string test_pic_path = "/home/mikkel/Desktop/Project_WorkCell_Cam/performance_pic/";
     int num_test_pic = 30;
+    const std::string file_name = "ball_performance.txt";
 
-    for(unsigned int i = 0; i < num_test_pic; i++)
-    {
-        test_left_ball_pics.push_back(cv::imread(test_pic_path + "Camera_Left" + std::to_string(i) + ".png"));
-        test_right_ball_pics.push_back(cv::imread(test_pic_path + "Camera_Right" + std::to_string(i) + ".png"));
-    }
-
-    // Evaluating performance
-    cv::Mat left_eval_pic;
-    cv::Mat right_eval_pic;
-    cv::Mat ball_pose;
-    float cur_std_dev;
-
-
-    std::ofstream myFile;
-    myFile.open("ball_performance.txt");
-
-
-    for(unsigned int i = 0; i < std_dev.size(); i++)
-    {
-        cur_std_dev = std_dev[i];
-        std::cout << "t " << cur_std_dev << std::endl;
-        for(unsigned int j = 0; j < num_test_pic; j++)
-        {
-            if(j % 5 == 0)
-            {
-                std::cout << "Testing standard deviation " << cur_std_dev << " Picture " << j << " out of " << num_test_pic << std::endl;
-            }
-            left_eval_pic = add_gaussian_noise(0, cur_std_dev, test_left_ball_pics[j]);
-            right_eval_pic = add_gaussian_noise(0, cur_std_dev, test_right_ball_pics[j]);
-
-            ball_pose = find_ball_pose(left_eval_pic, right_eval_pic, projection_mat_left, projection_mat_right);
-            myFile << cur_std_dev << " " << ball_pose.at<double>(0, 0) << " " << ball_pose.at<double>(0, 1) << " " << ball_pose.at<double>(0, 2) << std::endl;
-        }
-    }
-
-    myFile.close();
+    evaluate_ball_performance(mean, std_dev, test_pic_path, num_test_pic, file_name, projection_mat_left, projection_mat_right);
 
     return 0;
 

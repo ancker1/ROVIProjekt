@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -36,16 +38,36 @@ cv::Mat color_threshold_smiley(cv::Mat pic){
 cv::Mat color_threshold_ball(cv::Mat pic){
     cv::Mat image_HSV, mask, mask_yellow;
     cv::cvtColor(pic, image_HSV, cv::COLOR_BGR2HSV);
-    cv::inRange(image_HSV, cv::Scalar(25, 102, 153), cv::Scalar(28, 255, 255), mask_yellow);
+    cv::inRange(image_HSV, cv::Scalar(23, 25, 0), cv::Scalar(75, 255, 255), mask_yellow);
     mask = mask_yellow;
 
-    // Opening and closing to get whole duck
-    cv::Mat two_by_two( 2, 2, CV_8U, cv::Scalar(1) );
+    // Opening and closing to get whole ball
+    cv::Mat two_by_two( 5, 5, CV_8U, cv::Scalar(1) );
     cv::morphologyEx(mask, mask, cv::MORPH_OPEN, two_by_two);
     cv::Mat five_by_five( 5, 5, CV_8U, cv::Scalar(1) );
     cv::morphologyEx(mask, mask, cv::MORPH_CLOSE, five_by_five);
 
     return mask;
+}
+
+std::vector<cv::Vec3f> findCircles ( cv::Mat img , cv::Mat mask)
+{
+    cv::Mat imgCopy;
+    cv::cvtColor(mask, mask, CV_GRAY2BGR);
+    cv::bitwise_and(img, mask, imgCopy);
+    cv::cvtColor(imgCopy, imgCopy, CV_BGR2GRAY);
+    std::vector<cv::Vec3f> circles;
+    cv::HoughCircles( imgCopy, circles, CV_HOUGH_GRADIENT, 1, imgCopy.rows/8, 60, 25, 0, 0 );
+
+    img.copyTo(imgCopy);
+    cv::circle( imgCopy, cv::Point(circles[0][0], circles[0][1]), 3, cv::Scalar(0,255,0), -1, 8, 0 );
+    // circle outline
+    cv::circle( imgCopy, cv::Point(circles[0][0], circles[0][1]), circles[0][2], cv::Scalar(0,0,255), 3, 8, 0 );
+
+//    cv::imshow("Circle", img);
+//    cv::waitKey(0);
+
+    return circles;
 }
 
 cv::Point2d find_ball_center(cv::Mat ball_pic_binary){
@@ -106,6 +128,32 @@ cv::Mat find_ball_pose(cv::Mat left_img, cv::Mat right_img, cv::Mat proj_mat_lef
 
     return triangulate_point;
 }
+
+cv::Mat find_ball_pose(cv::Mat left_img, cv::Mat right_img, cv::Mat proj_mat_left, cv::Mat proj_mat_right, bool HOUGH)
+{
+    if ( HOUGH )
+    {
+
+        cv::Mat triangulate_point(1, 1, CV_64FC4);
+        cv::Mat left_point(1, 1, CV_64FC2);
+        cv::Mat right_point(1, 1, CV_64FC2);
+
+        // Finding center of ball using contour
+        cv::Vec3f leftPoint = findCircles(left_img, color_threshold_ball(left_img))[0];
+        cv::Vec3f rightPoint = findCircles(right_img, color_threshold_ball(right_img))[0];
+        left_point.at<cv::Vec2d>(0) = cv::Vec2d(leftPoint[0], leftPoint[1]);
+        right_point.at<cv::Vec2d>(0) = cv::Vec2d(rightPoint[0], rightPoint[1]);
+
+        // Triangulate the ball center features
+        cv::triangulatePoints(proj_mat_left, proj_mat_right, left_point, right_point, triangulate_point);
+        triangulate_point =  triangulate_point / triangulate_point.at<double>(0, 3); // Normalizing the 3D-point
+
+        return triangulate_point;
+    }
+    else
+        return find_ball_pose(left_img, right_img, proj_mat_left, proj_mat_right);
+}
+
 
 /****************************************************************************************
  **                             Rubber duck finding method                             **
