@@ -114,6 +114,29 @@ rw::trajectory::QPath calculate_path_rrt(rw::models::WorkCell::Ptr workcell, rw:
     return path;
 }
 
+rw::trajectory::QPath calculate_whole_path_rrt(std::vector<rw::math::Q> confi_along_path, rw::models::WorkCell::Ptr workcell, rw::kinematics::State state, rw::models::Device::Ptr robot, rw::kinematics::Frame* tool_frame, rw::kinematics::Frame* object_frame)
+{
+    rw::trajectory::QPath whole_path;
+    rw::trajectory::QPath sub_path;
+    rw::math::Q from;
+    rw::math::Q to;
+
+    for(unsigned int i = 0; i < confi_along_path.size(); i++)
+    {
+        from = confi_along_path[i];
+        to = confi_along_path[i+1];
+
+        sub_path = calculate_path_rrt(workcell, state, robot, tool_frame, object_frame, from, to);
+        for(unsigned int j = 0; j < sub_path.size(); j++)
+        {
+            whole_path.push_back(sub_path[j]);
+        }
+    }
+
+    return whole_path;
+}
+
+
 void calculate_path_from_stepsize_thread( rrt_connect &rrt_info, rw::models::WorkCell::Ptr workcell, rw::models::Device::Ptr robot, rw::kinematics::Frame* tool_frame, rw::kinematics::Frame* object_frame, rw::math::Q from, rw::math::Q to)
 {
     for (unsigned int i = 0; i < rrt_info.stepsizes.size(); i++) {
