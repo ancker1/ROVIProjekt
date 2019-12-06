@@ -32,9 +32,6 @@ for j = 1:nodes
     pitch(j) = RPY(2);
     yaw(j) = RPY(3);
     % Singularities maybe not take this
-    if yaw(j) < -3
-        yaw(j) = 3.142;
-    end
 %     if yaw(j) < 0
 %         yaw(j) = yaw(j)*-1;
 %     end
@@ -172,16 +169,13 @@ function RPYlength = pathRPYLength(data)
         roll(j) = RPY(1);
         pitch(j) = RPY(2);
         yaw(j) = RPY(3);
-        if yaw(j) < -3
-            yaw(j) = 3.142;
+           % Singularities maybe not take this
+        if yaw(j) < 0
+            yaw(j) = yaw(j)*-1;
         end
-       % Singularities maybe not take this
-%         if yaw(j) < 0
-%             yaw(j) = yaw(j)*-1;
-%         end
-%         if roll(j) < 0
-%             roll(j) = roll(j)*-1;
-%         end
+        if roll(j) < 0
+            roll(j) = roll(j)*-1;
+        end
     end
     RPYlength = sum(sqrt(diff(roll).^2 + diff(pitch).^2 + diff(yaw).^2));
 end

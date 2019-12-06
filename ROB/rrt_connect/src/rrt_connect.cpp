@@ -1,7 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <cstdio>
-#include <cstdlib>
 #include <rw/rw.hpp>
 #include <thread>
 
@@ -121,11 +119,11 @@ rw::trajectory::QPath calculate_whole_path_rrt(std::vector<rw::math::Q> confi_al
     rw::math::Q from;
     rw::math::Q to;
 
-    for(unsigned int i = 0; i < confi_along_path.size(); i++)
+    for(unsigned int i = 0; i < confi_along_path.size() - 1; i++)
     {
         from = confi_along_path[i];
         to = confi_along_path[i+1];
-
+        std::cout << "Planning from " << from << " to " << to << std::endl;
         sub_path = calculate_path_rrt(workcell, state, robot, tool_frame, object_frame, from, to);
         for(unsigned int j = 0; j < sub_path.size(); j++)
         {
@@ -136,6 +134,42 @@ rw::trajectory::QPath calculate_whole_path_rrt(std::vector<rw::math::Q> confi_al
     return whole_path;
 }
 
+rw::trajectory::QPath rrt_path_calculate(rw::math::Transform3D<> obj_place, rw::models::WorkCell::Ptr workcell, rw::kinematics::State state, rw::models::Device::Ptr robot, rw::models::SerialDevice::Ptr robot_serial, rw::kinematics::Frame* tool_frame, rw::kinematics::MovableFrame* object_frame, int &index_pick, int &index_place)
+{
+    rw::trajectory::QPath path;
+
+    rw::math::Q from = get_collision_free_configuration(object_frame->getName(), "GraspTCP", robot_serial, workcell, state); // Pick area
+    // Moving place frame to correct pos
+    object_frame->moveTo(obj_place, state);
+
+    rw::math::Q to = get_collision_free_configuration(object_frame->getName(), "GraspTCP", robot_serial, workcell, state); // Place area
+
+    rw::math::Q home = robot->getQ(state);
+    std::vector<rw::math::Q> confi_along_path = {home}; // Home position
+    confi_along_path.push_back(from);
+    confi_along_path.push_back(to);
+    confi_along_path.push_back(home);
+
+    path = calculate_whole_path_rrt(confi_along_path, workcell, state, robot, tool_frame, object_frame);
+
+    // Finding index of pick and place configuration
+    for (unsigned int i = 0; i < path.size(); i++)
+    {
+        std::cout << path[i] << std::endl;
+        if( from == path[i])
+        {
+            index_pick = i;
+            std::cout<< "pick " << i << std::endl;
+        }
+        if( to == path[i])
+        {
+            index_place = i;
+            std::cout << "place " << i << std::endl;
+        }
+    }
+
+    return path;
+}
 
 void calculate_path_from_stepsize_thread( rrt_connect &rrt_info, rw::models::WorkCell::Ptr workcell, rw::models::Device::Ptr robot, rw::kinematics::Frame* tool_frame, rw::kinematics::Frame* object_frame, rw::math::Q from, rw::math::Q to)
 {
@@ -436,8 +470,6 @@ int main(int argc, char** argv) {
     const std::string wcFile = "/home/mikkel/Desktop/Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml"; //"../../Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml";
     const std::string deviceName = "UR-6-85-5-A";
     std::cout << "Trying to use workcell " << wcFile << " and device " << deviceName << std::endl;
-    std::ofstream myfile;
-    myfile.open("path.lua");
     rw::math::Math::seed();     //Sets the random seed
 
 
@@ -469,8 +501,9 @@ int main(int argc, char** argv) {
 
     //Get the state
     rw::kinematics::State state = wc->getDefaultState();
-
-//    // Moving the object to correct position
+//    std::ofstream myfile;
+//    myfile.open("path.lua");
+    // Moving the object to correct position
 //    rw::math::Vector3D<> cylinder;
 //    cylinder[0] = -0.25; // x - coordinate of base frame
 //    cylinder[1] = 0.475; // y - coordinate of base frame
@@ -482,21 +515,14 @@ int main(int argc, char** argv) {
 //    rw::math::Q from = get_collision_free_configuration(name_cylinder_frame, "GraspTCP", device1, wc, state); // Pick area
 //    rw::math::Q to = get_collision_free_configuration(name_place_area_frame, "GraspTCP", device1, wc, state); // Place area
 
-//    //Set Q to the initial state and grip the bottle frame
-//    device->setQ(from, state); // sets initial state
-//    rw::kinematics::Kinematics::gripFrame(cylinder_frame, tool_frame, state); // Grip the bottle
+//    rw::math::Q home = device->getQ(state);
+//    std::vector<rw::math::Q> confi_along_path = {home}; // Home position
+//    confi_along_path.push_back(from);
+//    confi_along_path.push_back(to);
+//    confi_along_path.push_back(home);
 
-//    rw::proximity::CollisionDetector detector(wc, rwlibs::proximitystrategies::ProximityStrategyFactory::makeDefaultCollisionStrategy());
-//    rw::pathplanning::PlannerConstraint constraint = rw::pathplanning::PlannerConstraint::make(&detector,device,state);
+//    rw::trajectory::QPath path = calculate_whole_path_rrt(confi_along_path, wc, state, device, tool_frame, cylinder_frame);
 
-//    rw::pathplanning::QSampler::Ptr sampler = rw::pathplanning::QSampler::makeConstrained(rw::pathplanning::QSampler::makeUniform(device), constraint.getQConstraintPtr());
-//    rw::math::QMetric::Ptr metric = rw::math::MetricFactory::makeEuclidean<rw::math::Q>();
-//    rw::pathplanning::QToQPlanner::Ptr planner = rwlibs::pathplanners::RRTPlanner::makeQToQPlanner(constraint, sampler, metric, ESTEPSIZE, rwlibs::pathplanners::RRTPlanner::RRTConnect);
-
-//    if (!checkCollisions(device, state, detector, from))
-//        return 0;
-//    if (!checkCollisions(device, state, detector, to))
-//        return 0;
 
 //    //Creates the functions for the LUA script and initializes the position and state of the robot
 //    myfile << "wc = rws.getRobWorkStudio():getWorkCell()\n"
@@ -517,11 +543,6 @@ int main(int argc, char** argv) {
 //              <<"rw.sleep(0.1)\n"
 //              <<"end\n\n";
 
-//    std::cout << "Planning from " << from << " to " << to << std::endl;
-//    rw::trajectory::QPath path;
-//    //Use the planner to find a trajectory between the configurations
-//    planner->query(from, to, path);
-//    planner->make(constraint);
 
 //    double distance = 0;
 
@@ -571,6 +592,8 @@ int main(int argc, char** argv) {
     ****************************************************************************************/
 
     //Getting start and end configuration from pick and place area
+    rw::math::Q home = device->getQ(state);
+    std::vector<rw::math::Q> confi_along_path = {device->getQ(state)}; // Configuration that needs visited
     rw::math::Q to = get_collision_free_configuration(name_place_area_frame, "GraspTCP", device1, wc, state); // Place area
     std::vector<rw::trajectory::QPath> paths;
     rw::trajectory::QPath path;
@@ -584,16 +607,24 @@ int main(int argc, char** argv) {
     rw::math::Transform3D<> newCylinder (cylinder, cylinder_frame_moveable->getTransform(state).R());
     cylinder_frame_moveable->moveTo(newCylinder, state);
     rw::math::Q from = get_collision_free_configuration(name_cylinder_frame, "GraspTCP", device1, wc, state); // Pick area right corner
+
+    // Inserts all configuration that needs to be visited
+    confi_along_path.push_back(from);
+    confi_along_path.push_back(to);
+    confi_along_path.push_back(home);
     for(unsigned int i = 0; i < 60; i++)
     {
         // Time logging
         auto start = std::chrono::high_resolution_clock::now();
-        path = calculate_path_rrt(wc, state, device, tool_frame, cylinder_frame, from, to);
+
+        path = calculate_whole_path_rrt(confi_along_path, wc, state, device, tool_frame, cylinder_frame);
+
         auto stop = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
         path_planning_time.push_back(duration.count());
 
         paths.push_back(path);
+        state = wc->getDefaultState();
         cylinder_frame_moveable->moveTo(newCylinder, state);
     }
     print_trajectory_transform("rrtConnect_transform_pickplace_right.txt", paths, wc, device, tool_frame);
@@ -601,52 +632,93 @@ int main(int argc, char** argv) {
     print_trajectory_planning_time("rrtConnect_planning_times_pickplace_right.txt", path_planning_time);
 
     // ******************************* PICK PLACE 2 *********************************** //
+
+    // Resetting to get ready for next pick place
+    state = wc->getDefaultState();
+    paths.clear();
+    path_planning_time.clear();
+    confi_along_path.clear();
+
     // Moving the object to correct position
     cylinder[0] = 0; // x - coordinate of base frame
 
     newCylinder = rw::math::Transform3D<>(cylinder, cylinder_frame_moveable->getTransform(state).R());
     cylinder_frame_moveable->moveTo(newCylinder, state);
     from = get_collision_free_configuration(name_cylinder_frame, "GraspTCP", device1, wc, state); // Pick configuration middle
-    paths.clear();
-    path_planning_time.clear();
+
+    // Inserts all configuration that needs to be visited
+    confi_along_path.push_back(home);
+    confi_along_path.push_back(from);
+    confi_along_path.push_back(to);
+    confi_along_path.push_back(home);
+
     for(unsigned int i = 0; i < 60; i++)
     {
         // Time logging
         auto start = std::chrono::high_resolution_clock::now();
-        path = calculate_path_rrt(wc, state, device, tool_frame, cylinder_frame, from, to);
+
+        path = calculate_whole_path_rrt(confi_along_path, wc, state, device, tool_frame, cylinder_frame);
+
         auto stop = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
         path_planning_time.push_back(duration.count());
 
         paths.push_back(path);
+        state = wc->getDefaultState();
         cylinder_frame_moveable->moveTo(newCylinder, state);
     }
     print_trajectory_transform("rrtConnect_transform_pickplace_middle.txt", paths, wc, device, tool_frame);
     print_trajectory_configuration("rrtConnect_configuration_pickplace_middle.txt", paths);
     print_trajectory_planning_time("rrtConnect_planning_times_pickplace_middle.txt", path_planning_time);
+
     // ******************************* PICK PLACE 3 *********************************** //
+
+    // Resetting to get ready for next pick place
+    state = wc->getDefaultState();
+    paths.clear();
+    path_planning_time.clear();
+    confi_along_path.clear();
+
     // Moving the object to correct position
     cylinder[0] = 0.25; // x - coordinate of base frame
 
     newCylinder = rw::math::Transform3D<>(cylinder, cylinder_frame_moveable->getTransform(state).R());
     cylinder_frame_moveable->moveTo(newCylinder, state);
     from = get_collision_free_configuration(name_cylinder_frame, "GraspTCP", device1, wc, state);// Pick configuration left corner
-    paths.clear();
-    path_planning_time.clear();
+
+    // Inserts all configuration that needs to be visited
+    confi_along_path.push_back(home);
+    confi_along_path.push_back(from);
+    confi_along_path.push_back(to);
+    confi_along_path.push_back(home);
+
     for(unsigned int i = 0; i < 60; i++)
     {
         // Time logging
         auto start = std::chrono::high_resolution_clock::now();
-        path = calculate_path_rrt(wc, state, device, tool_frame, cylinder_frame, from, to);
+
+        path = calculate_whole_path_rrt(confi_along_path, wc, state, device, tool_frame, cylinder_frame);
+
         auto stop = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
         path_planning_time.push_back(duration.count());
 
         paths.push_back(path);
+        state = wc->getDefaultState();
         cylinder_frame_moveable->moveTo(newCylinder, state);
     }
     print_trajectory_transform("rrtConnect_transform_pickplace_left.txt", paths, wc, device, tool_frame);
     print_trajectory_configuration("rrtConnect_configuration_pickplace_left.txt", paths);
     print_trajectory_planning_time("rrtConnect_planning_times_pickplace_left.txt", path_planning_time);
+
+    /****************************************************************************************
+    **                              Function for sample plugin                             **
+    ****************************************************************************************/
+//    int a, b;
+//    rw::kinematics::MovableFrame* place_frame = wc->findFrame<rw::kinematics::MovableFrame>(name_place_area_frame);
+//    rw::math::Transform3D<> obj_place = place_frame->getTransform(state);
+//    rrt_path_calculate(obj_place, wc, state, device, device1, tool_frame, cylinder_frame, place_frame, a, b);
     return 0;
 }
+
+
