@@ -88,6 +88,20 @@ std::tuple<std::vector<rw::math::Transform3D<>>,std::vector<float>> getPointTime
 
     return std::make_tuple(points, times);
 }
+
+std::vector<rw::math::Q> mapCartesianToJoint( std::vector<rw::math::Transform3D<>> CPath, rw::kinematics::MovableFrame *targetFrame, rw::models::SerialDevice::Ptr UR6, rw::models::WorkCell::Ptr wc, rw::kinematics::State state, rw::proximity::CollisionDetector::Ptr detector )
+{
+    std::vector<rw::math::Q> QPath;
+    for ( rw::math::Transform3D<> T : CPath )
+    {
+        targetFrame->moveTo(T, state);
+        std::vector<rw::math::Q> solutions = interpolator::util::getConfigurations("GraspTarget", "GraspTCP", UR6, wc, state);
+        rw::math::Q configuration = interpolator::util::getCollisionFreeSolution(UR6, state, detector, solutions);
+        QPath.push_back(configuration);
+    }
+    return QPath;
+}
+
 }
 
 

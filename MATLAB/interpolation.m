@@ -55,6 +55,21 @@ linearPathRPY_3 = pathRPYLength(data)
 data = importdata('interpolation/blend_tau25_3.txt');
 parabolicPathRPY_3 = pathRPYLength(data)
 
+
+
+%% Plot of trajectory in join space (interpolation performed in Cartesian space)
+clc; clear; close all; format compact;
+data = importdata('interpolation/LinIntQ_1.txt');
+length = size(data,1);
+x = 1:length;
+plot(x, data)
+legend('q_0', 'q_1', 'q_2', 'q_3', 'q_4', 'q_5')
+xlabel('Step')
+ylabel('Joint value [rad]')
+set(gcf,'position',[0,0,800,400])
+set(gca,'FontSize',14)
+
+%% Function definitions
 function RPYlength = pathRPYLength(data)
     nodes = size(data,1)/4;
     for j = 1:nodes

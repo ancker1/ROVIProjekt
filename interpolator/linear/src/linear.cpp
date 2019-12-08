@@ -22,10 +22,6 @@ rw::math::VectorND<N,float> cubicSpline(float t, float ts, float tf, rw::math::V
 }*/
 
 
-
-
-
-
 int main(int argc, char** argv) {
 
    /**** Define 6 frames for linear interpolator ****/
@@ -71,7 +67,7 @@ int main(int argc, char** argv) {
 
 
     // Move Cylinder Frame for different pick locations
-    //cylinderFrame->moveTo(rw::math::Transform3D<>(rw::math::Vector3D<>(-0.250, 0.474, 0.150),cylinderFrame->getTransform(state).R()), state);
+    cylinderFrame->moveTo(rw::math::Transform3D<>(rw::math::Vector3D<>(-0.250, 0.474, 0.150),cylinderFrame->getTransform(state).R()), state);
     //cylinderFrame->moveTo(rw::math::Transform3D<>(rw::math::Vector3D<>(0.000, 0.474, 0.150),cylinderFrame->getTransform(state).R()), state);
     //cylinderFrame->moveTo(rw::math::Transform3D<>(rw::math::Vector3D<>(0.250, 0.474, 0.150),cylinderFrame->getTransform(state).R()), state);
 
@@ -153,6 +149,14 @@ int main(int argc, char** argv) {
     std::vector<rw::math::Transform3D<>> cartPath = std::get<1>(paths);
     std::cout << "Size of blend path: " << blendPath.size() << std::endl;
     // Write to file
+
+    std::ofstream blendQFile;
+    blendQFile.open("/home/emil/Documents/blendQ.txt");
+    std::vector<rw::math::Q> BlendQPath = interpolator::util::mapCartesianToJoint(blendPath, targetFrame, UR6, wc, state, detector);
+    for ( rw::math::Q jointQ : BlendQPath )
+        blendQFile << jointQ[0] << " " << jointQ[1] << " " << jointQ[2] << " " << jointQ[3] << " " << jointQ[4] << " " << jointQ[5] << std::endl;
+    blendQFile.close();
+
     std::ofstream tfFile, qFile, blendFile;
     tfFile.open("/home/emil/Documents/LinIntTF_1.txt");
     qFile.open("/home/emil/Documents/LinIntQ_1.txt");

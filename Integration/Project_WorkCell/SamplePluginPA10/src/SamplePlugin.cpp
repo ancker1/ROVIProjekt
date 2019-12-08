@@ -4,6 +4,7 @@
 #include "interpolator.hpp"
 #include "rrt.hpp"
 
+
 SamplePlugin::SamplePlugin():
 	RobWorkStudioPlugin("SamplePluginUI", QIcon(":/pa_icon.png")) 
 {
@@ -20,6 +21,8 @@ SamplePlugin::SamplePlugin():
     connect(_btn_m2    ,SIGNAL(pressed()), this, SLOT(btnPressed()) );
     connect(_btn_showPose    ,SIGNAL(pressed()), this, SLOT(btnPressed()) );
     connect(_btn_rrt    ,SIGNAL(pressed()), this, SLOT(btnPressed()) );
+    connect(_btn_solve    ,SIGNAL(pressed()), this, SLOT(btnPressed()) );
+    connect(_btn_random   ,SIGNAL(pressed()), this, SLOT(btnPressed()) );
 
 	_framegrabber = NULL;
 	
@@ -126,7 +129,10 @@ void SamplePlugin::open(rw::models::WorkCell* workcell)
 
     _device = _wc->findDevice("UR-6-85-5-A");
     _step = -1;
-	
+
+    _home = _UR6->getQ(_state);
+    _duckPos = _duck->getTransform(_state);
+	_duckHomePos = _duckPos;
     }
 }
 
@@ -182,18 +188,61 @@ void SamplePlugin::btnPressed() {
 		get25DImage();
 	}
 	else if( obj==_btn_run ){
+        resetRobotAndObject();
 		runLinearInterpolation();	
 	} else if ( obj == _btn_m2 ){
+        resetRobotAndObject();
         poseEstimateM2();
     } else if ( obj == _btn_showPose ){
+        resetRobotAndObject();
         showPoseEstimate();
     } else if ( obj == _btn_rrt )
     {
+        resetRobotAndObject();
         runRRT();
+    } else if ( obj == _btn_solve )
+    {
+        resetRobotAndObject();
+        combinedSolution();
+    } else if ( obj == _btn_random )
+    {
+        moveObjectRandomly();
     }
 	
 	
 }
+
+void SamplePlugin::moveObjectRandomly()
+{
+    rw::math::RPY<> rotz(double(_zrotdist(_generator))/1000.0,0,0);
+    rw::math::Transform3D<> moveTF(rw::math::Vector3D<>(double(_xdist(_generator))/1000.0, double(_ydist(_generator))/1000.0, _duck->getTransform(_state).P()[2]),rotz.toRotation3D());
+    _duckPos = moveTF;
+    _duck->moveTo(_duckPos, _state);
+    getRobWorkStudio()->setState(_state);
+}
+
+void SamplePlugin::combinedSolution()
+{
+    resetRobotAndObject();
+    poseEstimateM2(); 
+    runLinearInterpolation();
+    
+    if (!_timer->isActive()){
+        _timer->start(10); // run 100 Hz
+        _step = 0;
+    }
+    else
+        _step = 0;
+
+}
+
+void SamplePlugin::resetRobotAndObject()
+{
+    _device->setQ(_home,_state);
+    _duck->moveTo(_duckPos, _state);
+    getRobWorkStudio()->setState(_state);
+}
+
 void SamplePlugin::runRRT()
 {
     _target->moveTo(_scanner25D->getTransform(_state) * _pose * rw::math::Transform3D<>(rw::math::RPY<>(0,0,rw::math::Pi).toRotation3D()) * rw::math::Transform3D<>(rw::math::RPY<>(rw::math::Pi/2,0,0).toRotation3D()), _state);
@@ -210,8 +259,8 @@ void SamplePlugin::showPoseEstimate()
 
 void SamplePlugin::poseEstimateM2(){
     cout << "--- Initializing Pose Estimation M2 ---" << endl;
-    std::string scenePath = get25DImage(std::string(std::getenv("HOME"))+"/Desktop/");
-    
+    //std::string scenePath = get25DImage(std::string(std::getenv("HOME"))+"/Desktop/");
+    std::string scenePath = get25DImage("temp_");
     /**** Read point clouds ****/
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_object (new pcl::PointCloud<pcl::PointXYZ>);  // Point cloud with XYZ
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_scene  (new pcl::PointCloud<pcl::PointXYZ>);   // Point cloud with XYZ

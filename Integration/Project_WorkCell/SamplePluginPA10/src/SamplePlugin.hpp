@@ -39,6 +39,9 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 
+// STD
+#include <random>
+
 class SamplePlugin: public rws::RobWorkStudioPlugin, private Ui::SamplePlugin {
 Q_OBJECT
 Q_INTERFACES( rws::RobWorkStudioPlugin )
@@ -58,6 +61,9 @@ private slots:
     void poseEstimateM2();
     void showPoseEstimate();
     void runRRT();
+    void moveObjectRandomly();
+    void combinedSolution();
+    void resetRobotAndObject();
     std::string get25DImage(std::string);
     void runLinearInterpolation();
     void stateChangedListener(const rw::kinematics::State& state);
@@ -88,6 +94,18 @@ private:
     rw::kinematics::MovableFrame * _scanner25D;
     rw::kinematics::MovableFrame * _target;
     rw::math::Transform3D<> _place;
+    rw::math::Q _home;
+    rw::math::Transform3D<> _duckPos;
+    rw::math::Transform3D<> _duckHomePos;
+
+    //pcl::common::UniformGenerator<int> x_gen(-300, 300, 42); // mm
+    //pcl::common::UniformGenerator<int> y_gen(350, 550, 42); // mm
+    //pcl::common::UniformGenerator<int> zrot_gen(-3141, 3141, 42); // mm
+    std::default_random_engine _generator;
+    std::uniform_int_distribution<int> _xdist{-300,300};
+    std::uniform_int_distribution<int> _ydist{350,550};
+    std::uniform_int_distribution<int> _zrotdist{-3141, 3141};
+
 
 };
 
