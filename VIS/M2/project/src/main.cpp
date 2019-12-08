@@ -197,7 +197,6 @@ void genRandomPoses()
     pcl::common::UniformGenerator<int> zrot_gen(-3141, 3141, 42); // mm
 
 
-
     ofstream outfile, outfile2;
     outfile.open("/home/emil/Documents/posesRW.txt");
     outfile2.open("/home/emil/Documents/posesMATLAB.txt");
@@ -345,6 +344,8 @@ int main(int argc, char** argv)
     pcl::transformPointCloud(*cloud_object, *cloud_object, tf);
     align::showTwoPointClouds(cloud_scene, cloud_object);
     return 0;
+
+
 
     /**** Robustness test ****/
     //testRobustness();

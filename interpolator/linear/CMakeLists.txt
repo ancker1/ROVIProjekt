@@ -30,7 +30,7 @@ LINK_DIRECTORIES( ${ROBWORK_LIBRARY_DIRS} )
 
 
 # Add the source files to build
-SET(SrcFiles src/linear.cpp)
+SET(SrcFiles src/linear.cpp src/interpolator.hpp)
 
 # The shared library to build:
 ADD_EXECUTABLE(linear ${SrcFiles})
