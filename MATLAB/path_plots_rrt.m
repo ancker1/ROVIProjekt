@@ -27,20 +27,21 @@ for j = 1:nodes
     Pz(j) = TF(3,4);
     R = TF(1:3,1:3);
 
+    RPY = tr2eul(TF); %RPY = rotm2eul(R); %old with singularities
     RPY = rotm2eul(R);
     roll(j) = RPY(1);
     pitch(j) = RPY(2);
     yaw(j) = RPY(3);
-    % Singularities maybe not take this
-    if yaw(j) < -3
-        yaw(j) = 3.142;
+    
+    if j > 1
+        if ( abs(roll(j) - roll(j-1)) > pi )
+            roll(j) = roll(j) + 2*pi;
+        end
+        if ( abs(yaw(j) - yaw(j-1)) > pi )
+            yaw(j) = yaw(j) + 2*pi;
+        end    
     end
-%     if yaw(j) < 0
-%         yaw(j) = yaw(j)*-1;
-%     end
-%     if roll(j) < 0
-%         roll(j) = roll(j)*-1;
-%     end
+
 end
 
 
@@ -175,13 +176,15 @@ function RPYlength = pathRPYLength(data)
         if yaw(j) < -3
             yaw(j) = 3.142;
         end
-       % Singularities maybe not take this
-%         if yaw(j) < 0
-%             yaw(j) = yaw(j)*-1;
-%         end
-%         if roll(j) < 0
-%             roll(j) = roll(j)*-1;
-%         end
+        if j > 1
+            if ( abs(roll(j) - roll(j-1)) > pi )
+                roll(j) = roll(j) + 2*pi;
+            end
+            if ( abs(yaw(j) - yaw(j-1)) > pi )
+                yaw(j) = yaw(j) + 2*pi;
+            end    
+        end
+
     end
     RPYlength = sum(sqrt(diff(roll).^2 + diff(pitch).^2 + diff(yaw).^2));
 end

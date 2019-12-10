@@ -24,7 +24,7 @@
 
 
 /****************************************************************************************
- **                              Ball pose finding method                              **
+ **                             3D Ball pose finding method                            **
  ****************************************************************************************/
 cv::Mat color_threshold_ball(cv::Mat pic){
     cv::Mat image_HSV, mask, mask_yellow;
@@ -33,9 +33,8 @@ cv::Mat color_threshold_ball(cv::Mat pic){
     mask = mask_yellow;
 
     // Opening and closing to get whole ball
-    cv::Mat two_by_two( 5, 5, CV_8U, cv::Scalar(1) );
-    cv::morphologyEx(mask, mask, cv::MORPH_OPEN, two_by_two);
     cv::Mat five_by_five( 5, 5, CV_8U, cv::Scalar(1) );
+    cv::morphologyEx(mask, mask, cv::MORPH_OPEN, five_by_five);
     cv::morphologyEx(mask, mask, cv::MORPH_CLOSE, five_by_five);
 
     return mask;
@@ -55,9 +54,9 @@ cv::Point2d find_circle_center(cv::Mat ball_pic_binary){
     cv::Point2d left = contours_points[0][0];
     cv::Point2d right = contours_points[0][0];
 
-    for(int i = 0; i < contours_points.size(); i++)
+    for(unsigned int i = 0; i < contours_points.size(); i++)
     {
-        for(int j = 0; j < contours_points[i].size(); j++)
+        for(unsigned int j = 0; j < contours_points[i].size(); j++)
         {
             if(upper.y > contours_points[i][j].y)
                 upper = contours_points[i][j];
@@ -129,9 +128,6 @@ cv::Mat color_threshold_duck(cv::Mat pic){
     return mask;
 }
 
-/****************************************************************************************
- **                             Rubber duck dot finding method                         **
- ****************************************************************************************/
 cv::Mat color_threshold_dot_duck(cv::Mat pic){
 
     cv::Mat image_HSV, mask, duck;
@@ -139,7 +135,6 @@ cv::Mat color_threshold_dot_duck(cv::Mat pic){
     cv::inRange(image_HSV, cv::Scalar(0, 190, 70), cv::Scalar(154, 255, 255), mask);
 
     // Opening and closing to get whole duck
-    // Taking from function colorFiltering in TestingMethod
     cv::erode(mask, mask, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
     cv::dilate(mask, mask, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
     cv::dilate(mask, mask, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
@@ -160,7 +155,6 @@ cv::Mat color_threshold_duck_hsv(cv::Mat pic, cv::Scalar lower, cv::Scalar upper
     cv::inRange(image_HSV, lower, upper, mask);
 
     // Opening and closing to get whole duck
-    // Taking from function colorFiltering in TestingMethod
     cv::erode(mask, mask, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
     cv::dilate(mask, mask, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
     cv::dilate(mask, mask, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
@@ -290,7 +284,6 @@ Eigen::Matrix4f estimate_6D_pose_dot_duck(cv::Mat init_image_left, cv::Mat init_
                   -1, -1, -1, -1,
                  -1, -1, -1, -1,
                  -1, -1, -1, -1;
-        // cout << result
     }
     return result;
 }

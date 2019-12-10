@@ -2,15 +2,13 @@
 clear; clc
 number_of_repeated_data = 60;
 
-
-
 %Make a plot of mean and std-dev of the data. Test if the choosen stepsize
 %if the values is normal dist to say 3std-dev is equal to 99.7%(check this number) of all
 %values is inside. 
 %% RRT-connect stepsize vs configuration distance statistics
 
 % Loading the configuration data 
-dist_stepsize = load("build-rrt_connect-Desktop-Release/stepsize_vs_configuration_distance.txt");
+dist_stepsize = load("rrt_connect_data/stepsize_vs_configuration_distance.txt");
 [sorted I] = sort(dist_stepsize); % Sort by stepsizes 
 dist_stepsize = [dist_stepsize(I(:,1),1) dist_stepsize(I(:,1),2)]; % Taking the indices of sorted
 stepsize = dist_stepsize(:,1);
@@ -46,12 +44,16 @@ title('Standard deviation plot')
 xlabel('Stepsize')
 ylabel('Standard deviation configuration distance')
 
+hold on
 figure('name', 'Boxplot of configuration distance versus stepsize')
 boxplot(dist, stepsize);
 title('Boxplot of configuration distance versus stepsize', 'FontSize', 30)
 xlabel('Stepsize', 'FontSize', 20);
 ylabel('Configuration distance', 'FontSize', 20)
- 
+set(findobj(gca,'type','line'),'linew',2)
+set(gca,'FontSize',18)
+xtickangle(45)
+hold off
 disp('-------------------------------------------------------------------')
 disp('Finding minimum mean of configuration distance and corresponding stepsize')
 disp('-------------------------------------------------------------------')
@@ -63,7 +65,7 @@ stepsize_min_mean = mean_dist(index)
 % Distance is from world to TCP frame
 
 % Loading the configuration data 
-dist_stepsize = load("build-rrt_connect-Desktop-Release/stepsize_vs_cartesian_distance.txt");
+dist_stepsize = load("rrt_connect_data/stepsize_vs_cartesian_distance.txt");
 [sorted I] = sort(dist_stepsize); % Sort by stepsizes 
 dist_stepsize = [dist_stepsize(I(:,1),1) dist_stepsize(I(:,1),2)]; % Taking the indices of sorted
 stepsize = dist_stepsize(:,1);
@@ -99,11 +101,15 @@ title('Standard deviation plot')
 xlabel('Stepsize')
 ylabel('Standard deviation Cartersian distance')
 
+hold on
 figure('name', 'Boxplot of cartersian distance versus Stepsize')
 boxplot(dist, stepsize);
 xlabel('Stepsize')
 ylabel('Cartersian distance')
-
+set(findobj(gca,'type','line'),'linew',2)
+set(gca,'FontSize',18)
+xtickangle(45)
+hold off
 
 disp('-------------------------------------------------------------------')
 disp('Finding minimum mean of cartersian distance and corresponding stepsize')
@@ -113,7 +119,7 @@ minimum_mean
 stepsize_min_mean = mean_dist(index)
 %% RRT-connect stepsize vs calculation of path time statistics
 % Loading the configuration data 
-time_stepsize = load("build-rrt_connect-Desktop-Release/stepsize_vs_path_time.txt");
+time_stepsize = load("rrt_connect_data/stepsize_vs_path_time.txt");
 [sorted I] = sort(time_stepsize); % Sort by stepsizes 
 time_stepsize = [time_stepsize(I(:,1),1) time_stepsize(I(:,1),2)]; % Taking the indices of sorted
 stepsize = time_stepsize(:,1);
@@ -148,12 +154,16 @@ title('Standard deviation plot')
 xlabel('Stepsize')
 ylabel('Standard deviation calculation time of path')
 
+hold on
 figure('name', 'Boxplot of calculation time of path versus stepsize')
 boxplot(time, stepsize);
 title('Boxplot of calculation time of path versus stepsize', 'FontSize', 30)
 xlabel('Stepsize', 'FontSize', 20)
 ylabel('Calculation time of path [ms]', 'FontSize', 20)
-
+set(findobj(gca,'type','line'),'linew',2)
+set(gca,'FontSize',18)
+xtickangle(45)
+hold off
 
 disp('-------------------------------------------------------------------')
 disp('Finding minimum mean of time and corresponding stepsize')
@@ -164,7 +174,7 @@ stepsize_min_mean = mean_time(index)
 
 %% RRT-connect stepsize vs number of configuration statistics
 % Loading the configuration data 
-numconfig_stepsize = load("build-rrt_connect-Desktop-Release/stepsize_vs_configuration_number.txt");
+numconfig_stepsize = load("rrt_connect_data/stepsize_vs_configuration_number.txt");
 [sorted I] = sort(numconfig_stepsize); % Sort by stepsizes 
 numconfig_stepsize = [numconfig_stepsize(I(:,1),1) numconfig_stepsize(I(:,1),2)]; % Taking the indices of sorted
 stepsize = numconfig_stepsize(:,1);
@@ -199,11 +209,16 @@ title('Standard deviation plot')
 xlabel('Stepsize')
 ylabel('Standard deviation number of configuration ')
 
+hold on
 figure('name', 'Boxplot of number of configuration versus Stepsize')
 boxplot(numconfig, stepsize);
 title('Boxplot of number of configuration versus stepsize', 'FontSize', 30)
 xlabel('Stepsize', 'FontSize', 20)
 ylabel('Number of configuration ', 'FontSize', 20)
+set(findobj(gca,'type','line'),'linew',2)
+set(gca,'FontSize',18)
+xtickangle(45)
+hold off
 
 disp('-------------------------------------------------------------------')
 disp('Finding minimum mean of number of configuration and corresponding stepsize')

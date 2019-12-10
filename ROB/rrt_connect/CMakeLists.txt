@@ -17,6 +17,6 @@ FIND_PACKAGE(RobWork REQUIRED)
 include_directories(${ROBWORK_INCLUDE_DIRS})
 link_directories(${ROBWORK_LIBRARY_DIRS})
 
-add_executable( rrt_connect src/rrt_connect.cpp src/util.hpp src/PerformanceEvaluation.hpp)
+add_executable( rrt_connect src/main.cpp src/rrt_connect_methods.hpp src/util.hpp src/performance_evaluation.hpp)
 target_link_libraries(rrt_connect ${ROBWORK_LIBRARIES})
  
