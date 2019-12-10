@@ -1,9 +1,10 @@
 # ROVIProjekt
-This is a guide for how to use the different functions made for ROVI Project 2019. The functionality is split up in the parts seen below. 
+This README explains the overall structure of the code.
+For explanations of how to run the code, navigate into the folders and open the readme.txt located there.
 
-## Robotics
+## Folders
+Integration: contains workcell and code used for combination of robotics and computer vision solution.
+- Sources is located at: ROVIProjekt/Integration/Project_WorkCell/SamplePluginPA10/src/
+- SamplePlugin.cpp and SamplePlugin.hpp contains code for combining the robotics and vision solution.
 
-### Reachability
-
-### Path planning
 
