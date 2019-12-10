@@ -1,0 +1,3 @@
+/home/emil/Dropbox/UNI/MSc/ROVIProjekt/ROVIProjekt/interpolator/build/CMakeFiles/rebuild_cache.dir
+/home/emil/Dropbox/UNI/MSc/ROVIProjekt/ROVIProjekt/interpolator/build/CMakeFiles/linear.dir
+/home/emil/Dropbox/UNI/MSc/ROVIProjekt/ROVIProjekt/interpolator/build/CMakeFiles/edit_cache.dir

@@ -103,7 +103,9 @@ std::vector<rw::math::Q> mapCartesianToJoint( std::vector<rw::math::Transform3D<
 }
 
 }
-
+/***********************************************************************************************************
+  *  The interpolation functions is based on the lecture notes written by Aljaz Kramberger & Henrik Gordon *
+  **********************************************************************************************************/
 
   std::vector<rw::math::Transform3D<>> parabolicBlend(std::vector<rw::math::Transform3D<>> P, std::vector<float> T)
   {   // we wish to limit acceleration during blend (puts lower limit on tau)

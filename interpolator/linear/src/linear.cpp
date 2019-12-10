@@ -25,7 +25,7 @@ rw::math::VectorND<N,float> cubicSpline(float t, float ts, float tf, rw::math::V
 int main(int argc, char** argv) {
 
    /**** Define 6 frames for linear interpolator ****/
-    static const std::string wcPath = "/home/emil/Dropbox/UNI/MSc/ROVIProjekt/ROVIProjekt/Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml";
+    static const std::string wcPath = "../../Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml";
     const rw::models::WorkCell::Ptr wc = rw::loaders::WorkCellLoader::Factory::load(wcPath);
     if ( wc.isNull() )
     {
@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
         LItime.push_back(dur_ms);
         std::cout << "(" << i <<  ") Linear interpolation execution time: " << dur_ms << " [micros]" << std::endl;
     }
-    LIfile.open("/home/emil/Documents/LIexetime_micros_1.txt");
+    LIfile.open("LIexetime_micros.txt");
     for ( int msTime : LItime )
         LIfile << msTime << std::endl;
 
@@ -131,7 +131,7 @@ int main(int argc, char** argv) {
         PBtime.push_back(dur_ms);
         std::cout << "(" << i <<  ") Parabolic blend interpolation execution time: " << dur_ms << " [micros]" << std::endl;
     }
-    PBfile.open("/home/emil/Documents/PBexetime_micros_1.txt");
+    PBfile.open("PBexetime_micros.txt");
     for ( int msTime : PBtime )
         PBfile << msTime << std::endl;
 
@@ -151,16 +151,16 @@ int main(int argc, char** argv) {
     // Write to file
 
     std::ofstream blendQFile;
-    blendQFile.open("/home/emil/Documents/blendQ.txt");
+    blendQFile.open("blendQ.txt");
     std::vector<rw::math::Q> BlendQPath = interpolator::util::mapCartesianToJoint(blendPath, targetFrame, UR6, wc, state, detector);
     for ( rw::math::Q jointQ : BlendQPath )
         blendQFile << jointQ[0] << " " << jointQ[1] << " " << jointQ[2] << " " << jointQ[3] << " " << jointQ[4] << " " << jointQ[5] << std::endl;
     blendQFile.close();
 
     std::ofstream tfFile, qFile, blendFile;
-    tfFile.open("/home/emil/Documents/LinIntTF_1.txt");
-    qFile.open("/home/emil/Documents/LinIntQ_1.txt");
-    blendFile.open("/home/emil/Documents/blend_tau25_1.txt");
+    tfFile.open("LinIntTF.txt");
+    qFile.open("LinIntQ.txt");
+    blendFile.open("blend_tau25.txt");
     for ( rw::math::Q jointQ : jointPath )
     {
         qFile << jointQ[0] << " " << jointQ[1] << " " << jointQ[2] << " " << jointQ[3] << " " << jointQ[4] << " " << jointQ[5] << std::endl;

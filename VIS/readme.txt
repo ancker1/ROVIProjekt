@@ -1,0 +1,35 @@
+Folder overview
+- DenseStereo: contains work that was done to develop vision method M1.
+- M2: contains work done to develop vision method M2.
+- SparseStereo: contains work done to develop vision method M3.
+
+
+**********************************************
+*	    Running M2 tests		     *
+**********************************************
+Building and running main.cpp directly will perform a pose estimate on an example.
+
+
+To run the tests open the main.cpp file
+Uncomment lines from 350-370 depending on the tests
+- 351: robustness test (varying variance test)
+- 355 & 356: varying voxel leaf size in preprocessing of scene
+- 360 & 361: time test of RANSAC
+- 365: generation of poses
+- 369: fetch ground truth
+
+
+OBS! if tests is being run; edit absolute paths at the following lines (main.cpp).
+- 133
+- 149
+- 201
+- 202
+- 231
+- 263
+- 320
+
+
+
+**********************************************
+*	    Running M3 tests		     *
+**********************************************
