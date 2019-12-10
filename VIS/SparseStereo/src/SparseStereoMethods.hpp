@@ -8,13 +8,17 @@
 #include <opencv2/features2d.hpp>
 #include <opencv2/xfeatures2d/nonfree.hpp>
 
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+#include <pcl/io/io.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/registration/transformation_estimation_svd.h>
+
 
 /*
  * Contains two methods for finding either ball pose or rubber duck pose.
  * Ball pose only finds position of the center using primarly triangulate.
- * Rubber duck pose finds both position and oriantation using sift and solvePnP.
- * ( Right now solvePnP not give a correct solution )
- *
+ * Rubber duck pose finds both position and oriantation using a defined known pose/transformation of the duck and then using that as base.
  *
  */
 
@@ -22,19 +26,6 @@
 /****************************************************************************************
  **                              Ball pose finding method                              **
  ****************************************************************************************/
-cv::Mat color_threshold_smiley(cv::Mat pic){
-    cv::Mat image_HSV, mask, mask_yellow, mask_blue, mask_red, smiley;
-    cv::cvtColor(pic, image_HSV, cv::COLOR_BGR2HSV);
-    cv::inRange(image_HSV, cv::Scalar(25, 102, 153), cv::Scalar(28, 255, 255), mask_yellow);
-    cv::inRange(image_HSV, cv::Scalar(118, 250, 153), cv::Scalar(122, 255, 255), mask_blue);
-    cv::inRange(image_HSV, cv::Scalar(0, 250, 153), cv::Scalar(4, 255, 255), mask_red);
-    mask = mask_yellow + mask_red + mask_blue;
-    cv::cvtColor(mask, mask, cv::COLOR_GRAY2BGR);
-
-    cv::bitwise_and(pic, mask, smiley);
-    return smiley;
-}
-
 cv::Mat color_threshold_ball(cv::Mat pic){
     cv::Mat image_HSV, mask, mask_yellow;
     cv::cvtColor(pic, image_HSV, cv::COLOR_BGR2HSV);
@@ -50,27 +41,7 @@ cv::Mat color_threshold_ball(cv::Mat pic){
     return mask;
 }
 
-std::vector<cv::Vec3f> findCircles ( cv::Mat img , cv::Mat mask)
-{
-    cv::Mat imgCopy;
-    cv::cvtColor(mask, mask, CV_GRAY2BGR);
-    cv::bitwise_and(img, mask, imgCopy);
-    cv::cvtColor(imgCopy, imgCopy, CV_BGR2GRAY);
-    std::vector<cv::Vec3f> circles;
-    cv::HoughCircles( imgCopy, circles, CV_HOUGH_GRADIENT, 1, imgCopy.rows/8, 60, 25, 0, 0 );
-
-    img.copyTo(imgCopy);
-    cv::circle( imgCopy, cv::Point(circles[0][0], circles[0][1]), 3, cv::Scalar(0,255,0), -1, 8, 0 );
-    // circle outline
-    cv::circle( imgCopy, cv::Point(circles[0][0], circles[0][1]), circles[0][2], cv::Scalar(0,0,255), 3, 8, 0 );
-
-//    cv::imshow("Circle", img);
-//    cv::waitKey(0);
-
-    return circles;
-}
-
-cv::Point2d find_ball_center(cv::Mat ball_pic_binary){
+cv::Point2d find_circle_center(cv::Mat ball_pic_binary){
     cv::Point2d center;
 
     std::vector<std::vector<cv::Point>> contours_points;
@@ -119,44 +90,24 @@ cv::Mat find_ball_pose(cv::Mat left_img, cv::Mat right_img, cv::Mat proj_mat_lef
     right_img = color_threshold_ball(right_img);
 
     // Finding center of ball using contour
-    left_point.at<cv::Vec2d>(0) = find_ball_center(left_img);
-    right_point.at<cv::Vec2d>(0) = find_ball_center(right_img);
+    left_point.at<cv::Vec2d>(0) = find_circle_center(left_img);
+    right_point.at<cv::Vec2d>(0) = find_circle_center(right_img);
 
     // Triangulate the ball center features
     cv::triangulatePoints(proj_mat_left, proj_mat_right, left_point, right_point, triangulate_point);
     triangulate_point =  triangulate_point / triangulate_point.at<double>(0, 3); // Normalizing the 3D-point
 
-    return triangulate_point;
+    // Transform from world to table
+    cv::Mat TF_TABLE = (cv::Mat_<double>(4, 4) << 1, 0, 0, 0,
+                                                  0, 1, 0, 0,
+                                                  0, 0, 1, 0.1,
+                                                  0, 0, 0, 1);
+
+    return (TF_TABLE*triangulate_point);
 }
-
-cv::Mat find_ball_pose(cv::Mat left_img, cv::Mat right_img, cv::Mat proj_mat_left, cv::Mat proj_mat_right, bool HOUGH)
-{
-    if ( HOUGH )
-    {
-
-        cv::Mat triangulate_point(1, 1, CV_64FC4);
-        cv::Mat left_point(1, 1, CV_64FC2);
-        cv::Mat right_point(1, 1, CV_64FC2);
-
-        // Finding center of ball using contour
-        cv::Vec3f leftPoint = findCircles(left_img, color_threshold_ball(left_img))[0];
-        cv::Vec3f rightPoint = findCircles(right_img, color_threshold_ball(right_img))[0];
-        left_point.at<cv::Vec2d>(0) = cv::Vec2d(leftPoint[0], leftPoint[1]);
-        right_point.at<cv::Vec2d>(0) = cv::Vec2d(rightPoint[0], rightPoint[1]);
-
-        // Triangulate the ball center features
-        cv::triangulatePoints(proj_mat_left, proj_mat_right, left_point, right_point, triangulate_point);
-        triangulate_point =  triangulate_point / triangulate_point.at<double>(0, 3); // Normalizing the 3D-point
-
-        return triangulate_point;
-    }
-    else
-        return find_ball_pose(left_img, right_img, proj_mat_left, proj_mat_right);
-}
-
 
 /****************************************************************************************
- **                             Rubber duck finding method                             **
+ **                             6D - Rubber duck finding method                        **
  ****************************************************************************************/
 cv::Mat color_threshold_duck(cv::Mat pic){
 
@@ -172,8 +123,174 @@ cv::Mat color_threshold_duck(cv::Mat pic){
     cv::Mat fifteen_by_fifteen( 8, 8, CV_8U, cv::Scalar(1) );
     cv::morphologyEx(mask, mask, cv::MORPH_CLOSE, fifteen_by_fifteen);
 
+    //cv::cvtColor(mask, mask, cv::COLOR_GRAY2BGR);
+
+    //cv::bitwise_and(pic, mask, duck);
+    return mask;
+}
+
+/****************************************************************************************
+ **                             Rubber duck dot finding method                         **
+ ****************************************************************************************/
+cv::Mat color_threshold_dot_duck(cv::Mat pic){
+
+    cv::Mat image_HSV, mask, duck;
+    cv::cvtColor(pic, image_HSV, cv::COLOR_BGR2HSV);
+    cv::inRange(image_HSV, cv::Scalar(0, 190, 70), cv::Scalar(154, 255, 255), mask);
+
+    // Opening and closing to get whole duck
+    // Taking from function colorFiltering in TestingMethod
+    cv::erode(mask, mask, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
+    cv::dilate(mask, mask, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
+    cv::dilate(mask, mask, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
+    cv::erode(mask, mask, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
+
     cv::cvtColor(mask, mask, cv::COLOR_GRAY2BGR);
 
     cv::bitwise_and(pic, mask, duck);
+
     return duck;
+}
+
+cv::Mat color_threshold_duck_hsv(cv::Mat pic, cv::Scalar lower, cv::Scalar upper)
+{
+    cv::Mat image_HSV, mask, duck;
+    pic.copyTo(image_HSV);
+    cv::cvtColor(image_HSV, image_HSV, cv::COLOR_BGR2HSV);
+    cv::inRange(image_HSV, lower, upper, mask);
+
+    // Opening and closing to get whole duck
+    // Taking from function colorFiltering in TestingMethod
+    cv::erode(mask, mask, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
+    cv::dilate(mask, mask, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
+    cv::dilate(mask, mask, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
+    cv::erode(mask, mask, getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
+
+//    cv::cvtColor(mask, mask, cv::COLOR_GRAY2BGR);
+//    cv::bitwise_and(pic, mask, duck);
+    return mask;
+}
+
+void find_circle_center_from_dots(cv::Mat duck_pic, cv::Point2d &green_point, cv::Point2d &purple_point, cv::Point2d &red_point, cv::Point2d &blue_point)
+{
+     cv::Mat copy_duck, mask_green, mask_purple, mask_red, mask_blue;
+
+     duck_pic.copyTo(copy_duck);
+     copy_duck=color_threshold_dot_duck(copy_duck);
+
+     cv::Scalar red_l(0, 135, 0);
+     cv::Scalar red_u(26, 255, 255);
+     cv::Scalar blue_l(29, 0, 0);
+     cv::Scalar blue_u(137, 255, 226);
+     cv::Scalar green_l(57, 0, 0);
+     cv::Scalar green_u(107, 255, 255);
+     cv::Scalar purple_l(137, 0, 0);
+     cv::Scalar purple_u(179, 255, 255);
+
+     mask_green = color_threshold_duck_hsv(copy_duck, green_l, green_u);
+     mask_purple = color_threshold_duck_hsv(copy_duck, purple_l, purple_u);
+     mask_red = color_threshold_duck_hsv(copy_duck, red_l, red_u);
+     mask_blue = color_threshold_duck_hsv(copy_duck, blue_l, blue_u);
+
+     green_point = find_circle_center(mask_green);
+     purple_point = find_circle_center(mask_purple);
+     red_point = find_circle_center(mask_red);
+     blue_point = find_circle_center(mask_blue);
+     if (green_point == cv::Point2d(0,0) || purple_point == cv::Point2d(0,0) || red_point == cv::Point2d(0,0)|| blue_point == cv::Point2d(0,0))
+     {
+         //std::cout << "Not all dots on the duck found, please check thresholding" << std::endl;
+     }
+
+}
+
+std::vector<cv::Point3d> triangulate_duck(cv::Mat image_left, cv::Mat image_right, cv::Mat proj_mat_left, cv::Mat proj_mat_right)
+{
+    cv::Mat triangulate_points(1, 4, CV_64FC4);
+    cv::Mat mat_triang_norm;
+    std::vector<cv::Point3d> triangulate_points_norm;
+    cv::Mat left_points(1, 4, CV_64FC2);
+    cv::Mat right_points(1, 4, CV_64FC2);
+
+    // Thresholding and finding cirlce centers MISSING FOR RIGHT OR LEFT IMAGE
+    cv::Mat mask_green, mask_purple, mask_red, mask_blue, copy_duck;
+    cv::Point2d green_p_l, purple_p_l, red_p_l, blue_p_l, green_p_r, purple_p_r, red_p_r, blue_p_r;
+
+    find_circle_center_from_dots(image_left, green_p_l, purple_p_l, red_p_l, blue_p_l);
+    find_circle_center_from_dots(image_right, green_p_r, purple_p_r, red_p_r, blue_p_r);
+
+    left_points.at<cv::Vec2d>(0) = cv::Vec2d(green_p_l);
+    left_points.at<cv::Vec2d>(1) = cv::Vec2d(purple_p_l);
+    left_points.at<cv::Vec2d>(2) = cv::Vec2d(red_p_l);
+    left_points.at<cv::Vec2d>(3) = cv::Vec2d(blue_p_l);
+
+    right_points.at<cv::Vec2d>(0) = cv::Vec2d(green_p_r);
+    right_points.at<cv::Vec2d>(1) = cv::Vec2d(purple_p_r);
+    right_points.at<cv::Vec2d>(2) = cv::Vec2d(red_p_r);
+    right_points.at<cv::Vec2d>(3) = cv::Vec2d(blue_p_r);
+
+    cv::triangulatePoints(proj_mat_left, proj_mat_right, left_points, right_points, triangulate_points);
+    for (unsigned int i = 0; i < 4; i++) {
+        mat_triang_norm = triangulate_points.col(i).rowRange(0, 3) / triangulate_points.at<double>(3, i); // Normalizes the 3d points
+        triangulate_points_norm.push_back(cv::Point3d(mat_triang_norm.at<double>(0, 0), mat_triang_norm.at<double>(0, 1), mat_triang_norm.at<double>(0, 2))); // Normalizes the 3d points
+    }
+
+    return triangulate_points_norm;
+}
+
+Eigen::Matrix4f estimate_6D_pose_dot_duck(cv::Mat init_image_left, cv::Mat init_image_right, cv::Mat new_image_left, cv::Mat new_image_right, cv::Mat proj_mat_left, cv::Mat proj_mat_right)
+{
+    // Gotten from scene file for init pose of duck
+    Eigen::Matrix4f result;
+    Eigen::Matrix4f initTransform;
+    initTransform <<-1.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 1.0, 0.45,
+                    0.0, 1.0, 0.0, 0.188,
+                    0.0, 0.0, 0.0, 1.0;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr initPointCloud(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr newPointCloud(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ> ESTSVD;
+    pcl::registration::TransformationEstimationSVD<pcl::PointXYZ, pcl::PointXYZ>::Matrix4 newTransform;
+    initPointCloud->width = 4;
+    initPointCloud->height = 1;
+    initPointCloud->is_dense = false;
+    initPointCloud->resize(initPointCloud->height * initPointCloud->width);
+
+    newPointCloud->width = 4;
+    newPointCloud->height = 1;
+    newPointCloud->is_dense = false;
+    newPointCloud->resize(newPointCloud->height * newPointCloud->width);
+
+    // Triangulates the points
+    std::vector<cv::Point3d> initPoints =  triangulate_duck(init_image_left, init_image_right, proj_mat_left, proj_mat_right);
+    std::vector<cv::Point3d> newPoints = triangulate_duck(new_image_left, new_image_right, proj_mat_left, proj_mat_right);;
+
+    std::vector<int> indices;
+    for ( unsigned int i = 0; i < 4; i++ )
+    {
+        if ( initPoints[i].x > 100 || initPoints[i].y > 100 || initPoints[i].z > 100 || newPointCloud->points[i].x > 100 || newPointCloud->points[i].y > 100 || newPointCloud->points[i].z > 100)
+            continue;
+        initPointCloud->points[i].x = initPoints[i].x;
+        initPointCloud->points[i].y = initPoints[i].y;
+        initPointCloud->points[i].z = initPoints[i].z;
+
+        newPointCloud->points[i].x = newPoints[i].x;
+        newPointCloud->points[i].y = newPoints[i].y;
+        newPointCloud->points[i].z = newPoints[i].z;
+
+        indices.push_back(i);
+    }
+    if ( indices.size() > 2 )
+    {
+        ESTSVD.estimateRigidTransformation(*initPointCloud, indices, *newPointCloud, indices, newTransform);
+        result = initTransform * newTransform;
+    }
+    else
+    {
+        result << -1, -1, -1, -1,
+                  -1, -1, -1, -1,
+                 -1, -1, -1, -1,
+                 -1, -1, -1, -1;
+        // cout << result
+    }
+    return result;
 }

@@ -84,6 +84,7 @@ private slots:
     void getImageNamed(std::string name);
     void get25DImage();
     void generateTestImagesBall();
+    void generateTestImagesDuck_with_rotation();
 
     void stateChangedListener(const rw::kinematics::State& state);
 

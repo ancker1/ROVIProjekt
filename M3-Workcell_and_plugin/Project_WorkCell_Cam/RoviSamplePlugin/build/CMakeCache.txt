@@ -20,80 +20,78 @@ CMAKE_AR:FILEPATH=/usr/bin/ar
 //Archive directory
 CMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=/home/mikkel/Desktop/Project_WorkCell_Cam/RoviSamplePlugin/libs/Release
 
-//Choose the type of build, options are: None(CMAKE_CXX_FLAGS or
-// CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.
+//Choose the type of build, options are: None Debug Release RelWithDebInfo
+// MinSizeRel ...
 CMAKE_BUILD_TYPE:STRING=
 
 //Enable/Disable color output during build.
 CMAKE_COLOR_MAKEFILE:BOOL=ON
 
-//No help, variable specified on the command line.
-CMAKE_CXX_COMPILER:STRING=/usr/bin/g++
+//CXX compiler
+CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++
 
 //A wrapper around 'ar' adding the appropriate '--plugin' option
 // for the GCC compiler
-CMAKE_CXX_COMPILER_AR:FILEPATH=/usr/bin/gcc-ar-7
+CMAKE_CXX_COMPILER_AR:FILEPATH=/usr/bin/gcc-ar-9
 
 //A wrapper around 'ranlib' adding the appropriate '--plugin' option
 // for the GCC compiler
-CMAKE_CXX_COMPILER_RANLIB:FILEPATH=/usr/bin/gcc-ranlib-7
+CMAKE_CXX_COMPILER_RANLIB:FILEPATH=/usr/bin/gcc-ranlib-9
 
-//Flags used by the compiler during all build types.
+//Flags used by the CXX compiler during all build types.
 CMAKE_CXX_FLAGS:STRING=
 
-//Flags used by the compiler during debug builds.
+//Flags used by the CXX compiler during DEBUG builds.
 CMAKE_CXX_FLAGS_DEBUG:STRING=-g
 
-//Flags used by the compiler during release builds for minimum
-// size.
+//Flags used by the CXX compiler during MINSIZEREL builds.
 CMAKE_CXX_FLAGS_MINSIZEREL:STRING=-Os -DNDEBUG
 
-//Flags used by the compiler during release builds.
+//Flags used by the CXX compiler during RELEASE builds.
 CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
 
-//Flags used by the compiler during release builds with debug info.
+//Flags used by the CXX compiler during RELWITHDEBINFO builds.
 CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
 
-//No help, variable specified on the command line.
-CMAKE_C_COMPILER:STRING=/usr/bin/gcc
+//C compiler
+CMAKE_C_COMPILER:FILEPATH=/usr/bin/cc
 
 //A wrapper around 'ar' adding the appropriate '--plugin' option
 // for the GCC compiler
-CMAKE_C_COMPILER_AR:FILEPATH=/usr/bin/gcc-ar-7
+CMAKE_C_COMPILER_AR:FILEPATH=/usr/bin/gcc-ar-9
 
 //A wrapper around 'ranlib' adding the appropriate '--plugin' option
 // for the GCC compiler
-CMAKE_C_COMPILER_RANLIB:FILEPATH=/usr/bin/gcc-ranlib-7
+CMAKE_C_COMPILER_RANLIB:FILEPATH=/usr/bin/gcc-ranlib-9
 
-//Flags used by the compiler during all build types.
+//Flags used by the C compiler during all build types.
 CMAKE_C_FLAGS:STRING=
 
-//Flags used by the compiler during debug builds.
+//Flags used by the C compiler during DEBUG builds.
 CMAKE_C_FLAGS_DEBUG:STRING=-g
 
-//Flags used by the compiler during release builds for minimum
-// size.
+//Flags used by the C compiler during MINSIZEREL builds.
 CMAKE_C_FLAGS_MINSIZEREL:STRING=-Os -DNDEBUG
 
-//Flags used by the compiler during release builds.
+//Flags used by the C compiler during RELEASE builds.
 CMAKE_C_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
 
-//Flags used by the compiler during release builds with debug info.
+//Flags used by the C compiler during RELWITHDEBINFO builds.
 CMAKE_C_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
 
-//Flags used by the linker.
+//Flags used by the linker during all build types.
 CMAKE_EXE_LINKER_FLAGS:STRING=
 
-//Flags used by the linker during debug builds.
+//Flags used by the linker during DEBUG builds.
 CMAKE_EXE_LINKER_FLAGS_DEBUG:STRING=
 
-//Flags used by the linker during release minsize builds.
+//Flags used by the linker during MINSIZEREL builds.
 CMAKE_EXE_LINKER_FLAGS_MINSIZEREL:STRING=
 
-//Flags used by the linker during release builds.
+//Flags used by the linker during RELEASE builds.
 CMAKE_EXE_LINKER_FLAGS_RELEASE:STRING=
 
-//Flags used by the linker during Release with Debug Info builds.
+//Flags used by the linker during RELWITHDEBINFO builds.
 CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
 //Enable/Disable output of compile commands during generation.
@@ -111,18 +109,22 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld
 //Path to a program.
 CMAKE_MAKE_PROGRAM:FILEPATH=/usr/bin/make
 
-CMAKE_MODULE_LINKER_FLAGS:STRING='                                                              '
+CMAKE_MODULE_LINKER_FLAGS:STRING='              '
 
-//Flags used by the linker during debug builds.
+//Flags used by the linker during the creation of modules during
+// DEBUG builds.
 CMAKE_MODULE_LINKER_FLAGS_DEBUG:STRING=
 
-//Flags used by the linker during release minsize builds.
+//Flags used by the linker during the creation of modules during
+// MINSIZEREL builds.
 CMAKE_MODULE_LINKER_FLAGS_MINSIZEREL:STRING=
 
-//Flags used by the linker during release builds.
+//Flags used by the linker during the creation of modules during
+// RELEASE builds.
 CMAKE_MODULE_LINKER_FLAGS_RELEASE:STRING=
 
-//Flags used by the linker during Release with Debug Info builds.
+//Flags used by the linker during the creation of modules during
+// RELWITHDEBINFO builds.
 CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
 //Path to a program.
@@ -134,8 +136,11 @@ CMAKE_OBJCOPY:FILEPATH=/usr/bin/objcopy
 //Path to a program.
 CMAKE_OBJDUMP:FILEPATH=/usr/bin/objdump
 
-//No help, variable specified on the command line.
-CMAKE_PREFIX_PATH:STRING=%{Qt:QT_INSTALL_PREFIX}
+//Value Computed by CMake
+CMAKE_PROJECT_DESCRIPTION:STATIC=
+
+//Value Computed by CMake
+CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
 CMAKE_PROJECT_NAME:STATIC=RoViPlugin
@@ -146,18 +151,22 @@ CMAKE_RANLIB:FILEPATH=/usr/bin/ranlib
 //Runtime directory
 CMAKE_RUNTIME_OUTPUT_DIRECTORY:PATH=/home/mikkel/Desktop/Project_WorkCell_Cam/RoviSamplePlugin/bin/Release
 
-CMAKE_SHARED_LINKER_FLAGS:STRING='                                                              '
+CMAKE_SHARED_LINKER_FLAGS:STRING='              '
 
-//Flags used by the linker during debug builds.
+//Flags used by the linker during the creation of shared libraries
+// during DEBUG builds.
 CMAKE_SHARED_LINKER_FLAGS_DEBUG:STRING=
 
-//Flags used by the linker during release minsize builds.
+//Flags used by the linker during the creation of shared libraries
+// during MINSIZEREL builds.
 CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL:STRING=
 
-//Flags used by the linker during release builds.
+//Flags used by the linker during the creation of shared libraries
+// during RELEASE builds.
 CMAKE_SHARED_LINKER_FLAGS_RELEASE:STRING=
 
-//Flags used by the linker during Release with Debug Info builds.
+//Flags used by the linker during the creation of shared libraries
+// during RELWITHDEBINFO builds.
 CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
 //If set, runtime paths are not added when installing shared libraries,
@@ -167,19 +176,24 @@ CMAKE_SKIP_INSTALL_RPATH:BOOL=NO
 //If set, runtime paths are not added when using shared libraries.
 CMAKE_SKIP_RPATH:BOOL=NO
 
-//Flags used by the linker during the creation of static libraries.
+//Flags used by the linker during the creation of static libraries
+// during all build types.
 CMAKE_STATIC_LINKER_FLAGS:STRING=
 
-//Flags used by the linker during debug builds.
+//Flags used by the linker during the creation of static libraries
+// during DEBUG builds.
 CMAKE_STATIC_LINKER_FLAGS_DEBUG:STRING=
 
-//Flags used by the linker during release minsize builds.
+//Flags used by the linker during the creation of static libraries
+// during MINSIZEREL builds.
 CMAKE_STATIC_LINKER_FLAGS_MINSIZEREL:STRING=
 
-//Flags used by the linker during release builds.
+//Flags used by the linker during the creation of static libraries
+// during RELEASE builds.
 CMAKE_STATIC_LINKER_FLAGS_RELEASE:STRING=
 
-//Flags used by the linker during Release with Debug Info builds.
+//Flags used by the linker during the creation of static libraries
+// during RELWITHDEBINFO builds.
 CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
 //Path to a program.
@@ -225,16 +239,13 @@ OpenCV_DIR:PATH=/usr/local/share/OpenCV
 PYTHON_EXECUTABLE:FILEPATH=/usr/bin/python3
 
 //Path to a file.
-PYTHON_INCLUDE_DIR:PATH=/usr/include/python3.6m
+PYTHON_INCLUDE_DIR:PATH=/usr/include/python3.7m
 
 //Path to a library.
-PYTHON_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libpython3.6m.so
+PYTHON_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libpython3.7m.so
 
 //Path to a library.
 PYTHON_LIBRARY_DEBUG:FILEPATH=PYTHON_LIBRARY_DEBUG-NOTFOUND
-
-//No help, variable specified on the command line.
-QT_QMAKE_EXECUTABLE:STRING=
 
 //The directory containing a CMake configuration file for Qt5Core.
 Qt5Core_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt5Core
@@ -286,7 +297,7 @@ RW_LINKER_FLAGS:STRING=
 RoViPlugin_BINARY_DIR:STATIC=/home/mikkel/Desktop/Project_WorkCell_Cam/RoviSamplePlugin/build
 
 //Dependencies for the target
-RoViPlugin_LIB_DEPENDS:STATIC=general;/usr/lib/x86_64-linux-gnu/libpython3.6m.so;general;sdurws_lua_s;general;sdurws_luaeditor;general;sdurws;general;qtpropertybrowser;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_lua_s.a;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_assembly_lua_s.a;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_control_lua_s.a;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_pathoptimization_lua_s.a;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_pathplanners_lua_s.a;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_proximitystrategies_lua_s.a;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_simulation_lua_s.a;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_task_lua_s.a;general;/usr/lib/x86_64-linux-gnu/liblua5.3.so;general;/usr/lib/x86_64-linux-gnu/libm.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_algorithms.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_pathplanners.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_pathoptimization.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_simulation.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_opengl.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_assembly.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_task.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_calibration.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_csg.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_control.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_proximitystrategies.so;general;/home/mikkel/RobWork/RobWork/libs/release/libyaobi.so;general;/home/mikkel/RobWork/RobWork/libs/release/libpqp.so;general;/home/mikkel/RobWork/RobWork/libs/release/libfcl.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw.so;general;/usr/lib/x86_64-linux-gnu/libGL.so;general;/usr/lib/x86_64-linux-gnu/libGLU.so;general;/usr/lib/x86_64-linux-gnu/libxerces-c.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_assimp.so;general;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so;general;/usr/lib/x86_64-linux-gnu/libboost_regex.so;general;/usr/lib/x86_64-linux-gnu/libboost_serialization.so;general;/usr/lib/x86_64-linux-gnu/libboost_system.so;general;/usr/lib/x86_64-linux-gnu/libboost_thread.so;general;/usr/lib/x86_64-linux-gnu/libboost_program_options.so;general;/usr/lib/x86_64-linux-gnu/libboost_chrono.so;general;/usr/lib/x86_64-linux-gnu/libboost_date_time.so;general;/usr/lib/x86_64-linux-gnu/libboost_atomic.so;general;/usr/lib/x86_64-linux-gnu/libpthread.so;general;/usr/lib/x86_64-linux-gnu/libboost_test_exec_monitor.a;general;/usr/lib/x86_64-linux-gnu/libboost_unit_test_framework.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_unzip.a;general;/usr/lib/x86_64-linux-gnu/libz.so;general;/usr/lib/x86_64-linux-gnu/libdl.so;general;Qt5::Core;general;Qt5::Gui;general;Qt5::Widgets;general;Qt5::OpenGL;general;/usr/lib/x86_64-linux-gnu/libboost_program_options.so;general;/usr/lib/x86_64-linux-gnu/libGL.so;general;/usr/lib/x86_64-linux-gnu/libGLU.so;general;sdurws_jog;general;sdurws_log;general;sdurws_playback;general;sdurws_propertyview;general;sdurws_treeview;general;sdurws_planning;general;sdurws_sensors;general;sdurws_workcelleditorplugin;general;sdurws_luapl;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_lua_s.a;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_assembly_lua_s.a;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_control_lua_s.a;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_pathoptimization_lua_s.a;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_pathplanners_lua_s.a;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_proximitystrategies_lua_s.a;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_simulation_lua_s.a;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_task_lua_s.a;general;/usr/lib/x86_64-linux-gnu/liblua5.3.so;general;/usr/lib/x86_64-linux-gnu/libm.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_algorithms.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_pathplanners.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_pathoptimization.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_simulation.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_opengl.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_assembly.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_task.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_calibration.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_csg.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_control.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_proximitystrategies.so;general;/home/mikkel/RobWork/RobWork/libs/release/libyaobi.so;general;/home/mikkel/RobWork/RobWork/libs/release/libpqp.so;general;/home/mikkel/RobWork/RobWork/libs/release/libfcl.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw.so;general;/usr/lib/x86_64-linux-gnu/libGL.so;general;/usr/lib/x86_64-linux-gnu/libGLU.so;general;/usr/lib/x86_64-linux-gnu/libxerces-c.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_assimp.so;general;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so;general;/usr/lib/x86_64-linux-gnu/libboost_regex.so;general;/usr/lib/x86_64-linux-gnu/libboost_serialization.so;general;/usr/lib/x86_64-linux-gnu/libboost_system.so;general;/usr/lib/x86_64-linux-gnu/libboost_thread.so;general;/usr/lib/x86_64-linux-gnu/libboost_program_options.so;general;/usr/lib/x86_64-linux-gnu/libboost_chrono.so;general;/usr/lib/x86_64-linux-gnu/libboost_date_time.so;general;/usr/lib/x86_64-linux-gnu/libboost_atomic.so;general;/usr/lib/x86_64-linux-gnu/libpthread.so;general;/usr/lib/x86_64-linux-gnu/libboost_test_exec_monitor.a;general;/usr/lib/x86_64-linux-gnu/libboost_unit_test_framework.so;general;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_unzip.a;general;/usr/lib/x86_64-linux-gnu/libz.so;general;/usr/lib/x86_64-linux-gnu/libdl.so;general;opencv_calib3d;general;opencv_core;general;opencv_dnn;general;opencv_features2d;general;opencv_flann;general;opencv_highgui;general;opencv_imgcodecs;general;opencv_imgproc;general;opencv_ml;general;opencv_objdetect;general;opencv_photo;general;opencv_shape;general;opencv_stitching;general;opencv_superres;general;opencv_video;general;opencv_videoio;general;opencv_videostab;general;opencv_viz;general;opencv_aruco;general;opencv_bgsegm;general;opencv_bioinspired;general;opencv_ccalib;general;opencv_cvv;general;opencv_datasets;general;opencv_dnn_objdetect;general;opencv_dpm;general;opencv_face;general;opencv_freetype;general;opencv_fuzzy;general;opencv_hdf;general;opencv_hfs;general;opencv_img_hash;general;opencv_line_descriptor;general;opencv_optflow;general;opencv_phase_unwrapping;general;opencv_plot;general;opencv_reg;general;opencv_rgbd;general;opencv_saliency;general;opencv_sfm;general;opencv_stereo;general;opencv_structured_light;general;opencv_surface_matching;general;opencv_text;general;opencv_tracking;general;opencv_xfeatures2d;general;opencv_ximgproc;general;opencv_xobjdetect;general;opencv_xphoto;
+RoViPlugin_LIB_DEPENDS:STATIC=general;/usr/lib/x86_64-linux-gnu/libpython3.7m.so;general;sdurws_lua_s;general;sdurws_luaeditor;general;sdurws;general;qtpropertybrowser;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_lua_s.a;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_assembly_lua_s.a;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_control_lua_s.a;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_pathoptimization_lua_s.a;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_pathplanners_lua_s.a;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_proximitystrategies_lua_s.a;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_simulation_lua_s.a;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_task_lua_s.a;general;/usr/lib/x86_64-linux-gnu/liblua5.3.so;general;/usr/lib/x86_64-linux-gnu/libm.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_algorithms.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_pathplanners.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_pathoptimization.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_simulation.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_opengl.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_assembly.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_task.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_calibration.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_csg.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_control.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_proximitystrategies.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libyaobi.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libpqp.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libfcl.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw.so;general;/usr/lib/x86_64-linux-gnu/libOpenGL.so;general;/usr/lib/x86_64-linux-gnu/libGLX.so;general;/usr/lib/x86_64-linux-gnu/libGLU.so;general;/usr/lib/x86_64-linux-gnu/libxerces-c.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_assimp.so;general;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so;general;/usr/lib/x86_64-linux-gnu/libboost_regex.so;general;/usr/lib/x86_64-linux-gnu/libboost_serialization.so;general;/usr/lib/x86_64-linux-gnu/libboost_system.so;general;/usr/lib/x86_64-linux-gnu/libboost_thread.so;general;-lpthread;general;/usr/lib/x86_64-linux-gnu/libboost_program_options.so;general;/usr/lib/x86_64-linux-gnu/libboost_chrono.so;general;/usr/lib/x86_64-linux-gnu/libboost_date_time.so;general;/usr/lib/x86_64-linux-gnu/libboost_atomic.so;general;/usr/lib/x86_64-linux-gnu/libboost_test_exec_monitor.a;general;/usr/lib/x86_64-linux-gnu/libboost_unit_test_framework.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_unzip.a;general;/usr/lib/x86_64-linux-gnu/libz.so;general;/usr/lib/x86_64-linux-gnu/libdl.so;general;Qt5::Core;general;Qt5::Gui;general;Qt5::Widgets;general;Qt5::OpenGL;general;/usr/lib/x86_64-linux-gnu/libboost_program_options.so;general;/usr/lib/x86_64-linux-gnu/libOpenGL.so;general;/usr/lib/x86_64-linux-gnu/libGLX.so;general;/usr/lib/x86_64-linux-gnu/libGLU.so;general;sdurws_jog;general;sdurws_log;general;sdurws_playback;general;sdurws_propertyview;general;sdurws_treeview;general;sdurws_planning;general;sdurws_sensors;general;sdurws_workcelleditorplugin;general;sdurws_luapl;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_lua_s.a;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_assembly_lua_s.a;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_control_lua_s.a;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_pathoptimization_lua_s.a;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_pathplanners_lua_s.a;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_proximitystrategies_lua_s.a;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_simulation_lua_s.a;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_task_lua_s.a;general;/usr/lib/x86_64-linux-gnu/liblua5.3.so;general;/usr/lib/x86_64-linux-gnu/libm.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_algorithms.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_pathplanners.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_pathoptimization.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_simulation.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_opengl.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_assembly.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_task.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_calibration.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_csg.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_control.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_proximitystrategies.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libyaobi.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libpqp.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libfcl.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw.so;general;/usr/lib/x86_64-linux-gnu/libOpenGL.so;general;/usr/lib/x86_64-linux-gnu/libGLX.so;general;/usr/lib/x86_64-linux-gnu/libGLU.so;general;/usr/lib/x86_64-linux-gnu/libxerces-c.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_assimp.so;general;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so;general;/usr/lib/x86_64-linux-gnu/libboost_regex.so;general;/usr/lib/x86_64-linux-gnu/libboost_serialization.so;general;/usr/lib/x86_64-linux-gnu/libboost_system.so;general;/usr/lib/x86_64-linux-gnu/libboost_thread.so;general;-lpthread;general;/usr/lib/x86_64-linux-gnu/libboost_program_options.so;general;/usr/lib/x86_64-linux-gnu/libboost_chrono.so;general;/usr/lib/x86_64-linux-gnu/libboost_date_time.so;general;/usr/lib/x86_64-linux-gnu/libboost_atomic.so;general;/usr/lib/x86_64-linux-gnu/libboost_test_exec_monitor.a;general;/usr/lib/x86_64-linux-gnu/libboost_unit_test_framework.so;general;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_unzip.a;general;/usr/lib/x86_64-linux-gnu/libz.so;general;/usr/lib/x86_64-linux-gnu/libdl.so;general;opencv_calib3d;general;opencv_core;general;opencv_dnn;general;opencv_features2d;general;opencv_flann;general;opencv_highgui;general;opencv_imgcodecs;general;opencv_imgproc;general;opencv_ml;general;opencv_objdetect;general;opencv_photo;general;opencv_shape;general;opencv_stitching;general;opencv_superres;general;opencv_video;general;opencv_videoio;general;opencv_videostab;general;opencv_aruco;general;opencv_bgsegm;general;opencv_bioinspired;general;opencv_ccalib;general;opencv_cvv;general;opencv_datasets;general;opencv_dnn_objdetect;general;opencv_dpm;general;opencv_face;general;opencv_freetype;general;opencv_fuzzy;general;opencv_hdf;general;opencv_hfs;general;opencv_img_hash;general;opencv_line_descriptor;general;opencv_optflow;general;opencv_phase_unwrapping;general;opencv_plot;general;opencv_reg;general;opencv_rgbd;general;opencv_saliency;general;opencv_sfm;general;opencv_stereo;general;opencv_structured_light;general;opencv_surface_matching;general;opencv_text;general;opencv_tracking;general;opencv_xfeatures2d;general;opencv_ximgproc;general;opencv_xobjdetect;general;opencv_xphoto;
 
 //Value Computed by CMake
 RoViPlugin_SOURCE_DIR:STATIC=/home/mikkel/Desktop/Project_WorkCell_Cam/RoviSamplePlugin
@@ -306,9 +317,9 @@ CMAKE_CACHEFILE_DIR:INTERNAL=/home/mikkel/Desktop/Project_WorkCell_Cam/RoviSampl
 //Major version of cmake used to create the current loaded cache
 CMAKE_CACHE_MAJOR_VERSION:INTERNAL=3
 //Minor version of cmake used to create the current loaded cache
-CMAKE_CACHE_MINOR_VERSION:INTERNAL=10
+CMAKE_CACHE_MINOR_VERSION:INTERNAL=13
 //Patch version of cmake used to create the current loaded cache
-CMAKE_CACHE_PATCH_VERSION:INTERNAL=2
+CMAKE_CACHE_PATCH_VERSION:INTERNAL=4
 //ADVANCED property for variable: CMAKE_COLOR_MAKEFILE
 CMAKE_COLOR_MAKEFILE-ADVANCED:INTERNAL=1
 //Path to CMake executable.
@@ -367,6 +378,8 @@ CMAKE_EXPORT_COMPILE_COMMANDS-ADVANCED:INTERNAL=1
 CMAKE_EXTRA_GENERATOR:INTERNAL=
 //Name of generator.
 CMAKE_GENERATOR:INTERNAL=Unix Makefiles
+//Generator instance identifier.
+CMAKE_GENERATOR_INSTANCE:INTERNAL=
 //Name of generator platform.
 CMAKE_GENERATOR_PLATFORM:INTERNAL=
 //Name of generator toolset.
@@ -403,7 +416,7 @@ CMAKE_PLATFORM_INFO_INITIALIZED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_RANLIB
 CMAKE_RANLIB-ADVANCED:INTERNAL=1
 //Path to CMake installation.
-CMAKE_ROOT:INTERNAL=/usr/share/cmake-3.10
+CMAKE_ROOT:INTERNAL=/usr/share/cmake-3.13
 //ADVANCED property for variable: CMAKE_SHARED_LINKER_FLAGS
 CMAKE_SHARED_LINKER_FLAGS-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_SHARED_LINKER_FLAGS_DEBUG
@@ -431,7 +444,7 @@ CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_STRIP
 CMAKE_STRIP-ADVANCED:INTERNAL=1
 //uname command
-CMAKE_UNAME:INTERNAL=/bin/uname
+CMAKE_UNAME:INTERNAL=/usr/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 //Details about finding OpenCV
@@ -439,13 +452,13 @@ FIND_PACKAGE_MESSAGE_DETAILS_OpenCV:INTERNAL=[/usr/local][v3.4.7(3)]
 //Details about finding OpenGL
 FIND_PACKAGE_MESSAGE_DETAILS_OpenGL:INTERNAL=[/usr/lib/x86_64-linux-gnu/libOpenGL.so][/usr/lib/x86_64-linux-gnu/libGLX.so][/usr/include][c ][v()]
 //Details about finding PythonInterp
-FIND_PACKAGE_MESSAGE_DETAILS_PythonInterp:INTERNAL=[/usr/bin/python3][v3.6.9(3)]
+FIND_PACKAGE_MESSAGE_DETAILS_PythonInterp:INTERNAL=[/usr/bin/python3][v3.7.5(3)]
 //Details about finding PythonLibs
-FIND_PACKAGE_MESSAGE_DETAILS_PythonLibs:INTERNAL=[/usr/lib/x86_64-linux-gnu/libpython3.6m.so][/usr/include/python3.6m][v3.6.9()]
+FIND_PACKAGE_MESSAGE_DETAILS_PythonLibs:INTERNAL=[/usr/lib/x86_64-linux-gnu/libpython3.7m.so][/usr/include/python3.7m][v3.7.5()]
 //Details about finding RobWork
-FIND_PACKAGE_MESSAGE_DETAILS_RobWork:INTERNAL=[/home/mikkel/RobWork/RobWork/cmake/..][/home/mikkel/RobWork/RobWork/libs/release/libsdurw_lua_s.a;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_assembly_lua_s.a;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_control_lua_s.a;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_pathoptimization_lua_s.a;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_pathplanners_lua_s.a;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_proximitystrategies_lua_s.a;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_simulation_lua_s.a;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_task_lua_s.a;/usr/lib/x86_64-linux-gnu/liblua5.3.so;/usr/lib/x86_64-linux-gnu/libm.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_algorithms.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_pathplanners.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_pathoptimization.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_simulation.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_opengl.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_assembly.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_task.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_calibration.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_csg.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_control.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_proximitystrategies.so;/home/mikkel/RobWork/RobWork/libs/release/libyaobi.so;/home/mikkel/RobWork/RobWork/libs/release/libpqp.so;/home/mikkel/RobWork/RobWork/libs/release/libfcl.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw.so;/usr/lib/x86_64-linux-gnu/libGL.so;/usr/lib/x86_64-linux-gnu/libGLU.so;/usr/lib/x86_64-linux-gnu/libxerces-c.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_assimp.so;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so;/usr/lib/x86_64-linux-gnu/libboost_regex.so;/usr/lib/x86_64-linux-gnu/libboost_serialization.so;/usr/lib/x86_64-linux-gnu/libboost_system.so;/usr/lib/x86_64-linux-gnu/libboost_thread.so;/usr/lib/x86_64-linux-gnu/libboost_program_options.so;/usr/lib/x86_64-linux-gnu/libboost_chrono.so;/usr/lib/x86_64-linux-gnu/libboost_date_time.so;/usr/lib/x86_64-linux-gnu/libboost_atomic.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libboost_test_exec_monitor.a;/usr/lib/x86_64-linux-gnu/libboost_unit_test_framework.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_unzip.a;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so][/usr/include/eigen3;/home/mikkel/RobWork/RobWork/cmake/../src;/usr/include;/home/mikkel/RobWork/RobWork/cmake/../ext/rwyaobi;/home/mikkel/RobWork/RobWork/cmake/../ext/rwpqp;/usr/include/lua5.3;/home/mikkel/RobWork/RobWork/cmake/../ext/qhull/src;/home/mikkel/RobWork/RobWork/cmake/../ext/csgjs/src;/home/mikkel/RobWork/RobWork/cmake/../ext/assimp/include][/usr/include/eigen3;/home/mikkel/RobWork/RobWork/cmake/../src;/usr/include;/home/mikkel/RobWork/RobWork/cmake/../ext/rwyaobi;/home/mikkel/RobWork/RobWork/cmake/../ext/rwpqp;/usr/include/lua5.3;/home/mikkel/RobWork/RobWork/cmake/../ext/qhull/src;/home/mikkel/RobWork/RobWork/cmake/../ext/csgjs/src;/home/mikkel/RobWork/RobWork/cmake/../ext/assimp/include][/home/mikkel/RobWork/RobWork/cmake/../libs/release;/usr/lib/x86_64-linux-gnu][v()]
+FIND_PACKAGE_MESSAGE_DETAILS_RobWork:INTERNAL=[/home/mikkel/RobWork/RobWork/cmake/..][/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_lua_s.a;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_assembly_lua_s.a;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_control_lua_s.a;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_pathoptimization_lua_s.a;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_pathplanners_lua_s.a;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_proximitystrategies_lua_s.a;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_simulation_lua_s.a;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_task_lua_s.a;/usr/lib/x86_64-linux-gnu/liblua5.3.so;/usr/lib/x86_64-linux-gnu/libm.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_algorithms.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_pathplanners.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_pathoptimization.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_simulation.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_opengl.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_assembly.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_task.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_calibration.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_csg.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_control.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_proximitystrategies.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libyaobi.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libpqp.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libfcl.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw.so;/usr/lib/x86_64-linux-gnu/libOpenGL.so;/usr/lib/x86_64-linux-gnu/libGLX.so;/usr/lib/x86_64-linux-gnu/libGLU.so;/usr/lib/x86_64-linux-gnu/libxerces-c.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_assimp.so;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so;/usr/lib/x86_64-linux-gnu/libboost_regex.so;/usr/lib/x86_64-linux-gnu/libboost_serialization.so;/usr/lib/x86_64-linux-gnu/libboost_system.so;/usr/lib/x86_64-linux-gnu/libboost_thread.so;-lpthread;/usr/lib/x86_64-linux-gnu/libboost_program_options.so;/usr/lib/x86_64-linux-gnu/libboost_chrono.so;/usr/lib/x86_64-linux-gnu/libboost_date_time.so;/usr/lib/x86_64-linux-gnu/libboost_atomic.so;/usr/lib/x86_64-linux-gnu/libboost_test_exec_monitor.a;/usr/lib/x86_64-linux-gnu/libboost_unit_test_framework.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_unzip.a;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so][/usr/include/eigen3;/home/mikkel/RobWork/RobWork/cmake/../src;/usr/include;/home/mikkel/RobWork/RobWork/cmake/../ext/rwyaobi;/home/mikkel/RobWork/RobWork/cmake/../ext/rwpqp;/usr/include/lua5.3;/home/mikkel/RobWork/RobWork/cmake/../ext/qhull/src;/home/mikkel/RobWork/RobWork/cmake/../ext/csgjs/src;/home/mikkel/RobWork/RobWork/cmake/../ext/assimp/include][/usr/include/eigen3;/home/mikkel/RobWork/RobWork/cmake/../src;/usr/include;/home/mikkel/RobWork/RobWork/cmake/../ext/rwyaobi;/home/mikkel/RobWork/RobWork/cmake/../ext/rwpqp;/usr/include/lua5.3;/home/mikkel/RobWork/RobWork/cmake/../ext/qhull/src;/home/mikkel/RobWork/RobWork/cmake/../ext/csgjs/src;/home/mikkel/RobWork/RobWork/cmake/../ext/assimp/include][/home/mikkel/RobWork/RobWork/cmake/../libs/release;/usr/lib/x86_64-linux-gnu][v()]
 //Details about finding RobWorkStudio
-FIND_PACKAGE_MESSAGE_DETAILS_RobWorkStudio:INTERNAL=[/home/mikkel/RobWork/RobWorkStudio//cmake/..][/usr/lib/x86_64-linux-gnu/libpython3.6m.so;sdurws_lua_s;sdurws_luaeditor;sdurws;qtpropertybrowser;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_lua_s.a;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_assembly_lua_s.a;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_control_lua_s.a;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_pathoptimization_lua_s.a;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_pathplanners_lua_s.a;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_proximitystrategies_lua_s.a;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_simulation_lua_s.a;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_task_lua_s.a;/usr/lib/x86_64-linux-gnu/liblua5.3.so;/usr/lib/x86_64-linux-gnu/libm.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_algorithms.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_pathplanners.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_pathoptimization.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_simulation.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_opengl.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_assembly.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_task.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_calibration.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_csg.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_control.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_proximitystrategies.so;/home/mikkel/RobWork/RobWork/libs/release/libyaobi.so;/home/mikkel/RobWork/RobWork/libs/release/libpqp.so;/home/mikkel/RobWork/RobWork/libs/release/libfcl.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw.so;/usr/lib/x86_64-linux-gnu/libGL.so;/usr/lib/x86_64-linux-gnu/libGLU.so;/usr/lib/x86_64-linux-gnu/libxerces-c.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_assimp.so;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so;/usr/lib/x86_64-linux-gnu/libboost_regex.so;/usr/lib/x86_64-linux-gnu/libboost_serialization.so;/usr/lib/x86_64-linux-gnu/libboost_system.so;/usr/lib/x86_64-linux-gnu/libboost_thread.so;/usr/lib/x86_64-linux-gnu/libboost_program_options.so;/usr/lib/x86_64-linux-gnu/libboost_chrono.so;/usr/lib/x86_64-linux-gnu/libboost_date_time.so;/usr/lib/x86_64-linux-gnu/libboost_atomic.so;/usr/lib/x86_64-linux-gnu/libpthread.so;/usr/lib/x86_64-linux-gnu/libboost_test_exec_monitor.a;/usr/lib/x86_64-linux-gnu/libboost_unit_test_framework.so;/home/mikkel/RobWork/RobWork/libs/release/libsdurw_unzip.a;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;Qt5::Core;Qt5::Gui;Qt5::Widgets;Qt5::OpenGL;/usr/lib/x86_64-linux-gnu/libboost_program_options.so;/usr/lib/x86_64-linux-gnu/libGL.so;/usr/lib/x86_64-linux-gnu/libGLU.so;sdurws_jog;sdurws_log;sdurws_playback;sdurws_propertyview;sdurws_treeview;sdurws_planning;sdurws_sensors;sdurws_workcelleditorplugin;sdurws_luapl][/home/mikkel/RobWork/RobWorkStudio//cmake/../src/;/usr/include;/usr/include/eigen3;/home/mikkel/RobWork/RobWork/cmake/../src;/home/mikkel/RobWork/RobWork/cmake/../ext/rwyaobi;/home/mikkel/RobWork/RobWork/cmake/../ext/rwpqp;/usr/include/lua5.3;/home/mikkel/RobWork/RobWork/cmake/../ext/qhull/src;/home/mikkel/RobWork/RobWork/cmake/../ext/csgjs/src;/home/mikkel/RobWork/RobWork/cmake/../ext/assimp/include;/home/mikkel/RobWork/RobWorkStudio//cmake/../ext/qtpropertybrowser/src/][/usr/lib/x86_64-linux-gnu;/home/mikkel/RobWork/RobWork/cmake/../libs/release;/home/mikkel/RobWork/RobWorkStudio//cmake/../libs/release/][v()]
+FIND_PACKAGE_MESSAGE_DETAILS_RobWorkStudio:INTERNAL=[/home/mikkel/RobWork/RobWorkStudio//cmake/..][/usr/lib/x86_64-linux-gnu/libpython3.7m.so;sdurws_lua_s;sdurws_luaeditor;sdurws;qtpropertybrowser;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_lua_s.a;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_assembly_lua_s.a;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_control_lua_s.a;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_pathoptimization_lua_s.a;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_pathplanners_lua_s.a;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_proximitystrategies_lua_s.a;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_simulation_lua_s.a;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_task_lua_s.a;/usr/lib/x86_64-linux-gnu/liblua5.3.so;/usr/lib/x86_64-linux-gnu/libm.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_algorithms.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_pathplanners.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_pathoptimization.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_simulation.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_opengl.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_assembly.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_task.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_calibration.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_csg.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_control.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_proximitystrategies.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libyaobi.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libpqp.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libfcl.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw.so;/usr/lib/x86_64-linux-gnu/libOpenGL.so;/usr/lib/x86_64-linux-gnu/libGLX.so;/usr/lib/x86_64-linux-gnu/libGLU.so;/usr/lib/x86_64-linux-gnu/libxerces-c.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_assimp.so;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so;/usr/lib/x86_64-linux-gnu/libboost_regex.so;/usr/lib/x86_64-linux-gnu/libboost_serialization.so;/usr/lib/x86_64-linux-gnu/libboost_system.so;/usr/lib/x86_64-linux-gnu/libboost_thread.so;-lpthread;/usr/lib/x86_64-linux-gnu/libboost_program_options.so;/usr/lib/x86_64-linux-gnu/libboost_chrono.so;/usr/lib/x86_64-linux-gnu/libboost_date_time.so;/usr/lib/x86_64-linux-gnu/libboost_atomic.so;/usr/lib/x86_64-linux-gnu/libboost_test_exec_monitor.a;/usr/lib/x86_64-linux-gnu/libboost_unit_test_framework.so;/home/mikkel/RobWork/RobWork/cmake/../libs/release/libsdurw_unzip.a;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.so;Qt5::Core;Qt5::Gui;Qt5::Widgets;Qt5::OpenGL;/usr/lib/x86_64-linux-gnu/libboost_program_options.so;/usr/lib/x86_64-linux-gnu/libOpenGL.so;/usr/lib/x86_64-linux-gnu/libGLX.so;/usr/lib/x86_64-linux-gnu/libGLU.so;sdurws_jog;sdurws_log;sdurws_playback;sdurws_propertyview;sdurws_treeview;sdurws_planning;sdurws_sensors;sdurws_workcelleditorplugin;sdurws_luapl][/home/mikkel/RobWork/RobWorkStudio//cmake/../src/;/usr/include;/usr/include/eigen3;/home/mikkel/RobWork/RobWork/cmake/../src;/home/mikkel/RobWork/RobWork/cmake/../ext/rwyaobi;/home/mikkel/RobWork/RobWork/cmake/../ext/rwpqp;/usr/include/lua5.3;/home/mikkel/RobWork/RobWork/cmake/../ext/qhull/src;/home/mikkel/RobWork/RobWork/cmake/../ext/csgjs/src;/home/mikkel/RobWork/RobWork/cmake/../ext/assimp/include;/home/mikkel/RobWork/RobWorkStudio//cmake/../ext/qtpropertybrowser/src/][/usr/lib/x86_64-linux-gnu;/home/mikkel/RobWork/RobWork/cmake/../libs/release;/home/mikkel/RobWork/RobWorkStudio//cmake/../libs/release/][v()]
 //ADVANCED property for variable: OPENGL_EGL_INCLUDE_DIR
 OPENGL_EGL_INCLUDE_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: OPENGL_GLX_INCLUDE_DIR

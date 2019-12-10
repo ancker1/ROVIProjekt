@@ -21,6 +21,11 @@
 	<Frame name="GraspTCP" refframe="UR-6-85-5-A.TCP" type="Fixed">
 		<RPY>0 0 0</RPY> <Pos>0 0 0.15</Pos>
 	</Frame>
+
+	<Frame name="placeArea" refframe="Table" type="Movable">
+		<RPY>-90 0 180</RPY> <Pos>0.30 -0.50 0.150</Pos>
+	</Frame>
+
 <!--
 	<Frame name="Bin" refframe="Table"  type="Movable" daf="true" >
 		<RPY> 0 0 0 </RPY> <Pos> 0 0 0.002 </Pos>
@@ -28,18 +33,26 @@
          <Polytope file="table/bin" />
      </Drawable>
 	</Frame>
--->
+
+	<Frame name="Cylinder" refframe="Table"  type="Movable" daf="true" >
+     <RPY> -90 0 180 </RPY> <Pos> 0 0.45 0.150 </Pos>
+     <Drawable name="Cylinder" refframe="Cylinder">
+         <Polytope file="parts/cylinder_stl" />
+     </Drawable>
+</Frame>
+
+
 	<Frame name="Ball" refframe="Table"  type="Movable" daf="true" >
 		<RPY> 0 0 0 </RPY> <Pos> 0 0.45 0.175 </Pos>
     <Drawable name="Ball" refframe="Ball">
         <Polytope file="parts/ball" />
     </Drawable>
 	</Frame>
-<!--
+-->
 	<Frame name="Duck" refframe="Table"  type="Movable" daf="true" >
-		<RPY> 90 0 0 </RPY> <Pos> 0 0.45 0.11 </Pos>
+		<RPY> 180 0 90 </RPY> <Pos> 0 0.45 0.188 </Pos>
     <Drawable name="Duck" refframe="Duck">
-        <Polytope file="parts/duck" />
+        <Polytope file="parts/dot_duck" />
     </Drawable>
 	</Frame>
 <!--
@@ -64,12 +77,7 @@
      </Drawable>
 </Frame>
 
-	<Frame name="Cylinder" refframe="Table"  type="Movable" daf="true" >
-     <RPY> -90 0 180 </RPY> <Pos> 0 0.45 0.150 </Pos>
-     <Drawable name="Cylinder" refframe="Cylinder">
-         <Polytope file="parts/cylinder_stl" />
-     </Drawable>
-</Frame>
+
 
 <Frame name="Smiley" refframe="Table"  type="Movable" daf="true" >
 	<RPY> -90 0 180 </RPY> <Pos> 0 0.45 0.150 </Pos>
@@ -80,7 +88,7 @@
 -->
 
 <Frame name="GraspTarget" refframe="WORLD" type="Movable">
-	<RPY>0 0 0</RPY> <Pos>0 0 0</Pos>
+	<RPY>0 0 0</RPY> <Pos>0 0 0</Pos> <!-- <RPY>-90 0 90</RPY> <Pos>0 0.45 0.050</Pos> -->
 </Frame>
 
 <!-- Cameras -->

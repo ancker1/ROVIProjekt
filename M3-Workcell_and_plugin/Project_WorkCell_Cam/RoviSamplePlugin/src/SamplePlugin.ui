@@ -63,6 +63,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="_btn_genTestImgDuck">
+        <property name="text">
+         <string>Generate M3 test image duck</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="_label">
         <property name="text">
          <string>Label</string>

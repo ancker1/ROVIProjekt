@@ -16,7 +16,7 @@ SamplePlugin::SamplePlugin():
 	connect(_btn1    ,SIGNAL(pressed()), this, SLOT(btnPressed()) );
 	connect(_spinBox  ,SIGNAL(valueChanged(int)), this, SLOT(btnPressed()) );
     connect(_btn_genTestImgBall    ,SIGNAL(pressed()), this, SLOT(btnPressed()) );
-
+    connect(_btn_genTestImgDuck    ,SIGNAL(pressed()), this, SLOT(btnPressed()) );
 	_framegrabber = NULL;
 	
 	_cameras = {"Camera_Right", "Camera_Left"};
@@ -170,6 +170,9 @@ void SamplePlugin::btnPressed() {
     else if ( obj==_btn_genTestImgBall ){
         generateTestImagesBall();
     }
+    else if ( obj==_btn_genTestImgDuck){
+        generateTestImagesDuck_with_rotation();
+    }
 	
 	
 }
@@ -311,6 +314,99 @@ void SamplePlugin::generateTestImagesBall() {
         posBall = ball_test_positions[i];
         rw::math::Transform3D<> newBallTrans (posBall, ball->getTransform(_state).R());
         ball->moveTo(newBallTrans, _state);
+        getRobWorkStudio()->setState(_state);
+
+        getImageNamed(std::to_string(i)); // Saves both right and left image
+    }
+
+}
+
+void SamplePlugin::generateTestImagesDuck_with_rotation() {
+    std::ifstream myFilePos, myFileRot;
+    myFilePos.open("/home/mikkel/Desktop/Project_WorkCell_Cam/performEval_duck_pos.txt");
+    myFileRot.open("/home/mikkel/Desktop/Project_WorkCell_Cam/performEval_duck_rot.txt");
+
+    rw::math::Vector3D<> temp_pos;
+    rw::math::RPY<> temp_rot; //rw::math::RPY<> rotTarget_up(roll, rw::math::Deg2Rad*10, 0);(roll, rw::math::Deg2Rad*10, 0);
+    std::vector<rw::math::Vector3D<>> test_positions;
+    std::vector<rw::math::RPY<>> test_rotations;
+
+    std::string line;
+    std::string temp;
+    unsigned int coordinate = 0;
+    // Reading test positions
+    while(myFilePos >> line)// read lines
+    {
+        temp = "";
+        coordinate = 0;
+        for(unsigned int i = 0; i < line.size(); i++)
+        {
+
+            if(line[i] != ',')
+            {
+                temp += line[i];
+            }
+            else
+            {
+                if(coordinate == 0)
+                    temp_pos[0] = std::stof(temp); // string to float
+                else if(coordinate == 1)
+                    temp_pos[1] = std::stof(temp); // string to float
+                else
+                    temp_pos[2] = std::stof(temp); // string to float
+                coordinate++;
+                temp = "";
+            }
+        }
+        test_positions.push_back(temp_pos);
+    }
+
+    // Reading test positions
+    coordinate = 0;
+    line.clear();
+    temp.clear();
+    while(myFileRot >> line)// read lines
+    {
+        temp = "";
+        coordinate = 0;
+        for(unsigned int i = 0; i < line.size(); i++)
+        {
+
+            if(line[i] != ',')
+            {
+                temp += line[i];
+            }
+            else
+            {
+                if(coordinate == 0)
+                    temp_rot[0] = std::stof(temp); // string to float
+                else if(coordinate == 1)
+                    temp_rot[1] = std::stof(temp); // string to float
+                else
+                    temp_rot[2] = std::stof(temp); // string to float
+                coordinate++;
+                temp = "";
+            }
+        }
+        test_rotations.push_back(temp_rot);
+    }
+
+    myFilePos.close();
+    myFileRot.close();
+
+    // Moving the object to test translation and take pictures
+    for(unsigned int i = 0; i < test_positions.size(); i++)
+    {
+        rw::kinematics::MovableFrame *duck = _wc->findFrame<rw::kinematics::MovableFrame>("Duck");
+        rw::math::Vector3D<> pos;
+        rw::math::RPY<> rot;
+        pos = test_positions[i];
+        rot = test_rotations[i];
+        rot[0] = test_rotations[i][1]*rw::math::Deg2Rad;
+        rot[1] = test_rotations[i][0]*rw::math::Deg2Rad;
+        rot[2] = test_rotations[i][2]*rw::math::Deg2Rad;
+        rw::math::Transform3D<> newTrans (pos, duck->getTransform(_state).R()*rot.toRotation3D());
+        duck->moveTo(newTrans, _state);
         getRobWorkStudio()->setState(_state);
 
         getImageNamed(std::to_string(i)); // Saves both right and left image

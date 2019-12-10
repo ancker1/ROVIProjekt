@@ -6,18 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/home/mikkel/Desktop/Project_WorkCell_Cam/RoviSamplePlugin/build/qrc_resources.cpp
-
-/home/mikkel/Desktop/Project_WorkCell_Cam/RoviSamplePlugin/build/src/moc_SamplePlugin.cpp
-../../src/SamplePlugin.hpp
-/home/mikkel/Desktop/Project_WorkCell_Cam/RoviSamplePlugin/src/SamplePlugin.hpp
-QtCore/qbytearray.h
--
-QtCore/qmetatype.h
--
-QtCore/qplugin.h
--
-
 /home/mikkel/Desktop/Project_WorkCell_Cam/RoviSamplePlugin/src/SamplePlugin.cpp
 SamplePlugin.hpp
 /home/mikkel/Desktop/Project_WorkCell_Cam/RoviSamplePlugin/src/SamplePlugin.hpp
@@ -4259,12 +4247,16 @@ rw/common/Log.hpp
 /usr/include/eigen3/Eigen/Cholesky
 Core
 /usr/include/eigen3/Eigen/Core
+Jacobi
+/usr/include/eigen3/Eigen/Jacobi
 src/Core/util/DisableStupidWarnings.h
 /usr/include/eigen3/Eigen/src/Core/util/DisableStupidWarnings.h
 src/Cholesky/LLT.h
 /usr/include/eigen3/Eigen/src/Cholesky/LLT.h
 src/Cholesky/LDLT.h
 /usr/include/eigen3/Eigen/src/Cholesky/LDLT.h
+mkl_lapacke.h
+/usr/include/eigen3/Eigen/mkl_lapacke.h
 src/misc/lapacke.h
 /usr/include/eigen3/Eigen/src/misc/lapacke.h
 src/Cholesky/LLT_LAPACKE.h
@@ -4275,7 +4267,7 @@ src/Core/util/ReenableStupidWarnings.h
 /usr/include/eigen3/Eigen/Core
 src/Core/util/DisableStupidWarnings.h
 /usr/include/eigen3/Eigen/src/Core/util/DisableStupidWarnings.h
-math_functions.hpp
+cuda_runtime.h
 -
 new
 -
@@ -4395,6 +4387,8 @@ src/Core/arch/AVX/Complex.h
 /usr/include/eigen3/Eigen/src/Core/arch/AVX/Complex.h
 src/Core/arch/AVX/TypeCasting.h
 /usr/include/eigen3/Eigen/src/Core/arch/AVX/TypeCasting.h
+src/Core/arch/SSE/TypeCasting.h
+/usr/include/eigen3/Eigen/src/Core/arch/SSE/TypeCasting.h
 src/Core/arch/SSE/PacketMath.h
 /usr/include/eigen3/Eigen/src/Core/arch/SSE/PacketMath.h
 src/Core/arch/SSE/MathFunctions.h
@@ -4679,6 +4673,8 @@ src/Eigenvalues/GeneralizedEigenSolver.h
 /usr/include/eigen3/Eigen/src/Eigenvalues/GeneralizedEigenSolver.h
 src/Eigenvalues/MatrixBaseEigenvalues.h
 /usr/include/eigen3/Eigen/src/Eigenvalues/MatrixBaseEigenvalues.h
+mkl_lapacke.h
+/usr/include/eigen3/Eigen/mkl_lapacke.h
 src/misc/lapacke.h
 /usr/include/eigen3/Eigen/src/misc/lapacke.h
 src/Eigenvalues/RealSchur_LAPACKE.h
@@ -4799,6 +4795,8 @@ src/LU/FullPivLU.h
 /usr/include/eigen3/Eigen/src/LU/FullPivLU.h
 src/LU/PartialPivLU.h
 /usr/include/eigen3/Eigen/src/LU/PartialPivLU.h
+mkl_lapacke.h
+/usr/include/eigen3/Eigen/mkl_lapacke.h
 src/misc/lapacke.h
 /usr/include/eigen3/Eigen/src/misc/lapacke.h
 src/LU/PartialPivLU_LAPACKE.h
@@ -4843,6 +4841,8 @@ src/QR/ColPivHouseholderQR.h
 /usr/include/eigen3/Eigen/src/QR/ColPivHouseholderQR.h
 src/QR/CompleteOrthogonalDecomposition.h
 /usr/include/eigen3/Eigen/src/QR/CompleteOrthogonalDecomposition.h
+mkl_lapacke.h
+/usr/include/eigen3/Eigen/mkl_lapacke.h
 src/misc/lapacke.h
 /usr/include/eigen3/Eigen/src/misc/lapacke.h
 src/QR/HouseholderQR_LAPACKE.h
@@ -4871,6 +4871,8 @@ src/SVD/JacobiSVD.h
 /usr/include/eigen3/Eigen/src/SVD/JacobiSVD.h
 src/SVD/BDCSVD.h
 /usr/include/eigen3/Eigen/src/SVD/BDCSVD.h
+mkl_lapacke.h
+/usr/include/eigen3/Eigen/mkl_lapacke.h
 src/misc/lapacke.h
 /usr/include/eigen3/Eigen/src/misc/lapacke.h
 src/SVD/JacobiSVD_LAPACKE.h
@@ -5672,16 +5674,6 @@ qtimer.h
 qvariant.h
 /usr/include/x86_64-linux-gnu/qt5/QtCore/qvariant.h
 
-/usr/include/x86_64-linux-gnu/qt5/QtCore/qabstractitemmodel.h
-QtCore/qvariant.h
--
-QtCore/qobject.h
--
-QtCore/qhash.h
--
-QtCore/qvector.h
--
-
 /usr/include/x86_64-linux-gnu/qt5/QtCore/qalgorithms.h
 QtCore/qglobal.h
 -
@@ -5715,7 +5707,7 @@ QtCore/qgenericatomic.h
 -
 
 /usr/include/x86_64-linux-gnu/qt5/QtCore/qbasicatomic.h
-QtCore/qatomic.h
+QtCore/qglobal.h
 -
 QtCore/qatomic_bootstrap.h
 -
@@ -5746,8 +5738,6 @@ stdarg.h
 string
 -
 iterator
--
-QtCore/qstring.h
 -
 
 /usr/include/x86_64-linux-gnu/qt5/QtCore/qbytearraylist.h
@@ -5881,6 +5871,8 @@ cstddef
 -
 utility
 -
+assert.h
+-
 stddef.h
 -
 QtCore/qconfig-bootstrapped.h
@@ -5939,7 +5931,7 @@ algorithm
 -
 
 /usr/include/x86_64-linux-gnu/qt5/QtCore/qhashfunctions.h
-QtCore/qchar.h
+QtCore/qstring.h
 -
 QtCore/qpair.h
 -
@@ -5958,36 +5950,8 @@ QtCore/qscopedpointer.h
 QtCore/qstring.h
 -
 
-/usr/include/x86_64-linux-gnu/qt5/QtCore/qitemselectionmodel.h
-QtCore/qglobal.h
--
-QtCore/qset.h
--
-QtCore/qvector.h
--
-QtCore/qlist.h
--
-QtCore/qabstractitemmodel.h
--
-
 /usr/include/x86_64-linux-gnu/qt5/QtCore/qiterator.h
 QtCore/qglobal.h
--
-
-/usr/include/x86_64-linux-gnu/qt5/QtCore/qjsonobject.h
-QtCore/qjsonvalue.h
--
-QtCore/qiterator.h
--
-QtCore/qpair.h
--
-initializer_list
--
-
-/usr/include/x86_64-linux-gnu/qt5/QtCore/qjsonvalue.h
-QtCore/qglobal.h
--
-QtCore/qstring.h
 -
 
 /usr/include/x86_64-linux-gnu/qt5/QtCore/qline.h
@@ -6140,22 +6104,8 @@ QtCore/qnamespace.h
 QtCore/qglobal.h
 -
 
-/usr/include/x86_64-linux-gnu/qt5/QtCore/qplugin.h
-QtCore/qobject.h
--
-QtCore/qpointer.h
--
-QtCore/qjsonobject.h
--
-
 /usr/include/x86_64-linux-gnu/qt5/QtCore/qpoint.h
 QtCore/qnamespace.h
--
-
-/usr/include/x86_64-linux-gnu/qt5/QtCore/qpointer.h
-QtCore/qsharedpointer.h
--
-QtCore/qtypeinfo.h
 -
 
 /usr/include/x86_64-linux-gnu/qt5/QtCore/qprocessordetection.h
@@ -6251,6 +6201,12 @@ QtCore/qrefcount.h
 -
 QtCore/qnamespace.h
 -
+QtCore/qstringliteral.h
+-
+QtCore/qstringalgorithms.h
+-
+QtCore/qstringview.h
+-
 string
 -
 iterator
@@ -6258,6 +6214,10 @@ iterator
 stdarg.h
 -
 QtCore/qstringbuilder.h
+-
+
+/usr/include/x86_64-linux-gnu/qt5/QtCore/qstringalgorithms.h
+QtCore/qnamespace.h
 -
 
 /usr/include/x86_64-linux-gnu/qt5/QtCore/qstringbuilder.h
@@ -6280,8 +6240,24 @@ QtCore/qstring.h
 QtCore/qstringmatcher.h
 -
 
+/usr/include/x86_64-linux-gnu/qt5/QtCore/qstringliteral.h
+QtCore/qarraydata.h
+-
+
 /usr/include/x86_64-linux-gnu/qt5/QtCore/qstringmatcher.h
 QtCore/qstring.h
+-
+
+/usr/include/x86_64-linux-gnu/qt5/QtCore/qstringview.h
+QtCore/qchar.h
+-
+QtCore/qbytearray.h
+-
+QtCore/qstringliteral.h
+-
+QtCore/qstringalgorithms.h
+-
+string
 -
 
 /usr/include/x86_64-linux-gnu/qt5/QtCore/qsysinfo.h
@@ -6374,6 +6350,8 @@ QtCore/qstringlist.h
 QtCore/qobject.h
 -
 QtCore/qbytearraylist.h
+-
+variant
 -
 
 /usr/include/x86_64-linux-gnu/qt5/QtCore/qvarlengtharray.h
@@ -6776,17 +6754,9 @@ qaction.h
 qapplication.h
 /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qapplication.h
 
-/usr/include/x86_64-linux-gnu/qt5/QtWidgets/QButtonGroup
-qbuttongroup.h
-/usr/include/x86_64-linux-gnu/qt5/QtWidgets/qbuttongroup.h
-
 /usr/include/x86_64-linux-gnu/qt5/QtWidgets/QDockWidget
 qdockwidget.h
 /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qdockwidget.h
-
-/usr/include/x86_64-linux-gnu/qt5/QtWidgets/QHeaderView
-qheaderview.h
-/usr/include/x86_64-linux-gnu/qt5/QtWidgets/qheaderview.h
 
 /usr/include/x86_64-linux-gnu/qt5/QtWidgets/QLabel
 qlabel.h
@@ -6824,32 +6794,6 @@ QtGui/qicon.h
 QtGui/qkeysequence.h
 -
 QtWidgets/qwidget.h
--
-
-/usr/include/x86_64-linux-gnu/qt5/QtWidgets/qabstractitemdelegate.h
-QtWidgets/qtwidgetsglobal.h
--
-QtCore/qobject.h
--
-QtWidgets/qstyleoption.h
--
-
-/usr/include/x86_64-linux-gnu/qt5/QtWidgets/qabstractitemview.h
-QtWidgets/qtwidgetsglobal.h
--
-QtWidgets/qabstractscrollarea.h
--
-QtCore/qabstractitemmodel.h
--
-QtCore/qitemselectionmodel.h
--
-QtWidgets/qabstractitemdelegate.h
--
-
-/usr/include/x86_64-linux-gnu/qt5/QtWidgets/qabstractscrollarea.h
-QtWidgets/qtwidgetsglobal.h
--
-QtWidgets/qframe.h
 -
 
 /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qabstractslider.h
@@ -6916,12 +6860,6 @@ QtWidgets/qwidget.h
 limits.h
 -
 
-/usr/include/x86_64-linux-gnu/qt5/QtWidgets/qbuttongroup.h
-QtWidgets/qtwidgetsglobal.h
--
-QtCore/qobject.h
--
-
 /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qdesktopwidget.h
 QtWidgets/qtwidgetsglobal.h
 -
@@ -6948,12 +6886,6 @@ QtWidgets/qlayout.h
 QtWidgets/qwidget.h
 -
 limits.h
--
-
-/usr/include/x86_64-linux-gnu/qt5/QtWidgets/qheaderview.h
-QtWidgets/qtwidgetsglobal.h
--
-QtWidgets/qabstractitemview.h
 -
 
 /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qlabel.h
@@ -7006,12 +6938,6 @@ QtWidgets/qtwidgetsglobal.h
 QtWidgets/qabstractbutton.h
 -
 
-/usr/include/x86_64-linux-gnu/qt5/QtWidgets/qrubberband.h
-QtWidgets/qtwidgetsglobal.h
--
-QtWidgets/qwidget.h
--
-
 /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qsizepolicy.h
 QtWidgets/qtwidgetsglobal.h
 -
@@ -7030,58 +6956,6 @@ QtWidgets/qabstractslider.h
 QtWidgets/qtwidgetsglobal.h
 -
 QtWidgets/qabstractspinbox.h
--
-
-/usr/include/x86_64-linux-gnu/qt5/QtWidgets/qstyle.h
-QtWidgets/qtwidgetsglobal.h
--
-QtCore/qobject.h
--
-QtCore/qrect.h
--
-QtCore/qsize.h
--
-QtGui/qicon.h
--
-QtGui/qpixmap.h
--
-QtGui/qpalette.h
--
-QtWidgets/qsizepolicy.h
--
-
-/usr/include/x86_64-linux-gnu/qt5/QtWidgets/qstyleoption.h
-QtWidgets/qtwidgetsglobal.h
--
-QtCore/qlocale.h
--
-QtCore/qvariant.h
--
-QtWidgets/qabstractspinbox.h
--
-QtGui/qicon.h
--
-QtGui/qmatrix.h
--
-QtWidgets/qslider.h
--
-QtWidgets/qstyle.h
--
-QtWidgets/qtabbar.h
--
-QtWidgets/qtabwidget.h
--
-QtWidgets/qrubberband.h
--
-QtWidgets/qframe.h
--
-QtCore/qabstractitemmodel.h
--
-
-/usr/include/x86_64-linux-gnu/qt5/QtWidgets/qtabbar.h
-QtWidgets/qtwidgetsglobal.h
--
-QtWidgets/qwidget.h
 -
 
 /usr/include/x86_64-linux-gnu/qt5/QtWidgets/qtabwidget.h
@@ -8436,44 +8310,6 @@ opencv2/videostab/global_motion.hpp
 opencv2/videostab/log.hpp
 /usr/local/include/opencv2/videostab/opencv2/videostab/log.hpp
 
-/usr/local/include/opencv2/viz.hpp
-opencv2/viz/types.hpp
--
-opencv2/viz/widgets.hpp
--
-opencv2/viz/viz3d.hpp
--
-opencv2/viz/vizcore.hpp
--
-
-/usr/local/include/opencv2/viz/types.hpp
-string
--
-opencv2/core.hpp
--
-opencv2/core/affine.hpp
--
-
-/usr/local/include/opencv2/viz/viz3d.hpp
-opencv2/core.hpp
--
-opencv2/viz/types.hpp
--
-opencv2/viz/widgets.hpp
--
-
-/usr/local/include/opencv2/viz/vizcore.hpp
-opencv2/viz/types.hpp
--
-opencv2/viz/widgets.hpp
--
-opencv2/viz/viz3d.hpp
--
-
-/usr/local/include/opencv2/viz/widgets.hpp
-opencv2/viz/types.hpp
--
-
 /usr/local/include/opencv2/xfeatures2d/cuda.hpp
 opencv2/core/cuda.hpp
 /usr/local/include/opencv2/xfeatures2d/opencv2/core/cuda.hpp
@@ -8481,15 +8317,9 @@ opencv2/core/cuda.hpp
 ui_SamplePlugin.h
 QtCore/QVariant
 -
-QtWidgets/QAction
--
 QtWidgets/QApplication
 -
-QtWidgets/QButtonGroup
--
 QtWidgets/QDockWidget
--
-QtWidgets/QHeaderView
 -
 QtWidgets/QLabel
 -
