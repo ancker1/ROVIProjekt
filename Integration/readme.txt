@@ -9,7 +9,7 @@ $ cd /Project_WorkCell/SamplePluginPA10/build
 $ cmake ..
 $ make
 
-2) Open RobWorkStudio
+2) Open RobWorkStudio while standing in folder: /Project_WorkCell/SamplePluginPA10/libs/Release
 3) Load plugin:
 	/Project_WorkCell/SamplePluginPA10/libs/Release/libRoViPluginPA10.so
 

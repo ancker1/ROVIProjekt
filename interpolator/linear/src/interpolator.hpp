@@ -53,6 +53,27 @@ rw::math::Q getCollisionFreeSolution(rw::models::SerialDevice::Ptr UR6, rw::kine
     return configuration;
 }
 
+rw::math::Q getCollisionFreeSolution(rw::models::SerialDevice::Ptr UR6, rw::kinematics::State state, rw::proximity::CollisionDetector::Ptr detector, std::vector<rw::math::Q> solutions, rw::math::Q prevSolution)
+{
+    rw::math::Q configuration;
+    double dist = std::numeric_limits<double>::max();
+
+    for ( unsigned int i = 0; i < solutions.size(); i++ )
+    {
+        UR6->setQ(solutions[i], state);
+        if ( !detector->inCollision(state, NULL, true) )
+        {
+            double cdist = rw::math::Q(prevSolution - solutions[i]).norm2();
+            if ( cdist < dist )
+            {
+                configuration = solutions[i];
+                dist = cdist;
+            }
+        }
+    }
+    return configuration;
+}
+
 std::tuple<std::vector<rw::math::Transform3D<>>,std::vector<float>> getPointTimes(rw::math::Transform3D<> pickFrame, rw::math::Transform3D<> homeFrame, rw::math::Transform3D<> placeFrame)
 {   // Read/define frames...
     // start point: home
@@ -120,7 +141,7 @@ std::vector<rw::math::Q> mapCartesianToJoint( std::vector<rw::math::Transform3D<
           {
               rw::math::Vector3D<> Pi = P[0].P() + (P[1].P() - P[0].P())*(t - T[0])/(T[1] - T[0]);
               Ps.push_back(Pi);
-              rw::math::EAA<> eaaDiff(P[1].R() * P[0].R().inverse());
+              rw::math::EAA<> eaaDiff(P[1].R() * rw::math::inverse(P[0].R()));
               rw::math::EAA<> eaaChange(eaaDiff.axis(), eaaDiff.angle()*(t - T[0])/(T[1]-T[0]));
               Path.push_back(rw::math::Transform3D<>( Pi, eaaChange.toRotation3D()*P[0].R() ));
           }
@@ -134,7 +155,7 @@ std::vector<rw::math::Q> mapCartesianToJoint( std::vector<rw::math::Transform3D<
               {
                   rw::math::Vector3D<> Pi = P[i-1].P() + (P[i].P() - P[i-1].P())*(t - T[i-1])/(T[i] - T[i-1]);
                   Ps.push_back(Pi);
-                  rw::math::EAA<> eaaDiff(P[i-1].R() * P[i].R().inverse());
+                  rw::math::EAA<> eaaDiff(P[i-1].R() * rw::math::inverse(P[i].R()));
                   rw::math::EAA<> eaaChange(eaaDiff.axis(), eaaDiff.angle()*(t - T[i])/(T[i-1]-T[i]));
                   Path.push_back(rw::math::Transform3D<>( Pi, eaaChange.toRotation3D()*P[i].R() ));
               }
@@ -146,10 +167,10 @@ std::vector<rw::math::Q> mapCartesianToJoint( std::vector<rw::math::Transform3D<
                   rw::math::Vector3D<> Pblend = (v2 - v1)/(4 * tau) * pow(t - T[i] + tau, 2) + v1*(t-T[i]) + X;
                   Ps.push_back(Pblend);
 
-                  rw::math::EAA<> vR1eaa(P[i-1].R() * P[i].R().inverse());
+                  rw::math::EAA<> vR1eaa(P[i-1].R() * rw::math::inverse(P[i].R()));
                   rw::math::Vector3D<> vR1 = rw::math::Vector3D<>(vR1eaa.axis()*vR1eaa.angle() / (T[i-1] - T[i]));
 
-                  rw::math::EAA<> vR2eaa(P[i+1].R() * P[i].R().inverse());
+                  rw::math::EAA<> vR2eaa(P[i+1].R() * rw::math::inverse(P[i].R()));
                   rw::math::Vector3D<> vR2 = rw::math::Vector3D<>(vR2eaa.axis()*vR2eaa.angle() / (T[i+1] - T[i]));
 
                   rw::math::Vector3D <> vBlend = (vR2 - vR1)/(4*tau)*pow(t - T[i] + tau, 2) + vR1*(t-T[i]); // + (X=0)
@@ -169,7 +190,7 @@ std::vector<rw::math::Q> mapCartesianToJoint( std::vector<rw::math::Transform3D<
           {
               rw::math::Vector3D<> Pi = P[P.size()-2].P() + (P[P.size()-1].P() - P[P.size()-2].P())*(t - T[T.size()-2])/(T[T.size()-1] - T[T.size()-2]);
               Ps.push_back(Pi);
-              rw::math::EAA<> eaaDiff(P[P.size()-1].R() * P[P.size()-2].R().inverse());
+              rw::math::EAA<> eaaDiff(P[P.size()-1].R() * rw::math::inverse(P[P.size()-2].R()));
               rw::math::EAA<> eaaChange(eaaDiff.axis(), eaaDiff.angle()*(t - T[T.size()-2])/(T[T.size()-1]-T[T.size()-2]));
               Path.push_back(rw::math::Transform3D<>( Pi, eaaChange.toRotation3D()*P[P.size()-2].R() ));
           }
@@ -231,13 +252,15 @@ std::vector<rw::math::Q> mapCartesianToJoint( std::vector<rw::math::Transform3D<
       std::vector<rw::math::Transform3D<>> xits;
       for ( unsigned int i = 1; i < P.size(); i++ )
       {
+          //std::cout <<  "Pi" <<  P[i] << std::endl;
           for ( float t = T[i-1]; t < T[i]; t += 0.01f )
           {
+
               // Interpolate transforms...
               rw::math::Vector3D<> Pi = P[i-1].P() + (P[i].P() - P[i-1].P())*(t - T[i-1])/(T[i] - T[i-1]);
 
-            rw::math::EAA<> eaaDiff(P[i].R() * rw::math::inverse(P[i-1].R()));
-            rw::math::Vector3D<> vR = rw::math::Vector3D<>(eaaDiff.axis()*eaaDiff.angle() * (t - T[i-1])/(T[i]-T[i-1]));
+              rw::math::EAA<> eaaDiff(P[i].R() * rw::math::inverse(P[i-1].R()));
+              rw::math::Vector3D<> vR = rw::math::Vector3D<>(eaaDiff.axis()*eaaDiff.angle() * (t - T[i-1])/(T[i]-T[i-1]));
               rw::math::EAA<> eaaChange(vR);
 
               xits.push_back(rw::math::Transform3D<>( Pi, eaaChange.toRotation3D()*P[i-1].R() ));
@@ -245,7 +268,13 @@ std::vector<rw::math::Q> mapCartesianToJoint( std::vector<rw::math::Transform3D<
               targetFrame->moveTo(xits.back(), state);
 
               std::vector<rw::math::Q> solutions = interpolator::util::getConfigurations("GraspTarget", "GraspTCP", UR6, wc, state);
-              rw::math::Q configuration = interpolator::util::getCollisionFreeSolution(UR6, state, detector, solutions);
+
+              rw::math::Q configuration;
+              if ( path.size() > 0 )
+                  configuration = interpolator::util::getCollisionFreeSolution(UR6, state, detector, solutions, path.back());
+              else
+                  configuration = interpolator::util::getCollisionFreeSolution(UR6, state, detector, solutions);
+
               path.push_back(configuration);
           }
       }

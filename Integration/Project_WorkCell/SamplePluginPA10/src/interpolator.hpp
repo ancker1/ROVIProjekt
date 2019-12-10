@@ -53,6 +53,27 @@ rw::math::Q getCollisionFreeSolution(rw::models::SerialDevice::Ptr UR6, rw::kine
     return configuration;
 }
 
+rw::math::Q getCollisionFreeSolution(rw::models::SerialDevice::Ptr UR6, rw::kinematics::State state, rw::proximity::CollisionDetector::Ptr detector, std::vector<rw::math::Q> solutions, rw::math::Q prevSolution)
+{
+    rw::math::Q configuration;
+    double dist = std::numeric_limits<double>::max();
+
+    for ( unsigned int i = 0; i < solutions.size(); i++ )
+    {
+        UR6->setQ(solutions[i], state);
+        if ( !detector->inCollision(state, NULL, true) )
+        {
+            double cdist = rw::math::Q(prevSolution - solutions[i]).norm2();
+            if ( cdist < dist )
+            {
+                configuration = solutions[i];
+                dist = cdist;
+            }
+        }
+    }
+    return configuration;
+}
+
 std::tuple<std::vector<rw::math::Transform3D<>>,std::vector<float>> getPointTimes(rw::math::Transform3D<> pickFrame, rw::math::Transform3D<> homeFrame, rw::math::Transform3D<> placeFrame)
 {   // Read/define frames...
     // start point: home
@@ -244,7 +265,14 @@ std::vector<rw::math::Q> mapCartesianToJoint( std::vector<rw::math::Transform3D<
               targetFrame->moveTo(xits.back(), state);
 
               std::vector<rw::math::Q> solutions = interpolator::util::getConfigurations("GraspTarget", "GraspTCP", UR6, wc, state);
-              rw::math::Q configuration = interpolator::util::getCollisionFreeSolution(UR6, state, detector, solutions);
+              //rw::math::Q configuration = interpolator::util::getCollisionFreeSolution(UR6, state, detector, solutions);
+              //path.push_back(configuration);
+              rw::math::Q configuration;
+              if ( path.size() > 0 )
+                  configuration = interpolator::util::getCollisionFreeSolution(UR6, state, detector, solutions, path.back());
+              else
+                  configuration = interpolator::util::getCollisionFreeSolution(UR6, state, detector, solutions);
+
               path.push_back(configuration);
           }
       }

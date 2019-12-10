@@ -55,7 +55,8 @@ void SamplePlugin::open(rw::models::WorkCell* workcell)
     _state = _wc->getDefaultState();
 
     log().info() << workcell->getFilename() << "\n";
-
+    if ( _wc == nullptr )
+        RW_THROW("workcell not found.");
     if (_wc != NULL) {
 	// Add the texture render to this workcell if there is a frame for texture
     rw::kinematics::Frame* textureFrame = _wc->findFrame("MarkerTexture");

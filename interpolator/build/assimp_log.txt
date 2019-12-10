@@ -1,0 +1,12 @@
+Info,  T0: this is my info call
+Info,  T0: Load /home/emil/Desktop/workcell/wsg50/geometry/FingerWeiss50_tip.obj
+Debug, T0: Assimp 3.3.176583636 amd64 gcc shared singlethreaded
+Info,  T0: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T0: Import root directory is '/home/emil/Desktop/workcell/wsg50/geometry/'
+Info,  T0: Entering post processing pipeline
+Debug, T0: Generate spatially-sorted vertex cache
+Debug, T0: JoinVerticesProcess begin
+Debug, T0: Mesh 0 (105,105,105) | Verts in: 2238 out: 697 | ~68.8561%
+Debug, T0: Mesh 1 (958C35B35D1DDCBC1C6392E0A553FFF841F1A56E) | Verts in: 432 out: 162 | ~62.5%
+Info,  T0: JoinVerticesProcess finished | Verts in: 2670 out: 859 | ~67.8%
+Info,  T0: Leaving post processing pipeline

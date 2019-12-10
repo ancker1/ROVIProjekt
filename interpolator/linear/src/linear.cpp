@@ -25,7 +25,9 @@ rw::math::VectorND<N,float> cubicSpline(float t, float ts, float tf, rw::math::V
 int main(int argc, char** argv) {
 
    /**** Define 6 frames for linear interpolator ****/
-    static const std::string wcPath = "../../Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml";
+    //static const std::string wcPath = "../../Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml";
+
+    static const std::string wcPath = "/home/emil/Desktop/workcell/Scene.wc.xml";
     const rw::models::WorkCell::Ptr wc = rw::loaders::WorkCellLoader::Factory::load(wcPath);
     if ( wc.isNull() )
     {
@@ -113,9 +115,9 @@ int main(int argc, char** argv) {
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
         int dur_ms = duration.count();
         LItime.push_back(dur_ms);
-        std::cout << "(" << i <<  ") Linear interpolation execution time: " << dur_ms << " [micros]" << std::endl;
+        //std::cout << "(" << i <<  ") Linear interpolation execution time: " << dur_ms << " [micros]" << std::endl;
     }
-    LIfile.open("LIexetime_micros.txt");
+    LIfile.open("../LIexetime_micros.txt");
     for ( int msTime : LItime )
         LIfile << msTime << std::endl;
 
@@ -129,9 +131,9 @@ int main(int argc, char** argv) {
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
         int dur_ms = duration.count();
         PBtime.push_back(dur_ms);
-        std::cout << "(" << i <<  ") Parabolic blend interpolation execution time: " << dur_ms << " [micros]" << std::endl;
+        //std::cout << "(" << i <<  ") Parabolic blend interpolation execution time: " << dur_ms << " [micros]" << std::endl;
     }
-    PBfile.open("PBexetime_micros.txt");
+    PBfile.open("../PBexetime_micros.txt");
     for ( int msTime : PBtime )
         PBfile << msTime << std::endl;
 
@@ -147,25 +149,26 @@ int main(int argc, char** argv) {
     std::vector<rw::math::Transform3D<>> blendPath = interpolator::parabolicBlend(Tfs, Times);
     std::vector<rw::math::Q> jointPath = std::get<0>(paths);
     std::vector<rw::math::Transform3D<>> cartPath = std::get<1>(paths);
-    std::cout << "Size of blend path: " << blendPath.size() << std::endl;
+    std::cout << "Linear interpolate: " << jointPath.size() << std::endl;
+    std::cout << "Linear interpolate: " << cartPath.size() << std::endl;
     // Write to file
 
-    std::ofstream blendQFile;
-    blendQFile.open("blendQ.txt");
-    std::vector<rw::math::Q> BlendQPath = interpolator::util::mapCartesianToJoint(blendPath, targetFrame, UR6, wc, state, detector);
-    for ( rw::math::Q jointQ : BlendQPath )
-        blendQFile << jointQ[0] << " " << jointQ[1] << " " << jointQ[2] << " " << jointQ[3] << " " << jointQ[4] << " " << jointQ[5] << std::endl;
-    blendQFile.close();
+    //std::ofstream blendQFile;
+    //blendQFile.open("blendQ.txt");
+    //std::vector<rw::math::Q> BlendQPath = interpolator::util::mapCartesianToJoint(blendPath, targetFrame, UR6, wc, state, detector);
+    //for ( rw::math::Q jointQ : BlendQPath )
+    //    blendQFile << jointQ[0] << " " << jointQ[1] << " " << jointQ[2] << " " << jointQ[3] << " " << jointQ[4] << " " << jointQ[5] << std::endl;
+    //blendQFile.close();
 
     std::ofstream tfFile, qFile, blendFile;
-    tfFile.open("LinIntTF.txt");
-    qFile.open("LinIntQ.txt");
-    blendFile.open("blend_tau25.txt");
+    qFile.open("../LinIntQ.txt");
+
     for ( rw::math::Q jointQ : jointPath )
     {
         qFile << jointQ[0] << " " << jointQ[1] << " " << jointQ[2] << " " << jointQ[3] << " " << jointQ[4] << " " << jointQ[5] << std::endl;
     }
     qFile.close();
+    tfFile.open("../LinIntTF.txt");
     for ( rw::math::Transform3D<> tf : cartPath )
     {
         tfFile << tf.R().getRow(0)[0] << " " << tf.R().getRow(0)[1] << " " << tf.R().getRow(0)[2] << " " << tf.P()[0] << std::endl;
@@ -174,6 +177,7 @@ int main(int argc, char** argv) {
         tfFile <<          0          << " " <<          0          << " " <<          0          << " " <<      1    << std::endl;
     }
     tfFile.close();
+    blendFile.open("../blend_tau25.txt");
     for ( rw::math::Transform3D<> tf : blendPath )
     {
         //blendFile << p[0] << " " << p[1] << " " << p[2] << std::endl;

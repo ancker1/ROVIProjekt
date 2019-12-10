@@ -1,17 +1,41 @@
 %% v1
 
 clc;clear;close all;format compact;
-QPath=importdata('/home/emil/Documents/LinIntQ.txt');
-CPath=importdata('/home/emil/Documents/LinIntTF.txt');
+QPath2=importdata('/home/emil/Documents/LinIntQ.txt');
+QPath=importdata('/home/emil/Dropbox/UNI/MSc/ROVIProjekt/ROVIProjekt/interpolator/LinIntQ.txt');
 
-blendData=importdata('/home/emil/Documents/blend.txt');
+CPath=importdata('/home/emil/Dropbox/UNI/MSc/ROVIProjekt/ROVIProjekt/interpolator/LinIntTF.txt');
+%CPath=importdata('/home/emil/Dropbox/UNI/MSc/ROVIProjekt/ROVIProjekt/interpolator/LinIntTF.txt');
+
+blendData=importdata('/home/emil/Dropbox/UNI/MSc/ROVIProjekt/ROVIProjekt/interpolator/blend_tau25.txt');
 
 nodes=size(QPath,1);
-
+%QPath(1,6) = QPath(1,6)*-1;
 figure('Name','Joint path')
 x = 1:nodes;
+% for i = 1:size(QPath,2)
+%     for j = 1:size(QPath,1)
+%         if ( j > 1 )
+%             if ( QPath(j,i) - QPath(j-1,i) > pi)
+%                 QPath(j,i) = QPath(j,i) - 2*pi;
+%             elseif ( QPath(j-1,i) - QPath(j,i) > pi )
+%                 QPath(j,i) = QPath(j,i) + 2*pi;
+%             end
+%         else
+%             if ( QPath(j,i) - QPath(j+1,i) > pi)
+%                 QPath(j,i) = QPath(j,i) - 2*pi;
+%             elseif ( QPath(j+1,i) - QPath(j,i) > pi )
+%                 QPath(j,i) = QPath(j,i) + 2*pi;
+%             end
+%         end
+%     end
+% end
 plot(x,QPath)
+legend('Joint 0', 'Joint 1', 'Joint 2', 'Joint 3', 'Joint 4', 'Joint 5')
 
+figure('Name','Joint path')
+plot(x,QPath2)
+legend('Joint 0', 'Joint 1', 'Joint 2', 'Joint 3', 'Joint 4', 'Joint 5')
 
 
 for j = 1:nodes
@@ -28,7 +52,7 @@ for j = 1:nodes
     pitch(j) = RPY(2);
     yaw(j) = RPY(3);
     if yaw(j) > 3
-        yaw(j) = -3.142;
+        %yaw(j) = -3.142;
     end
       
     
@@ -54,7 +78,7 @@ for j = 1:nodes
     pitchBlend(j) = RPY(2);
     yawBlend(j) = RPY(3);
     if (yawBlend(j)) > 3
-        yawBlend(j) = -3.142;
+        %yawBlend(j) = -3.142;
     end
 end
 
@@ -70,7 +94,7 @@ hold off
 legend('x', 'y', 'z')
 set(gcf,'position',[0,0,1000*0.7,600*0.7])
 xlabel('Step')
-ylabel('Position in [m]')
+ylabel('Position [m]')
 set(gca,'FontSize',14)
 
 figure('Name','RPY path')
@@ -89,6 +113,42 @@ set(gca,'FontSize',14)
 %figure('Name','Quaternion path')
 %plot(x,q)
 
+
+xvel = 1:size(diff(Px),2);
+figure('Name','Linear XYZ velocity')
+plot(xvel,diff(Px)/(1/100),xvel,diff(Py)/(1/100),xvel,diff(Pz)/(1/100),'LineWidth',2)
+legend('x', 'y', 'z')
+set(gcf,'position',[0,0,1000*0.7,600*0.7])
+xlabel('Step')
+ylabel('Velocity [m/s]')
+set(gca,'FontSize',14)
+
+xvel = 1:size(diff(PxBlend),2);
+figure('Name','Parabolic XYZ velocity')
+plot(xvel,diff(PxBlend)/(1/100),xvel,diff(PyBlend)/(1/100),xvel,diff(PzBlend)/(1/100),'LineWidth',2)
+legend('x', 'y', 'z')
+set(gcf,'position',[0,0,1000*0.7,600*0.7])
+xlabel('Step')
+ylabel('Velocity [m/s]')
+set(gca,'FontSize',14)
+
+xvel = 1:size(diff(roll),2);
+figure('Name','Linear RPY velocity')
+plot(xvel,diff(roll)/(1/100),xvel,diff(pitch)/(1/100),xvel,diff(yaw)/(1/100),'LineWidth',2)
+legend('R', 'P', 'Y')
+set(gcf,'position',[0,0,1000*0.7,600*0.7])
+xlabel('Step')
+ylabel('Velocity [rad/s]')
+set(gca,'FontSize',14)
+
+xvel = 1:size(diff(rollBlend),2);
+figure('Name','parabolic RPY velocity')
+plot(xvel,diff(rollBlend)/(1/100),xvel,diff(pitchBlend)/(1/100),xvel,diff(yawBlend)/(1/100),'LineWidth',2)
+legend('R', 'P', 'Y')
+set(gcf,'position',[0,0,1000*0.7,600*0.7])
+xlabel('Step')
+ylabel('Velocity [rad/s]')
+set(gca,'FontSize',14)
 
 
 
