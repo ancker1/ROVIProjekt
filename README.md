@@ -34,15 +34,17 @@ To run the code in this project the following libraries needs to be installed:
 
 
 ## Source files
+|                       Name                       | Description                                                                           | Location                                             |
+|:------------------------------------------------:|---------------------------------------------------------------------------------------|------------------------------------------------------|
+| Reachability analysis                            | Contains source code for implementation and  test of reachability                     | ROVIProjekt/ROB/Reachability/src/reachability.cpp    |
+| Linear interpolation                             | Contains functions which implements a linear interpolator                             | ROVIProjekt/interpolator/linear/src/interpolator.hpp |
+| Parabolic blend                                  | Contains functions implementing parabolic blend in a linear interpolator              | ROVIProjekt/interpolator/linear/src/interpolator.hpp |
+| Test of linear interpolation and parabolic blend | File which should be run to execute tests of linear interpolation and parabolic blend | ROVIProjekt/interpolator/linear/src/linear.cpp       |
+| RRT-connect                                      | File containing source code and test  for RRT-connect                                 | ROVIProjekt/ROB/rrt_connect/src/rrt_connect.cpp      |
+| M2 preprocessing                                 | Source code used for preprocessing  of scene in M2.                                   | ROVIProjekt/VIS/M2/project/src/preprocess.hpp        |
+| M2 global alignment                              | Source code for implementation of global alignment and RANSAC                         | ROVIProjekt/VIS/M2/project/src/global_alignment.hpp  |
+|                                                  |                                                                                       |                                                      |
+|                                                  |                                                                                       |                                                      |
 
-<b>Reachability</b>
 
-<b>Linear interpolation (with and without parabolic blend)</b>
 
-<b>RRT</b>
-
-<b>M2</b>
-
-<b>M3</b>
-
-<b>Integration</b>
