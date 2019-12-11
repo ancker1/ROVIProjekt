@@ -72,6 +72,7 @@ rw::math::Q get_collision_free_configuration(const std::string nameGoal, const s
     return rw::math::Q();
 }
 
+// The two functions below has inspiration from https://www.robwork.dk//manual/kinematics/?highlight=forward%20kinematics#forward-kinematics //
 rw::math::Transform3D<> fw_kinematics_pos_world_to_mFrame(rw::models::WorkCell::Ptr workcell, rw::math::Q configuration, rw::models::Device::Ptr robot, rw::kinematics::Frame* mframe)
 {
     rw::math::Transform3D<> worldTmFramePos;

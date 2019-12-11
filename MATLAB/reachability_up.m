@@ -1,10 +1,17 @@
 %% Figure 1
 clc; clear; close all;
 
-data_place = importdata('up/base_pos_up_place.txt');
-data_pick_left = importdata('up/base_pos_up_pick_left.txt');
-data_pick_mid = importdata('up/base_pos_up_pick_mid.txt');
-data_pick_right = importdata('up/base_pos_up_pick_right.txt');
+% 10 deg in yaw from above
+% data_place = importdata('up/base_pos_up_place.txt');
+% data_pick_left = importdata('up/base_pos_up_pick_left.txt');
+% data_pick_mid = importdata('up/base_pos_up_pick_mid.txt');
+% data_pick_right = importdata('up/base_pos_up_pick_right.txt');
+
+% Directly above
+data_place = importdata('up/base_pos_directly_up_place.txt');
+data_pick_left = importdata('up/base_pos_directly_up_pick_left.txt');
+data_pick_mid = importdata('up/base_pos_directly_up_pick_mid.txt');
+data_pick_right = importdata('up/base_pos_directly_up_pick_right.txt');
 
 data = data_place;
 data(:,3) = data_place(:,3) + data_pick_left(:,3) + data_pick_mid(:,3) + data_pick_right(:,3);
@@ -51,10 +58,17 @@ hold off
 %% (MIN-MAX) Normalized data
 clc; clear;
 
-data_place = importdata('up/base_pos_up_place.txt');
-data_pick_left = importdata('up/base_pos_up_pick_left.txt');
-data_pick_mid = importdata('up/base_pos_up_pick_mid.txt');
-data_pick_right = importdata('up/base_pos_up_pick_right.txt');
+% 10 deg in yaw from above
+% data_place = importdata('up/base_pos_up_place.txt');
+% data_pick_left = importdata('up/base_pos_up_pick_left.txt');
+% data_pick_mid = importdata('up/base_pos_up_pick_mid.txt');
+% data_pick_right = importdata('up/base_pos_up_pick_right.txt');
+
+% Directly above
+data_place = importdata('up/base_pos_directly_up_place.txt');
+data_pick_left = importdata('up/base_pos_directly_up_pick_left.txt');
+data_pick_mid = importdata('up/base_pos_directly_up_pick_mid.txt');
+data_pick_right = importdata('up/base_pos_directly_up_pick_right.txt');
 
 data = data_place;
 %data(:,3) = data_place(:,3) + data_pick_left(:,3) + data_pick_mid(:,3) + data_pick_right(:,3);
@@ -102,10 +116,18 @@ hold off
 
 %% Surface plot
 clc; clear; close all;
-data_place = importdata('up/base_pos_up_place.txt');
-data_pick_left = importdata('up/base_pos_up_pick_left.txt');
-data_pick_mid = importdata('up/base_pos_up_pick_mid.txt');
-data_pick_right = importdata('up/base_pos_up_pick_right.txt');
+
+% 10 deg in yaw from above
+% data_place = importdata('up/base_pos_up_place.txt');
+% data_pick_left = importdata('up/base_pos_up_pick_left.txt');
+% data_pick_mid = importdata('up/base_pos_up_pick_mid.txt');
+% data_pick_right = importdata('up/base_pos_up_pick_right.txt');
+
+% Directly above
+data_place = importdata('up/base_pos_directly_up_place.txt');
+data_pick_left = importdata('up/base_pos_directly_up_pick_left.txt');
+data_pick_mid = importdata('up/base_pos_directly_up_pick_mid.txt');
+data_pick_right = importdata('up/base_pos_directly_up_pick_right.txt');
 
 % data = data_place
 % data = data_pick_left
