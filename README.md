@@ -19,6 +19,8 @@ To run the code in this project the following libraries needs to be installed:
 
 <b>Project_WorkCell_Cam</b> contains a workcell with the duck object in the scene.
 
+<b>Project_WorkCell_Cam_RRT</b> contains a workcell with the cylinder object and a bin around the pick area in the scene.
+
 <b>ROB</b> contains folders with sources and test for reachability analysis and RRT-connect.
 - Reachability source is located at ROVIProjekt/ROB/Reachability/src/
 - RRT-connect source is located at ROVIProjekt/ROB/rrt_connect/src/
