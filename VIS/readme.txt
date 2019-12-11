@@ -43,7 +43,7 @@ Two methods were implemented for sparse stereo.
 - (Single test) Outcomment line 103-111
 - (Performance evaluation) Outcomment line 114-120
 
-Both methods need pictures. Thus modify the paths.
+Both methods need pictures. Thus modify the paths at the line number below.
 - 68 (get the camera matrix from supplied workcell)
 - 84
 - 85
