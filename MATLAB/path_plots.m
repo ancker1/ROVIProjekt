@@ -13,23 +13,7 @@ nodes=size(QPath,1);
 %QPath(1,6) = QPath(1,6)*-1;
 figure('Name','Joint path')
 x = 1:nodes;
-% for i = 1:size(QPath,2)
-%     for j = 1:size(QPath,1)
-%         if ( j > 1 )
-%             if ( QPath(j,i) - QPath(j-1,i) > pi)
-%                 QPath(j,i) = QPath(j,i) - 2*pi;
-%             elseif ( QPath(j-1,i) - QPath(j,i) > pi )
-%                 QPath(j,i) = QPath(j,i) + 2*pi;
-%             end
-%         else
-%             if ( QPath(j,i) - QPath(j+1,i) > pi)
-%                 QPath(j,i) = QPath(j,i) - 2*pi;
-%             elseif ( QPath(j+1,i) - QPath(j,i) > pi )
-%                 QPath(j,i) = QPath(j,i) + 2*pi;
-%             end
-%         end
-%     end
-% end
+
 plot(x,QPath)
 legend('Joint 0', 'Joint 1', 'Joint 2', 'Joint 3', 'Joint 4', 'Joint 5')
 
@@ -150,6 +134,42 @@ xlabel('Step')
 ylabel('Velocity [rad/s]')
 set(gca,'FontSize',14)
 
+
+xvel = 1:size(diff(diff(Px)),2);
+figure('Name','Linear XYZ acceleration')
+plot(xvel,diff(diff(Px)/(1/100))/(1/100),xvel,diff(diff(Py)/(1/100))/(1/100),xvel,diff(diff(Pz)/(1/100))/(1/100),'LineWidth',2)
+legend('x', 'y', 'z')
+set(gcf,'position',[0,0,1000*0.7,600*0.7])
+xlabel('Step')
+ylabel('Acceleraion [m/s²]')
+set(gca,'FontSize',14)
+
+xvel = 1:size(diff(diff(roll)),2);
+figure('Name','Linear RPY acceleration')
+plot(xvel,diff(diff(roll)/(1/100))/(1/100),xvel,diff(diff(pitch)/(1/100))/(1/100),xvel,diff(diff(yaw)/(1/100))/(1/100),'LineWidth',2)
+legend('R', 'P', 'Y')
+set(gcf,'position',[0,0,1000*0.7,600*0.7])
+xlabel('Step')
+ylabel('Acceleraion [rad/s²]')
+set(gca,'FontSize',14)
+
+xvel = 1:size(diff(diff(PxBlend)),2);
+figure('Name','Parabolic XYZ acceleration')
+plot(xvel,diff(diff(PxBlend)/(1/100))/(1/100),xvel,diff(diff(PyBlend)/(1/100))/(1/100),xvel,diff(diff(PzBlend)/(1/100))/(1/100),'LineWidth',2)
+legend('x', 'y', 'z')
+set(gcf,'position',[0,0,1000*0.7,600*0.7])
+xlabel('Step')
+ylabel('Acceleraion [m/s²]')
+set(gca,'FontSize',14)
+
+xvel = 1:size(diff(diff(rollBlend)),2);
+figure('Name','Parabolic RPY acceleration')
+plot(xvel,diff(diff(rollBlend)/(1/100))/(1/100),xvel,diff(diff(pitchBlend)/(1/100))/(1/100),xvel,diff(diff(yawBlend)/(1/100))/(1/100),'LineWidth',2)
+legend('R', 'P', 'Y')
+set(gcf,'position',[0,0,1000*0.7,600*0.7])
+xlabel('Step')
+ylabel('Acceleraion [rad/s²]')
+set(gca,'FontSize',14)
 
 
 %% Old
