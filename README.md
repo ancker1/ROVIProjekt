@@ -14,8 +14,8 @@ OBS: if the error "buffer overflow detected" is present during execution of sour
 workcell used in the code might be too long. Try moving the workcell (and edit absolute paths) or move the whole project
 to a location with a shorter path.
 
-When compiling the cmake projects using RobWorkStudio a path to the RobWorkStudio root needs to be set in the cmakelists.txt
-- set(RWSTUDIO_ROOT /home/emil/RobWork/RobWorkStudio)
+When compiling the CMake projects using RobWorkStudio a path to the RobWorkStudio root needs to be set in the CMakeLists.txt
+- e.g.: set(RWSTUDIO_ROOT /home/emil/RobWork/RobWorkStudio)
 
 ## Folders
 <b>Integration</b> contains workcell and code used for combination of robotics and computer vision solution.
