@@ -8,7 +8,7 @@ Folder overview
 **********************************************
 Both a visulization method and evaluation for grasping from top and side is included in main.cpp.
 To run the script edit the path in line 209 of the workcell to the supplied workcell "ROVIProjekt/Project_WorkCell_Cam_RRT/Project_WorkCell/Scene.wc.xml".
-Futhermore in the edit the scene file so only the table and cylinder is present.
+Futhermore in the scene file edit it so only the table and cylinder is present, not the bin.
 
 The methods is is descripted below.
 - (Reachability for grasping above data generation) line 243-272
