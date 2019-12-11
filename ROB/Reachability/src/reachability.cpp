@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 
+// Function below is from template used in lab5 //
 std::vector<rw::math::Q> getConfigurations(const std::string nameGoal, const std::string nameTcp, rw::models::SerialDevice::Ptr robot, rw::models::WorkCell::Ptr wc, rw::kinematics::State state)
 {
     // Get, make and print name of frames
@@ -41,7 +42,7 @@ std::vector<rw::math::Q> getConfigurations(const std::string nameGoal, const std
 
 std::vector<rw::math::Q> collision_free_from_object(bool from_side, const rw::models::WorkCell::Ptr workcell, rw::kinematics::State state, rw::models::SerialDevice::Ptr robot, rw::kinematics::MovableFrame::Ptr object_frame)
 {
-    rw::kinematics::MovableFrame *target = workcell->findFrame<rw::kinematics::MovableFrame>("GraspTarget"); // using to grasp to. Linked to object
+    rw::kinematics::MovableFrame *target = workcell->findFrame<rw::kinematics::MovableFrame>("GraspTarget"); // using to grasp, linked to object
     std::vector<rw::math::Q> collisionFreeSolutions;
 
     rw::proximity::CollisionDetector::Ptr detector = rw::common::ownedPtr(new rw::proximity::CollisionDetector(workcell, rwlibs::proximitystrategies::ProximityStrategyFactory::makeDefaultCollisionStrategy()));
@@ -76,7 +77,7 @@ std::vector<rw::math::Q> collision_free_from_object(bool from_side, const rw::mo
         // Finds solutions from top of object
         for (double roll = 0; roll < 2*rw::math::Pi; roll += rw::math::Deg2Rad*1) {
             // Rotates axis so following grasp target from the top
-            rw::math::RPY<> rotTarget_up(roll, rw::math::Deg2Rad*10, 0); // set to zero if not skew grapping
+            rw::math::RPY<> rotTarget_up(roll, 0, 0); // set to zero if not skew grapping
             rw::math::Vector3D<> posTarget = object_frame->getTransform(state).P();
             posTarget[2] = 0.07;
             rw::math::Transform3D<> newTarget (posTarget, object_frame->getTransform(state).R()*rotTarget_up.toRotation3D());
@@ -123,8 +124,6 @@ std::vector<rw::math::Vector3D<double>> position_base_frame_gen_rand(int iterati
         }
 
     }
-
-
     return pos_base_check;
 }
 
@@ -203,11 +202,11 @@ int main(int argc, char** argv)
 
     std::cout << "-- Begin --" << std::endl;
 
-    /*******************************************************************
-     *  Load workcell, frames and device
-     *******************************************************************/
+    /****************************************************************************************
+    **                            RobWork setup for workcell                               **
+    ****************************************************************************************/
     // Load workcell
-    static std::string workcellpath = "/home/mikkel/Desktop/Project_WorkCell_Cam/Project_WorkCell"; //"../../Project_WorkCell_Cam/Project_WorkCell/Scene.wc.xml";
+    static std::string workcellpath = "/home/mikkel/Desktop/Project_WorkCell_Cam/Project_WorkCell";
     static const std::string wc_path = workcellpath + "/Scene.wc.xml";
     const rw::models::WorkCell::Ptr wc = rw::loaders::WorkCellLoader::Factory::load(wc_path);
     if ( wc.isNull() ){
@@ -236,64 +235,89 @@ int main(int argc, char** argv)
 
     rw::proximity::CollisionDetector::Ptr detector = rw::common::ownedPtr(new rw::proximity::CollisionDetector(wc, rwlibs::proximitystrategies::ProximityStrategyFactory::makeDefaultCollisionStrategy()));
     rw::kinematics::State state = wc->getDefaultState();
-    //std::cout << cylinderFrame->getTransform(state).P() << std::endl;
 
-    //Finding configuration for place area and pick area for RRT TEST
-    //rw::math::Vector3D<> cylinderPos(0.3, -0.5, 0.150);
-    //rw::math::Transform3D<> cylinderTrans(cylinderPos, cylinderFrame->getTransform(state).R());
-    //cylinderFrame->moveTo(cylinderTrans, state);
-    //collision_free_from_object(false, wc, state, robotUR6, cylinderFrame);
-    /*******************************************************************
-     * Moving robot around to get best position of base and get collsion free for up/side of object
-     *******************************************************************/
-    std::vector<rw::math::Vector3D<double>> base_frame_positions_pick_right = position_base_frame_gen_rand(1000); // gen 1000 random point
-    std::vector<rw::math::Vector3D<double>> base_frame_positions_pick_mid = base_frame_positions_pick_right;
-    std::vector<rw::math::Vector3D<double>> base_frame_positions_pick_left = base_frame_positions_pick_right;
-    std::vector<rw::math::Vector3D<double>> base_frame_positions_place = base_frame_positions_pick_right;
-    //std::vector<rw::math::Vector3D<double>> base_frame_positions_top = position_base_frame_gen();
+    /****************************************************************************************
+    **                            Reachability for grasping above                          **
+    ****************************************************************************************/
+
+//    // Generating 1000 random points for base of robot
+//    std::vector<rw::math::Vector3D<double>> base_frame_positions_pick_right = position_base_frame_gen_rand(1000);
+//    std::vector<rw::math::Vector3D<double>> base_frame_positions_pick_mid = base_frame_positions_pick_right;
+//    std::vector<rw::math::Vector3D<double>> base_frame_positions_pick_left = base_frame_positions_pick_right;
+//    std::vector<rw::math::Vector3D<double>> base_frame_positions_place = base_frame_positions_pick_right;
 
 
-    // Cylinder pos right
-    rw::math::Vector3D<> cylinderPos(-0.25, 0.474, 0.150);
-    base_frame_positions_pick_right = best_robot_position(base_frame_positions_pick_right, cylinderPos, false, wc, state, robotUR6, cylinderFrame); // Moves all robot position to one object position
+//    // Cylinder pos right
+//    rw::math::Vector3D<> cylinderPos(-0.25, 0.474, 0.150);
+//    base_frame_positions_pick_right = best_robot_position(base_frame_positions_pick_right, cylinderPos, false, wc, state, robotUR6, cylinderFrame); // Moves all robot position to one object position
 
-    // Cylinder pos mid
-    cylinderPos[0] = 0.0;
-    base_frame_positions_pick_mid = best_robot_position(base_frame_positions_pick_mid, cylinderPos, false, wc, state, robotUR6, cylinderFrame);
+//    // Cylinder pos mid
+//    cylinderPos[0] = 0.0;
+//    base_frame_positions_pick_mid = best_robot_position(base_frame_positions_pick_mid, cylinderPos, false, wc, state, robotUR6, cylinderFrame);
 
-    // Cylinder pos left
-    cylinderPos[0] = 0.25;
-    base_frame_positions_pick_left = best_robot_position(base_frame_positions_pick_left, cylinderPos, false, wc, state, robotUR6, cylinderFrame);
+//    // Cylinder pos left
+//    cylinderPos[0] = 0.25;
+//    base_frame_positions_pick_left = best_robot_position(base_frame_positions_pick_left, cylinderPos, false, wc, state, robotUR6, cylinderFrame);
 
-    // Cylinder in place area
-    cylinderPos[0] = 0.3;
-    cylinderPos[1] = -0.5;
-    base_frame_positions_place = best_robot_position(base_frame_positions_place, cylinderPos, false, wc, state, robotUR6, cylinderFrame);
-    //base_frame_positions_top = best_robot_position(base_frame_positions_top, false, wc, state, robotUR6, cylinderFrame);
+//    // Cylinder in place area
+//    cylinderPos[0] = 0.3;
+//    cylinderPos[1] = -0.5;
+//    base_frame_positions_place = best_robot_position(base_frame_positions_place, cylinderPos, false, wc, state, robotUR6, cylinderFrame);
+//    //base_frame_positions_top = best_robot_position(base_frame_positions_top, false, wc, state, robotUR6, cylinderFrame);
 
-    /*******************************************************************
-     *                          Writing to file
-     *******************************************************************/
-     write_pos_to_file("base_pos_up_pick_right.txt", base_frame_positions_pick_right);
-     write_pos_to_file("base_pos_up_pick_mid.txt", base_frame_positions_pick_mid);
-     write_pos_to_file("base_pos_up_pick_left.txt", base_frame_positions_pick_left);
-     write_pos_to_file("base_pos_up_place.txt", base_frame_positions_place);
+//     // ******************************Printing to file********************************** //
+//     write_pos_to_file("base_pos_directly_up_pick_right.txt", base_frame_positions_pick_right);
+//     write_pos_to_file("base_pos_directly_up_pick_mid.txt", base_frame_positions_pick_mid);
+//     write_pos_to_file("base_pos_directly_up_pick_left.txt", base_frame_positions_pick_left);
+//     write_pos_to_file("base_pos_directly_up_place.txt", base_frame_positions_place);
 
+     /****************************************************************************************
+     **                            Reachability for grasping side                           **
+     ****************************************************************************************/
+    // Generating 1000 random points for base of robot
+//    std::vector<rw::math::Vector3D<double>> base_frame_positions_pick_right = position_base_frame_gen_rand(1000);
+//    std::vector<rw::math::Vector3D<double>> base_frame_positions_pick_mid = base_frame_positions_pick_right;
+//    std::vector<rw::math::Vector3D<double>> base_frame_positions_pick_left = base_frame_positions_pick_right;
+//    std::vector<rw::math::Vector3D<double>> base_frame_positions_place = base_frame_positions_pick_right;
 
+//    // Cylinder pos right
+//    rw::math::Vector3D<> cylinderPos(-0.25, 0.474, 0.150);
+//    base_frame_positions_pick_right = best_robot_position(base_frame_positions_pick_right, cylinderPos, true, wc, state, robotUR6, cylinderFrame); // Moves all robot position to one object position
 
+//    // Cylinder pos mid
+//    cylinderPos[0] = 0.0;
+//    base_frame_positions_pick_mid = best_robot_position(base_frame_positions_pick_mid, cylinderPos, true, wc, state, robotUR6, cylinderFrame);
 
-//    /*******************************************************************
-//     *  Show solution
-//     *******************************************************************/
- //    rw::kinematics::MovableFrame *base = wc->findFrame<rw::kinematics::MovableFrame>("URReference");
- //    rw::math::Vector3D<> posBase;
- //    posBase[0] = 0.125; // x - coordinate of base frame
- //    posBase[1] = -0.5; // y - coordinate of base frame
+//    // Cylinder pos left
+//    cylinderPos[0] = 0.25;
+//    base_frame_positions_pick_left = best_robot_position(base_frame_positions_pick_left, cylinderPos, true, wc, state, robotUR6, cylinderFrame);
 
- //    rw::math::Transform3D<> newBase (posBase, base->getTransform(state).R());
- //    base->moveTo(newBase, state);
+//    // Cylinder in place area
+//    cylinderPos[0] = 0.3;
+//    cylinderPos[1] = -0.5;
+//    base_frame_positions_place = best_robot_position(base_frame_positions_place, cylinderPos, true, wc, state, robotUR6, cylinderFrame);
 
- //    std::vector<rw::math::Q> collisionFreeSolutions = collision_free_from_object(false, wc, state, robotUR6, cylinderFrame);
+//    // ******************************Printing to file********************************** //
+
+//    write_pos_to_file("base_pos_side_pick_right.txt", base_frame_positions_pick_right);
+//    write_pos_to_file("base_pos_side_pick_mid.txt", base_frame_positions_pick_mid);
+//    write_pos_to_file("base_pos_side_pick_left.txt", base_frame_positions_pick_left);
+//    write_pos_to_file("base_pos_side_place.txt", base_frame_positions_place);
+
+     /****************************************************************************************
+     **                             visualization of reachability                           **
+     ****************************************************************************************/
+//    rw::kinematics::MovableFrame *base = wc->findFrame<rw::kinematics::MovableFrame>("URReference");
+//    rw::math::Vector3D<> posBase;
+//    posBase[0] = 0.125; // x - coordinate of base frame
+//    posBase[1] = -0.5; // y - coordinate of base frame
+
+//    rw::math::Transform3D<> newBase (posBase, base->getTransform(state).R());
+//    base->moveTo(newBase, state);
+
+//     // From side
+//    std::vector<rw::math::Q> collisionFreeSolutions = collision_free_from_object(true, wc, state, robotUR6, cylinderFrame);
+
 //    rw::trajectory::TimedStatePath statePath;
 //    double time = 0;
 //    double dur = 5;
@@ -307,5 +331,6 @@ int main(int argc, char** argv)
 
 
     std::cout << "-- Done --" << std::endl;
+
     return 0;
 }

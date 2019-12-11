@@ -1,16 +1,9 @@
 clc;clear;close all;format compact;
 
-T_World_Table = [eul2rotm([0 0 0]) [0; 0; -0.1;]; 0 0 0 1];
-T_Table_World = inv(T_World_Table);
-
-% Scanner
-scanner_RPY = [0 0 deg2rad(-25)];
-scanner_R = eul2rotm(scanner_RPY);
-scanner_P = [0.05; 1.033; 0.8];
-T_World_Scanner = [scanner_R scanner_P; 0 0 0 1];
 estimates = load('ball_performance.txt');
-estimates = estimates(1:(240 - 90),:)
+estimates = estimates(1:(240 - 90),:);
 poses = load('/home/mikkel/Desktop/Project_WorkCell_Cam/performEval_ball_pos.txt');
+poses = poses(1:30,:);
 all_epsilon_t = ones(30, size(estimates,1)/30);
 epsilon_t = ones(30, 1);
 for i = 1:size(estimates,1)/30
@@ -37,6 +30,7 @@ set(gcf,'position',[0,0,700,400])
 
 estimates = load('ball_performance.txt');
 poses = load('/home/mikkel/Desktop/Project_WorkCell_Cam/performEval_ball_pos.txt');
+poses = poses(1:30,:);
 all_epsilon_t = ones(30, size(estimates,1)/30);
 epsilon_t = ones(30, 1);
 for i = 1:size(estimates,1)/30
@@ -65,3 +59,27 @@ xlabel('\sigma [RGB intensity]')
 ylabel('Success ratio')
 set(gca,'FontSize',15)
 set(gcf,'position',[0,0,900,400])
+
+%% Time performance
+times = load('ball_performance_time.txt');
+mean_times = mean(times)/10^3 % ms
+mean_times_std = std(times)/10^3 % ms
+
+%% Without any noise
+clc;clear;
+ 
+disp('TIME PERFORMANCE')
+times = load('ball_performance_time_without_noise.txt');
+mean_times = mean(times)/10^3 % ms
+mean_times_std = std(times)/10^3 % ms
+
+disp('POSE ESTIMATION ERROR')
+poses = load('/home/mikkel/Desktop/Project_WorkCell_Cam/performEval_ball_pos.txt');
+poses = poses(1:30,:);
+pose_estimates = load('ball_performance_without_noise.txt');
+pose_estimates(:,1) = []; % Removing 1 col
+
+pos_dif = pose_estimates - poses;
+a = sqrt(sum(pos_dif.^2,2));
+mean_pos_dif = mean(a)
+std_pos_dif = std(a)

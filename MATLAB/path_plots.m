@@ -213,4 +213,3 @@ legend('R', 'P', 'Y')
 figure('Name','Quaternion path')
 plot(x,q)
 
-
