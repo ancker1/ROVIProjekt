@@ -1,4 +1,6 @@
 # ROVI Project
+This project is a part of the course Robotics and Computer Vision (ROVI) at University of Southern Denmark on the Advanced Robotics Technology master education.
+
 This README explains the overall structure of the code.
 For explanations of how to run the code, navigate into the folders and open the readme.txt located there.
 
