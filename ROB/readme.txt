@@ -39,7 +39,7 @@ The main functionen is descripted below.
 - (Generating data with optimal stepsize at 3 different pick place) line 119-237
 
 All the methods needs path to the workcell which have the bin around the pick area and the cylinder.
-Thus modify the path below to the supplied workcell "Project_WorkCell_Cam_RRT".
+Thus modify the path below to the supplied workcell "ROVIProjekt/Project_WorkCell_Cam_RRT".
 - line 22 
 
 
