@@ -4,7 +4,7 @@ Folder overview
 
 
 **********************************************
-*	    Running Reachability tests		     *
+*	   Running Reachability tests		  *
 **********************************************
 Building and running main.cpp directly will perform a pose estimate on an example.
 
@@ -30,7 +30,7 @@ OBS! if tests is being run; edit absolute paths at the following lines (main.cpp
 
 
 **********************************************
-*	    Running rrt_connect tests		     *
+*	  Running rrt_connect tests	   *
 **********************************************
 Two methods were implemented for sparse stereo. 
 
