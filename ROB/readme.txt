@@ -4,7 +4,7 @@ Folder overview
 
 
 **********************************************
-*	    Running Reachability tests	   *
+*	    Running Reachability tests	     *
 **********************************************
 Building and running main.cpp directly will perform a pose estimate on an example.
 
