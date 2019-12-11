@@ -33,7 +33,17 @@ OBS! if tests is being run; edit absolute paths at the following lines (main.cpp
 **********************************************
 *	    Running M3 tests		     *
 **********************************************
-Two methods were implemented for sparse stereo. One 3D pose estimation of a yellow ball and one 6D for pose estimation of a duck. Both methods needs correct paths to the required images supplied in this github. Thus modify the paths.
+Two methods were implemented for sparse stereo. 
+
+3D Pose estimation (yellow ball):
+- (Single test) Outcomment line 83-88
+- (Performance evaluation) Outcomment line 92-98
+
+6D Pose estimation (dotted duck):
+- (Single test) Outcomment line 103-111
+- (Performance evaluation) Outcomment line 114-120
+
+Both methods need pictures. Thus modify the paths at the line number below.
 - 68 (get the camera matrix from supplied workcell)
 - 84
 - 85
@@ -44,11 +54,5 @@ Two methods were implemented for sparse stereo. One 3D pose estimation of a yell
 - 108
 - 116
 
-3D Pose estimation:
-- (Single test) Outcomment line 83-88
-- (Performance evaluation) Outcomment line 92-98
 
-6D Pose estimation:
-- (Single test) Outcomment line 103-111
-- (Performance evaluation) Outcomment line 114-120
 
