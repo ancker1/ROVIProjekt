@@ -8,6 +8,10 @@ To run the code in this project the following libraries needs to be installed:
 - RobWork
 - RobWorkStudio
 
+OBS: if the error "buffer overflow detected" is present during execution of source files. Then the path to the
+workcell used in the code might be too long. Try moving the workcell (and edit absolute paths) or move the whole project
+to a location with a shorter path.
+
 ## Folders
 <b>Integration</b> contains workcell and code used for combination of robotics and computer vision solution.
 - Sources is located at: ROVIProjekt/Integration/Project_WorkCell/SamplePluginPA10/src/
