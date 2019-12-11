@@ -115,5 +115,6 @@
  </Drawable>
 
  <CollisionSetup file="CollisionSetup.prox.xml" />
-<Q name="Home">2.1 -1.5 0.1 -0.1 1.571 0.1 </Q>
+<!--<Q name="Home">2.1 -1.5 0.1 -0.1 1.571 0.1 </Q>-->
+<Q name="Home">1.571 -1.571 -1.571 -1.571 1.571 0 </Q>
 </SerialDevice>

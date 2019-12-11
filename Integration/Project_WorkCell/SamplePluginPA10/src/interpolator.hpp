@@ -268,7 +268,7 @@ std::vector<rw::math::Q> mapCartesianToJoint( std::vector<rw::math::Transform3D<
               //rw::math::Q configuration = interpolator::util::getCollisionFreeSolution(UR6, state, detector, solutions);
               //path.push_back(configuration);
               rw::math::Q configuration;
-              if ( path.size() > 0 )
+              if ( path.size() > 0 && path.back().size() == 6 )
                   configuration = interpolator::util::getCollisionFreeSolution(UR6, state, detector, solutions, path.back());
               else
                   configuration = interpolator::util::getCollisionFreeSolution(UR6, state, detector, solutions);
