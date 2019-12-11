@@ -1,4 +1,4 @@
-# ROVIProjekt
+# ROVI Project
 This README explains the overall structure of the code.
 For explanations of how to run the code, navigate into the folders and open the readme.txt located there.
 
