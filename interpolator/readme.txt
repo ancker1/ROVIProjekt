@@ -7,3 +7,4 @@ Files will be created containing relevant data.
 
 
 OBS if error "buffer overflow detected" is present, then the path to the project is too long.
+- Edit the path at line 30 to where the workcell is placed. This is written as absolute to avoid "buffer overflow detected", which is an error caused by RobWorkStudio.
