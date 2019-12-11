@@ -54,5 +54,5 @@ Both methods need pictures. Thus modify the paths at the line number below.
 - 108
 - 116
 
-
+Futhermore a script to generate 30 test images were developed. This can be seen in /ROVIProjekt/M3-Workcell_and_plugin/Project_WorkCell_Cam/RoviSamplePlugin/
 
