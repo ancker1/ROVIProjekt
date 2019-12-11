@@ -32,25 +32,15 @@ OBS! if tests is being run; edit absolute paths at the following lines (main.cpp
 **********************************************
 *	   Running rrt_connect tests	     *
 **********************************************
-Two methods were implemented for sparse stereo. 
+Both testing method and evaluation method is included in main.cpp.
+The main functionen is descripted below.
+- (Visualization by LUA file) line 56-76
+- (Generating data to boxplot of different stepsizes) line 82-112
+- (Generating data with optimal stepsize at 3 different pick place) line 119-237
 
-3D Pose estimation (yellow ball):
-- (Single test) Outcomment line 83-88
-- (Performance evaluation) Outcomment line 92-98
+All the methods needs path to the workcell which have the bin around the pick area and the cylinder.
+Thus modify the path below to the supplied workcell "Project_WorkCell_Cam_RRT".
+- line 22 
 
-6D Pose estimation (dotted duck):
-- (Single test) Outcomment line 103-111
-- (Performance evaluation) Outcomment line 114-120
-
-Both methods need pictures. Thus modify the paths.
-- 68 (get the camera matrix from supplied workcell)
-- 84
-- 85
-- 94
-- 105
-- 106
-- 107
-- 108
-- 116
 
 
